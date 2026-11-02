@@ -1,0 +1,74 @@
+@page {
+  size: A4;
+  margin: 4cm 3cm 3cm 4cm;
+}
+@media print {
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: 'Times New Roman', serif !important;
+    font-size: 12pt;
+  }
+  .topbar,
+  .footer,
+  .print-actions,
+  .toast,
+  .no-print {
+    display: none !important;
+  }
+  .print-document {
+    padding: 0;
+    margin: 0;
+    max-width: none;
+    background: white !important;
+    color: black !important;
+  }
+  .print-document h1 {
+    font-family: 'Times New Roman', serif !important;
+    font-size: 24pt;
+    margin-top: 3cm;
+    page-break-after: always;
+  }
+  .print-document h2 {
+    font-size: 16pt;
+    page-break-before: always;
+    break-after: avoid;
+  }
+  .print-document h3 {
+    font-size: 14pt;
+    break-after: avoid;
+  }
+  .manuscript-text {
+    font-family: 'Times New Roman', serif !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+    color: black !important;
+  }
+  .manuscript-text table {
+    display: table;
+    font-size: 10pt;
+  }
+  .manuscript-text td,
+  .manuscript-text th {
+    font-size: 10pt;
+    color: black;
+    border-color: gray;
+  }
+  .manuscript-text mark {
+    background: transparent !important;
+    color: inherit;
+  }
+  .requirement-entry {
+    break-inside: avoid;
+  }
+  .document-section {
+    content-visibility: visible !important;
+  }
+  .requirement-id {
+    position: static;
+  }
+  .quality-strip {
+    display: none;
+  }
+}

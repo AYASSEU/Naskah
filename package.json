@@ -1,0 +1,29 @@
+{
+  "name": "naskah",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "postinstall": "node scripts/prepare-assets.mjs",
+    "dev": "pnpm --filter @naskah/web dev",
+    "build": "pnpm --filter @naskah/web build",
+    "start": "pnpm --filter @naskah/web start",
+    "typecheck": "pnpm --filter @naskah/web typecheck",
+    "lint": "eslint apps/web/src packages/contracts/src",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "audit:slop": "node scripts/audit-slop.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "eslint": "latest",
+    "typescript-eslint": "latest",
+    "typescript": "~5.9.3",
+    "vitest": "latest",
+    "@playwright/test": "latest",
+    "@types/node": "latest",
+    "prettier": "latest",
+    "fflate": "latest"
+  }
+}

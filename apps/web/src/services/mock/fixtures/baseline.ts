@@ -1,0 +1,3 @@
+// Synthetic demonstration baseline. Replace with a validated human document in Phase 2.
+export const humanBaseline =
+  '**REQ-F-01 — Pendaftaran pasien**\nPetugas pendaftaran mencatat identitas pasien, memeriksa NIK 16 digit, dan membuat nomor rekam medis unik. NIK yang sama tidak dapat didaftarkan dua kali.\n\n**REQ-F-02 — Penjadwalan kunjungan**\nPasien memilih dokter dan waktu yang tersedia. Sistem mengunci slot setelah konfirmasi dan menolak pemesanan bersamaan.\n\n**REQ-F-03 — Rekam medis**\nDokter mencatat keluhan, diagnosis, dan tindakan pada kunjungan terkait. Identitas dokter dan waktu perubahan disimpan.';
