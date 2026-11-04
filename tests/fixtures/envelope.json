@@ -1,0 +1,13 @@
+{
+  "key": "ERERERERERERERERERERERERERERERERERERERERERE=",
+  "provider": "public-test-vector",
+  "owner": "test-owner",
+  "plaintext": "Envelope interoperability: bukan API key",
+  "envelope": {
+    "ciphertext": "UplxLKyg7zrFVrBILdSGpXrhrIAD7cU/K3UqinyKBG1lPvtLc8Ocpw==",
+    "iv": "IiIiIiIiIiIiIiIi",
+    "tag": "Ehmc0gtscOvNuPhepTKKqw==",
+    "key_version": 1,
+    "key_hint": " key"
+  }
+}

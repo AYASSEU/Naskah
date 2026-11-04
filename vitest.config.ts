@@ -4,6 +4,7 @@ export default defineConfig({
   test: { include: ['tests/**/*.test.ts'] },
   resolve: {
     alias: {
+      'server-only': path.resolve('tests/server-only.ts'),
       '@': path.resolve('apps/web/src'),
       '@naskah/contracts': path.resolve('packages/contracts/src/index.ts'),
     },
