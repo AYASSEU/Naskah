@@ -1,0 +1,18 @@
+# ADR 002: Phase 2 runtime and evidence
+
+Date: 2026-11-05. Status: accepted for implementation; runtime acceptance remains tracked separately.
+
+1. **Generation model:** official DeepSeek documentation now recommends `deepseek-flash` (V4.1). `deepseek-v4-flash` is a compatibility alias, not a frozen model. Default to the current canonical name, retain configurable models and check GET /models. Record returned model in run metrics. This deviates from the brief's older default. [Models](https://api-docs.deepseek.com/quick_start/pricing)
+2. **JSON:** request json_object, explicitly include JSON and schema in prompts, reject whitespace/empty output, and allow one schema-repair attempt. [JSON documentation](https://api-docs.deepseek.com/guides/json_mode/)
+3. **Thinking:** the official API documents `thinking: {type: "disabled"}`; temperature has no effect with thinking enabled. Use the documented non-thinking mode for DeepSeek when temperature 0.2 is required; omit vendor fields for custom providers. [Thinking mode](https://api-docs.deepseek.com/guides/thinking_mode/)
+4. **Embeddings:** use a separate OpenAI-compatible integration, text-embedding-3-small, dimension 1536. DeepSeek's documented API does not list an embeddings service. Store model and dimension with provenance; never silently substitute a model.
+5. **Credential update:** installed n8n 2.45.7 controller supports PATCH. Preserve PATCH → PUT → staged replacement/rebind fallback for older installs, falling back only on unsupported-method responses, never on authorization/network failures. Cache schemas from the installed API. Do not expose credential values.
+6. **Webhooks:** explicitly publish after create/update; use authenticated production /webhook paths. Editor /webhook-test paths are not application endpoints.
+7. **Networking:** app → n8n localhost:5678; container → host host.docker.internal. Local Supabase planned API 54321, Postgres 54322. Verify after startup. Put addresses in validated environment settings.
+8. **Encryption:** retain the existing n8n data-volume encryption key when making it explicit in compose. Changing it invalidates credentials. Backups and local secret material stay outside Git. Application envelope uses independent AES-256-GCM key and provider/owner associated data.
+9. **Configuration:** secrets live in n8n credentials and encrypted database rows. Runtime non-secret configuration uses app_config/deployment substitution, not paid n8n Variables or $env.
+10. **Assumptions and language:** unsupported numeric rewrites require confirmation. Default output language id; cross-language ROUGE is rejected unless explicitly overridden and labeled. See research notes.
+11. **Migrations:** replace the never-applied 0001_init scaffold with a CLI-generated timestamped initial migration. Its UUID knowledge-base id/train-test scaffold disagrees with the SRS; authoritative Phase 2 bigserial id/kb-only split wins. Preserve SRS table names and Phase 1 API fields.
+12. **Corpora:** public source discovery does not establish ingestion or redistribution rights. PURE source is Zenodo 7118517; PROMISE_exp source/terms and the ambiguous Kaggle Fault-Prone SRS reference require a recorded manifest. Synthetic dev_seed data remains clearly separate from thesis results. Record actual fetch outcomes in the ingestion report.
+
+Supabase changelog checked before implementation: https://supabase.com/changelog.md. Relevant current docs were retrieved through search_docs (local CLI, RLS, HNSW). The hosted MCP cannot inspect the planned local stack; CLI fallback is necessary, not an assumed local MCP connection.
