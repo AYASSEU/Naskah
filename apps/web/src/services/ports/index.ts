@@ -16,6 +16,7 @@ import type {
   AiConnectionSave,
   AiConnectionSnapshot,
   AiConnectionTest,
+  IntegrationId, IntegrationSave, IntegrationState, SystemStatus,
 } from '@naskah/contracts';
 import type { ExampleRepository } from './examples';
 export class PortError extends Error {
@@ -126,6 +127,14 @@ export interface SimulationConfig {
   failure: 'none' | 'retrieval' | 'chapter3' | 'guardrail' | 'revision';
 }
 export interface Services {
+  integrations?: {
+    status():Promise<SystemStatus>;
+    get(id:IntegrationId):Promise<IntegrationState>;
+    save(id:IntegrationId,input:IntegrationSave):Promise<IntegrationState>;
+    test(id:IntegrationId):Promise<IntegrationState>;
+    remove(id:IntegrationId):Promise<IntegrationState>;
+    reapply():Promise<void>;
+  };
   aiConnection: AiConnectionService;
   projects: ProjectRepository;
   documents: DocumentRepository;

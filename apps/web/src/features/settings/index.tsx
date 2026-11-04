@@ -9,6 +9,7 @@ import { appEvents } from '@/shared/lib/events';
 import { flags } from '@/shared/config/flags';
 import { Button, Toggle, Select } from '@/shared/ui';
 import { AiConnectionSettings } from './ai-connection';
+import { IntegrationsSettings } from './integrations';
 export function Settings() {
   const t = useTranslations();
   const { theme, setTheme } = useTheme();
@@ -37,7 +38,7 @@ export function Settings() {
       <div className="page-heading">
         <div>
           <h1>{t('settingsTitle')}</h1>
-          <p>{t('localNote')}</p>
+          <p>{t(services.mode === 'live' ? 'serverNote' : 'localNote')}</p>
         </div>
       </div>
       <section className="settings-section">
@@ -77,7 +78,11 @@ export function Settings() {
           </div>
         </div>
       </section>
-      <AiConnectionSettings key={resetVersion} />
+      {services.mode === 'live' ? (
+        <IntegrationsSettings key={resetVersion} />
+      ) : (
+        <AiConnectionSettings key={resetVersion} />
+      )}
       <section className="settings-section">
         <h2>{t('research')}</h2>
         <div className="setting-row">
@@ -91,9 +96,11 @@ export function Settings() {
       <section className="settings-section">
         <h2>{t('data')}</h2>
         <div>
-          <p className="help-note">{t('dataDescription')}</p>
+          <p className="help-note">
+            {t(services.mode === 'live' ? 'liveDataDescription' : 'dataDescription')}
+          </p>
           <p className="help-note" style={{ margin: '15px 0 25px' }}>
-            {t('simulation')}: <code>{services.mode}</code>
+            {t(services.mode === 'live' ? 'liveMode' : 'simulation')}: <code>{services.mode}</code>
           </p>
           <AlertDialog.Root>
             <AlertDialog.Trigger asChild>

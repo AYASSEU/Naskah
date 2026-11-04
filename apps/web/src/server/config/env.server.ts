@@ -20,6 +20,7 @@ export const ServerEnvSchema = z.object({
   GENERATION_MAX_TIMEOUT_MS: z.coerce.number().int().positive().default(900000),
 });
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
+export function serverConfigured() { return ServerEnvSchema.safeParse(process.env).success; }
 let cached: ServerEnv | undefined;
 export function env(): ServerEnv {
   if (cached) return cached;

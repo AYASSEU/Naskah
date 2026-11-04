@@ -1,6 +1,9 @@
 import type { Services } from '../ports';
 import { NotImplementedError } from '../ports';
 import { GenerateInputSchema, ReviseInputSchema, AiConnectionSaveSchema } from '@naskah/contracts';
+import { IntegrationStateSchema, SystemStatusSchema } from '@naskah/contracts';
+import { z } from 'zod';
+import { request } from './client';
 export const endpoints = {
   generate: '/webhook/generate-srs',
   revise: '/webhook/revise-srs',
@@ -18,6 +21,26 @@ const unavailable = async () => {
 };
 export function createHttpServices(): Services {
   return {
+    integrations: {
+      status: () => request('/api/system/status', SystemStatusSchema),
+      get: (id) => request(`/api/settings/integrations/${id}`, IntegrationStateSchema),
+      save: (id, input) =>
+        request(`/api/settings/integrations/${id}`, IntegrationStateSchema, {
+          method: 'PUT',
+          body: JSON.stringify(input),
+        }),
+      test: (id) =>
+        request(`/api/settings/integrations/${id}/test`, IntegrationStateSchema, {
+          method: 'POST',
+        }),
+      remove: (id) =>
+        request(`/api/settings/integrations/${id}`, IntegrationStateSchema, { method: 'DELETE' }),
+      async reapply() {
+        await request('/api/settings/integrations/reapply', z.object({ ok: z.boolean() }), {
+          method: 'POST',
+        });
+      },
+    },
     aiConnection: {
       getSettings: unavailable,
       saveSettings: unavailable,

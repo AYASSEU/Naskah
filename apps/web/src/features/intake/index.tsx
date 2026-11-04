@@ -9,9 +9,11 @@ import { PortError } from '@/services/ports';
 import type { ParsedDocument } from '@/services/ports';
 import { Button } from '@/shared/ui';
 import { mergeSources } from '@/entities/document/cleaning';
+import {SystemStatus,useSystemReadiness} from '@/features/system-status';
 export function Intake() {
   const t = useTranslations();
   const services = useServices();
+  const readiness=useSystemReadiness();
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState('');
@@ -69,7 +71,7 @@ export function Intake() {
     setParsing(false);
   }
   async function submit() {
-    if (!title.trim() || !corpus.trim() || busy) return;
+    if (!title.trim() || !corpus.trim() || busy || !readiness.ready) return;
     setBusy(true);
     setError('');
     try {
@@ -275,11 +277,12 @@ export function Intake() {
               {error}
             </p>
           )}
+          <SystemStatus status={readiness}/>
           <div className="form-submit">
             <Button
               type="submit"
               variant="primary"
-              disabled={!title.trim() || !corpus.trim() || parsing || busy}
+              disabled={!title.trim() || !corpus.trim() || parsing || busy || !readiness.ready}
             >
               <FilePlus2 />
               {busy ? t('saving') : t('generate')}

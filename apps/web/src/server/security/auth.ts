@@ -11,10 +11,13 @@ export function constantTimeEqual(a: string, b: string) {
 function sign(payload: string) { return createHmac('sha256',Buffer.from(env().APP_ENCRYPTION_KEY,'base64')).update(`session:${payload}`).digest('base64url'); }
 export function assertLocalRequest(request: Request) {
   const configured=new URL(env().APP_BASE_URL), actual=new URL(request.url);
+  // Next can normalize request.url to localhost while the browser uses 127.0.0.1.
+  // Validate the actual Host authority as well; never trust forwarded headers here.
+  let browserUrl:URL;try{browserUrl=new URL(`${actual.protocol}//${request.headers.get('host')??actual.host}`);}catch{throw new AppError('local_access_only',403);}
   const local=new Set(['localhost','127.0.0.1','[::1]']);
-  if(!local.has(configured.hostname)||!local.has(actual.hostname)||actual.port!==configured.port) throw new AppError('local_access_only',403);
+  if(!local.has(configured.hostname)||!local.has(actual.hostname)||!local.has(browserUrl.hostname)||actual.port!==configured.port||browserUrl.port!==configured.port) throw new AppError('local_access_only',403);
   const origin=request.headers.get('origin');
-  if(origin && origin!==actual.origin) throw new AppError('cross_origin_request',403);
+  if(origin && origin!==browserUrl.origin) throw new AppError('cross_origin_request',403);
   const site=request.headers.get('sec-fetch-site');
   if(site && !['same-origin','none'].includes(site)) throw new AppError('cross_origin_request',403);
   if(!['GET','HEAD'].includes(request.method) && !origin && request.headers.get('x-naskah-client')!=='web') throw new AppError('cross_origin_request',403);

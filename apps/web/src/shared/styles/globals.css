@@ -2227,6 +2227,24 @@ tbody tr:hover {
 .ai-settings-body {
   min-width: 0;
 }
+.integrations-ledger { min-width: 0; }
+.integration-row { border-bottom: 1px solid var(--line); padding: 22px 0; }
+.integration-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.integration-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.integration-heading h3 { font-size: 18px; }
+.integration-states { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ink-3); }
+.integration-state.ready { color: var(--positive); }
+.integration-key-row > label { display: block; margin-bottom: 8px; font-size: 13px; }
+.integration-key-input { display: flex; gap: 10px; align-items: center; min-height: 40px; }
+.integration-key-input input { min-width: 0; flex: 1; }
+.integration-advanced { margin-top: 16px; font-size: 13px; }
+.integration-advanced summary { cursor: pointer; color: var(--ink-2); padding: 8px 0; }
+.integration-advanced label { display: grid; gap: 8px; margin-top: 12px; }
+.integration-advanced input { width: 100%; }
+.integration-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 10px; }
+.integration-row ul { list-style: none; padding: 0; margin: 12px 0; font-size: 13px; }
+.integration-row li { padding: 6px 0; overflow-wrap: anywhere; }
+.integration-row .inline-error { color: var(--danger); margin-top: 12px; }
 .ai-mode-note {
   border-left: 2px solid var(--line-strong);
   padding-left: 14px;

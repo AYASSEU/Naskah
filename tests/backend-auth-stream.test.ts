@@ -21,6 +21,10 @@ describe('request guards',()=>{
     expect(()=>assertFresh('invalid')).toThrow('stale_callback');
     expect(()=>assertFresh('2000-01-01T00:00:00Z')).toThrow('stale_callback');
   });
+  it('matches the validated Host when Next normalizes the request URL',()=>{
+    expect(()=>createSession(new Request('http://localhost:3000/api/auth/session',{headers:{host:'127.0.0.1:3000',origin:'http://127.0.0.1:3000','X-Naskah-Client':'web'}}))).not.toThrow();
+    expect(()=>createSession(new Request('http://localhost:3000/api/auth/session',{headers:{host:'evil.test:3000',origin:'http://evil.test:3000','X-Naskah-Client':'web'}}))).toThrow('local_access_only');
+  });
 });
 describe('SSE replay',()=>{
   it('resumes after the last acknowledged event and closes after terminal output',async()=>{

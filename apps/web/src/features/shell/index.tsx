@@ -110,10 +110,10 @@ export function Shell({
         <footer className="footer">
           <span>
             <span className="small-square" />
-            {t('localNote')}
+            {t(getEnvironment().mode === 'live' ? 'serverNote' : 'localNote')}
           </span>
           <span>
-            {t('simulation')}
+            {t(getEnvironment().mode === 'live' ? 'liveMode' : 'simulation')}
             <span className="footer-slash">/</span>
             {t('standard')}
           </span>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Providers, Shell } from '@/features/shell';
 import '@/shared/styles/globals.css';
-import { serverConfigured } from '@/shared/config/env';
+import { serverConfigured } from '@/server/config/env.server';
 import { BRAND } from '@/shared/config/brand';
 const literata = localFont({
   src: '../../node_modules/@fontsource-variable/literata/files/literata-latin-standard-normal.woff2',

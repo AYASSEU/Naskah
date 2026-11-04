@@ -1,5 +1,6 @@
 import { z } from 'zod';
 export * from './ai-connection';
+export * from './backend';
 export const ProjectStatus = z.enum([
   'draft_input',
   'generating',
@@ -18,6 +19,8 @@ export const ProjectSchema = z.object({
   updatedAt: z.string(),
   sessionId: z.uuid(),
   rawText: z.string(),
+  output_language: z.enum(['id', 'en']).optional(),
+  templateId: z.string().optional(),
 });
 export type Project = z.infer<typeof ProjectSchema>;
 export const RequirementSchema = z.object({
@@ -37,6 +40,7 @@ export const RewriteSchema = z.object({
   rewritten: z.string(),
   reason: z.string(),
   resolved: z.boolean().default(false),
+  needs_confirmation: z.boolean().optional(),
 });
 export const GuardrailSchema = z.object({
   dimensions: z.array(
@@ -59,13 +63,18 @@ export const SectionSchema = z.object({
   requirements: z.array(RequirementSchema),
   guardrail: GuardrailSchema,
   updatedAt: z.string(),
+  version: z.number().int().positive().optional(),
+  locked: z.boolean().optional(),
 });
 export type Section = z.infer<typeof SectionSchema>;
 export const RetrievedChunkSchema = z.object({
   id: z.string(),
-  dataset: z.enum(['PURE', 'PROMISE_exp', 'Kaggle']),
+  dataset: z.enum(['PURE', 'PROMISE_exp', 'Kaggle', 'dev_seed']),
   similarity: z.number().min(0).max(1),
   excerpt: z.string(),
+  doc_id: z.string().optional(),
+  section: z.string().optional(),
+  embedding_model: z.string().optional(),
 });
 export type RetrievedChunk = z.infer<typeof RetrievedChunkSchema>;
 export const DocumentSchema = z.object({
@@ -97,6 +106,10 @@ export const GenerationLogSchema = z.object({
   execution_time_seconds: z.number(),
   structure_completeness_pct: z.number().min(0).max(100),
   created_at: z.string(),
+  is_thesis_run: z.boolean().optional(),
+  model: z.string().optional(),
+  embedding_model: z.string().optional(),
+  metrics: z.record(z.string(), z.unknown()).optional(),
 });
 export type GenerationLog = z.infer<typeof GenerationLogSchema>;
 export const GenerateInputSchema = z.object({
@@ -104,6 +117,11 @@ export const GenerateInputSchema = z.object({
   project_title: z.string().min(1),
   domain: z.string().min(1),
   raw_text: z.string().min(1),
+  run_id: z.uuid().optional(),
+  output_language: z.enum(['id', 'en']).optional(),
+  template_id: z.string().optional(),
+  options: z.object({ retrieval_k: z.number().int().min(5).max(8).optional(), model: z.string().optional(), temperature: z.number().min(0).max(2).optional() }).optional(),
+  resume: z.object({ from_part: z.number().int().min(1).max(4), completed_sections: z.array(SectionSchema) }).optional(),
 });
 export type GenerateInput = z.infer<typeof GenerateInputSchema>;
 export const ReviseInputSchema = z.object({
@@ -111,6 +129,9 @@ export const ReviseInputSchema = z.object({
   target_section: z.string().min(1),
   current_section_text: z.string(),
   user_instructions: z.string().min(1),
+  revision_id: z.uuid().optional(),
+  base_section_version: z.number().int().positive().optional(),
+  output_language: z.enum(['id', 'en']).optional(),
 });
 export type ReviseInput = z.infer<typeof ReviseInputSchema>;
 export const RevisionProposalSchema = z.object({
@@ -121,6 +142,9 @@ export const RevisionProposalSchema = z.object({
   after: z.string(),
   retrievalQuery: z.string(),
   status: z.enum(['pending', 'accepted', 'rejected']),
+  base_section_version: z.number().int().positive().optional(),
+  chunks: z.array(RetrievedChunkSchema).optional(),
+  guardrail: GuardrailSchema.optional(),
 });
 export type RevisionProposal = z.infer<typeof RevisionProposalSchema>;
 export const ChapterOutputSchema = z.object({

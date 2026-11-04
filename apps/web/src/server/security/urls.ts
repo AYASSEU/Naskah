@@ -32,6 +32,8 @@ export async function validateProviderUrl(raw: string, allowLocal: boolean, reso
 // Recheck before every request; redirects are forbidden to prevent credential forwarding.
 export async function providerFetch(base: string, path: string, key: string, allowLocal: boolean, init: RequestInit = {}) {
   const u=await validateProviderUrl(base,allowLocal);
+  // Docker Desktop resolves this name inside containers, not necessarily on Windows.
+  if(allowLocal&&u.hostname==='host.docker.internal')u.hostname='localhost';
   const target=new URL(`${u.toString().replace(/\/$/,'')}/${path.replace(/^\//,'')}`);
   if(target.origin!==u.origin) throw new AppError('invalid_provider_url');
   const agent = new Agent({connect:{lookup(hostname,options,callback){
@@ -48,4 +50,9 @@ export async function providerFetch(base: string, path: string, key: string, all
     if(reader)try{while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>4*1024*1024){await reader.cancel();throw new AppError('provider_invalid_response',502);}chunks.push(value);}}finally{reader.releaseLock();}
     return new Response(Buffer.concat(chunks),{status:response.status,headers:Object.fromEntries(response.headers)});
   } finally {await agent.close();}
+}
+export function containerProviderUrl(base:string){
+  const u=new URL(base);
+  if(['localhost','127.0.0.1','[::1]'].includes(u.hostname))u.hostname='host.docker.internal';
+  return u.toString().replace(/\/$/,'');
 }
