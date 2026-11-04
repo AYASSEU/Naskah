@@ -8,3 +8,11 @@ coverage/
 playwright-report/
 test-results/
 *.tsbuildinfo
+__pycache__/
+.venv/
+*.pyc
+ingestion/data/
+ingestion/output/
+compiler-service/output/
+artifacts/
+infra/.env.local
