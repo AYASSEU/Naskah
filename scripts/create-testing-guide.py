@@ -23,11 +23,11 @@ doc.styles['Title'].font.size=Pt(27)
 doc.styles['Heading 1'].font.size=Pt(19)
 doc.styles['Heading 2'].font.size=Pt(12)
 doc.styles['Caption'].font.size=Pt(9)
-doc.core_properties.title='Naskah local webapp testing guide'
-doc.core_properties.subject='Sequential UI testing and live backend connection checks'
+doc.core_properties.title='Panduan pengujian aplikasi web Naskah secara lokal'
+doc.core_properties.subject='Urutan pengujian antarmuka dan pemeriksaan sambungan backend live'
 doc.core_properties.author='Naskah project'
 footer=s.footer.paragraphs[0];footer.alignment=2
-footer.add_run('Naskah testing guide  |  ')
+footer.add_run('Panduan pengujian Naskah  |  ')
 field=OxmlElement('w:fldSimple');field.set(qn('w:instr'),'PAGE');footer._p.append(field)
 
 def p(text):doc.add_paragraph(text)
@@ -45,127 +45,168 @@ def shot(name,caption,height=3.5):
  doc.add_paragraph(caption,'Caption')
 def page(title):doc.add_page_break();doc.add_heading(title,level=1)
 
-doc.add_paragraph('Naskah local webapp testing guide','Title')
-p('A sequential walkthrough for testing the current application on Windows. Follow the mock-mode journey first, then check the live Settings integration. UI button names are kept in Indonesian so you can match the screenshots directly.')
-p('Verified 5 November 2026. Baseline source commit ad08a86 in AYASSEU/Naskah. The complete document workflow currently runs in mock mode. Live mode supports encrypted integration settings, n8n credential synchronization and corpus status; generation, revision, compiler and research services are still being built.')
-doc.add_heading('Start the application',level=2)
-step(1,'Open PowerShell in the project folder. Start the app with these commands. The .cmd suffix avoids the disabled PowerShell script-policy problem.')
+doc.add_paragraph('Panduan pengujian aplikasi web Naskah secara lokal','Title')
+p('Panduan berurutan untuk menguji aplikasi saat ini di Windows. Ikuti alur mode simulasi terlebih dahulu, lalu periksa integrasi Pengaturan pada mode live. Nama tombol mengikuti tampilan aplikasi agar mudah dicocokkan dengan tangkapan layar.')
+p('Diverifikasi pada 5 November 2026 dengan kode dasar commit ad08a86 di AYASSEU/Naskah. Alur dokumen lengkap saat ini berjalan dalam mode simulasi. Mode live mendukung pengaturan integrasi terenkripsi, sinkronisasi kredensial n8n, dan status korpus. Layanan pembuatan dokumen, revisi, kompilasi, dan penelitian masih dikembangkan.')
+doc.add_heading('Daftar fitur A sampai M',level=2)
+p('Status SIMULASI berarti fitur berjalan dengan data contoh di peramban. LIVE berarti sudah terhubung ke layanan lokal. DALAM PENGEMBANGAN berarti backend lengkapnya belum tersedia.')
+features_first=[
+('A','Daftar dan pencarian proyek','SIMULASI','Menampilkan proyek, status, pencarian, penyaringan, serta akses kembali ke dokumen.'),
+('B','Pembuatan proyek','SIMULASI','Mengisi judul, domain, versi, dan memeriksa kelengkapan isian wajib.'),
+('C','Masukan kebutuhan berbentuk teks','SIMULASI','Menerima deskripsi sistem, catatan, atau transkrip sebagai konteks awal.'),
+('D','Unggah PDF dan TXT','SIMULASI','Membaca berkas sumber yang didukung; PDF memerlukan lapisan teks.'),
+('E','Peninjauan dan penggabungan sumber','SIMULASI','Meninjau teks ekstraksi dan menggabungkannya dengan catatan pengguna.'),
+('F','Penyusunan SRS IEEE','SIMULASI','Menyusun empat bagian IEEE 830 beserta subbagiannya. Backend live masih dikembangkan.'),
+('G','Progres dan pemulihan penyusunan','SIMULASI','Memantau tahap, membatalkan proses, dan melanjutkan draf setelah kegagalan.'),
+('H','Ruang kerja naskah','SIMULASI','Membaca dokumen melalui daftar isi, navigasi bagian, dan tampilan Markdown.'),
+('I','Penyuntingan manual','SIMULASI','Mengubah dan menyimpan bagian tanpa meminta revisi AI.'),
+('J','Pengelolaan kebutuhan','SIMULASI','Menampilkan ID serta prioritas kebutuhan dan memperingatkan duplikasi ID.'),
+('K','Penguncian bagian','SIMULASI','Melindungi bagian yang dikunci dari perubahan melalui alur antarmuka.'),
+('L','Riwayat dan versi dokumen','SIMULASI','Memeriksa versi tersimpan dan memulihkan konten uji dari riwayat.'),
+('M','Permintaan revisi AI terarah','SIMULASI','Memberi instruksi revisi untuk bagian tertentu. Workflow revisi live belum selesai.'),
+]
+features_second=[
+('N','Perbandingan dan persetujuan revisi','SIMULASI','Membandingkan teks, menerima atau menolak usulan, serta menjaga bagian lain tetap sama.'),
+('O','Pemeriksaan mutu kebutuhan','SIMULASI','Meninjau kejelasan, kelengkapan, kebenaran, dan keterujian. Konfirmasi asumsi numerik live masih dikembangkan.'),
+('P','Panel sumber dan konteks RAG','SIMULASI','Memeriksa contoh sumber dan kemiripan pada dokumen. Integrasi dengan generasi live masih dikembangkan.'),
+('Q','Peninjauan dan finalisasi','SIMULASI','Memastikan penulis meninjau dokumen sebelum menyetujui hasil akhir.'),
+('R','Ekspor Word','SIMULASI','Mengunduh DOCX nyata dari sisi peramban. Kompilator server masih dikembangkan.'),
+('S','Simpan sebagai PDF','SIMULASI','Menggunakan dialog cetak peramban. Ekspor PDF melalui server masih dikembangkan.'),
+('T','Ringkasan evaluasi dan impor hasil','SIMULASI','Menampilkan data contoh serta impor ROUGE dan statistik. Backend penelitian belum selesai.'),
+('U','Penilaian pakar tersamar','SIMULASI','Menilai dokumen A dan B pada empat dimensi dengan alasan penilaian.'),
+('V','Kuesioner SUS','SIMULASI','Mengisi sepuluh butir dan menghitung skor, termasuk tampilan bertahap pada layar kecil.'),
+('W','Preferensi dan tampilan responsif','SIMULASI','Mengganti tema, bahasa, tampilan kertas, serta menyesuaikan antarmuka dengan lebar layar.'),
+('X','Pengaturan integrasi dan kredensial','LIVE','Menyimpan kunci terenkripsi, menyinkronkan kredensial n8n, menguji, mengganti, menghapus, dan menerapkan ulang sambungan.'),
+('Y','Ingestion dan basis pengetahuan','LIVE','Memproses korpus, membagi data, membuat embedding, memuat indeks, dan memverifikasi 150 potongan pengembangan.'),
+('Z','Diagnosis dan alat pengujian','SIMULASI DAN LIVE','Menguji skenario kegagalan dan memeriksa kesiapan layanan. Workflow produksi serta backend penelitian lengkap masih dikembangkan.'),
+]
+def feature_list(rows):
+ for letter,title,status,description in rows:
+  paragraph=doc.add_paragraph()
+  paragraph.paragraph_format.space_after=Pt(7)
+  paragraph.add_run(f'{letter}  {title}').bold=True
+  paragraph.add_run(f'  [{status}]\n{description}')
+feature_list(features_first)
+page('Daftar fitur N sampai Z')
+feature_list(features_second)
+page('Mulai menjalankan aplikasi')
+step(1,'Buka PowerShell di folder proyek. Jalankan aplikasi menggunakan perintah berikut. Akhiran .cmd menghindari masalah kebijakan PowerShell yang memblokir skrip.')
 code('cd "C:\\Users\\didra\\Documents\\WebApp Adeek\\App"\n$env:NEXT_PUBLIC_DATA_MODE="mock"\nnpx.cmd --yes pnpm@11.25.0 dev')
-step(2,'Keep that terminal open. Browse to http://127.0.0.1:3000. Expect the Dokumen Anda page and three example projects in a fresh browser profile.')
-step(3,'Use a separate browser profile or InPrivate window for tests. Mock projects and preferences are stored in that browser. Use the same host and port throughout a test.')
-shot('01-ledger','Figure 1  Starting document ledger in mock mode',3.2)
+step(2,'Biarkan terminal tetap terbuka. Buka http://127.0.0.1:3000. Pada profil peramban baru, halaman Dokumen Anda akan menampilkan tiga proyek contoh.')
+step(3,'Gunakan profil peramban terpisah atau jendela InPrivate untuk pengujian. Proyek simulasi dan preferensi tersimpan di peramban tersebut. Gunakan alamat host dan port yang sama selama satu pengujian.')
+shot('01-ledger','Gambar 1  Daftar dokumen awal dalam mode simulasi',3.2)
 
-page('1 Check preferences and the document list')
-step(1,'Click the gear icon to open Pengaturan. Change Tema between Terang, Gelap and the system setting. Open each dropdown and confirm its choices remain readable in both themes.')
-step(2,'Change Bahasa antarmuka to English, confirm labels change, then return to Bahasa Indonesia for the remaining steps. Refresh and confirm the preference persists.')
-step(3,'In mock Koneksi AI, enter a dummy value such as example-key-local-testing. Save settings and run Uji koneksi simulasi. Expect an explicit simulation message; it does not verify an external provider.')
-step(4,'Refresh. The password field must be empty. Mock keys remain in memory only and must be entered again after reload. Use Hapus key to remove the temporary value.')
-step(5,'Return to Dokumen. Open the hospital example and return to the list. Confirm the title and status match. Avoid resetting an existing browser containing work you want to keep.')
-shot('11-settings-mock','Figure 2  Mock AI settings and appearance controls',3.8)
-p('Pass when both themes and languages are usable, navigation succeeds, and the mock connection is clearly labeled simulated. A simulation result is not evidence that n8n or DeepSeek received a request.')
+page('1 Periksa preferensi dan daftar dokumen')
+step(1,'Klik ikon roda gigi untuk membuka Pengaturan. Ganti Tema antara Terang, Gelap, dan pengaturan sistem. Buka setiap menu pilihan dan pastikan opsinya tetap terbaca pada kedua tema.')
+step(2,'Ubah Bahasa antarmuka menjadi English dan pastikan label berubah. Kembalikan ke Bahasa Indonesia untuk langkah berikutnya. Muat ulang halaman dan pastikan preferensi tetap tersimpan.')
+step(3,'Pada Koneksi AI dalam mode simulasi, masukkan nilai uji seperti example-key-local-testing. Simpan pengaturan dan jalankan Uji koneksi simulasi. Hasil harus menyatakan bahwa pengujian bersifat simulasi dan belum memverifikasi penyedia eksternal.')
+step(4,'Muat ulang halaman. Kolom kata sandi harus kosong. Kunci simulasi hanya berada di memori dan perlu dimasukkan kembali setelah pemuatan ulang. Gunakan Hapus key untuk menghapus nilai sementara.')
+step(5,'Kembali ke Dokumen. Buka contoh rumah sakit, lalu kembali ke daftar. Pastikan judul dan status sesuai. Hindari mengatur ulang peramban yang menyimpan pekerjaan yang ingin dipertahankan.')
+shot('11-settings-mock','Gambar 2  Pengaturan AI simulasi dan tampilan',3.8)
+p('Pengujian lulus jika kedua tema dan bahasa dapat digunakan, navigasi berhasil, serta koneksi simulasi diberi penjelasan yang jelas. Hasil simulasi bukan bukti bahwa n8n atau DeepSeek menerima permintaan.')
 
-page('2 Create a project from text and a file')
-step(1,'Open /new-project. Fill Nama dokumen with Uji panduan klinik mahasiswa. Keep Healthcare as the domain and version 0.1.')
-step(2,'Paste this into Deskripsi sistem: Petugas klinik mendaftarkan pasien mahasiswa dan mengatur jadwal dokter. Hak akses berdasarkan peran. Waktu respons maksimal 2 detik.')
-step(3,'Before submitting, leave the title empty once and then the description empty once. The generation button should be disabled until both required inputs exist.')
-step(4,'For a second project, upload a small PDF with selectable text or a UTF-8 TXT transcript. Open Tinjau teks hasil ekstraksi, inspect the text and correct extraction errors before generation. Add a short textarea note to check merging.')
-step(5,'For the first project, click Mulai buat dokumen SRS. Expect navigation to a workspace. Use a PDF with a text layer for the parser check; a scanned image document requires OCR.')
-shot('02-intake','Figure 3  Filled text intake before generation',3.8)
-p('Pass when the selected file appears, extracted text can be reviewed, and notes plus file content are included in the context. File parsing and merging were tested in both themes.')
+page('2 Buat proyek dari teks dan berkas')
+step(1,'Buka /new-project. Isi Nama dokumen dengan Uji panduan klinik mahasiswa. Pertahankan Healthcare sebagai domain dan versi 0.1.')
+step(2,'Tempelkan pada Deskripsi sistem: Petugas klinik mendaftarkan pasien mahasiswa dan mengatur jadwal dokter. Hak akses berdasarkan peran. Waktu respons maksimal 2 detik.')
+step(3,'Sebelum mengirim, coba kosongkan judul, lalu kosongkan deskripsi secara bergantian. Tombol pembuatan dokumen harus nonaktif sampai kedua isian wajib terisi.')
+step(4,'Untuk proyek kedua, unggah PDF kecil dengan teks yang dapat dipilih atau transkrip TXT UTF-8. Buka Tinjau teks hasil ekstraksi, periksa teks, dan perbaiki kesalahan ekstraksi sebelum membuat dokumen. Tambahkan catatan singkat di kolom deskripsi untuk memeriksa penggabungan sumber.')
+step(5,'Pada proyek pertama, klik Mulai buat dokumen SRS. Halaman harus beralih ke ruang kerja. Gunakan PDF dengan lapisan teks untuk menguji pembacaan berkas. Dokumen hasil pemindaian memerlukan OCR.')
+shot('02-intake','Gambar 3  Isian konteks sebelum pembuatan dokumen',3.8)
+p('Pengujian lulus jika berkas terpilih muncul, teks ekstraksi dapat ditinjau, serta catatan dan isi berkas digabungkan menjadi konteks. Pembacaan dan penggabungan PDF telah diuji pada kedua tema.')
 
-page('3 Observe generation and test recovery')
-step(1,'Watch the workspace stages and the sections filling with draft content. Wait until Setujui dan finalisasi becomes enabled. Mock generation may take several seconds.')
-step(2,'Check that the document has the four IEEE parts and their subsections. Open the context and quality panels to inspect example retrieved chunks and guardrail explanations.')
-step(3,'Refresh after completion and reopen the project from the ledger. The draft and project status should persist in the same browser profile.')
-step(4,'For recovery, open the failed example project from the initial ledger and choose Lanjutkan penyusunan. Its completed introduction must remain present while later parts finish.')
-step(5,'For optional failure testing, open developer tools with Ctrl Shift D. Select retrieval, chapter3, guardrail or revision as the failure scenario and repeat the relevant action. Expect a visible failure and recoverable state; restore none after the check.')
-shot('03-generation','Figure 4  Generation progress in the mock workspace',3.7)
-p('Pass when completed sections survive retry and the document becomes reviewable. These are mock UI tests; live workflow execution and SSE reconnect acceptance are still pending.')
+page('3 Amati penyusunan dan uji pemulihan')
+step(1,'Amati tahapan pada ruang kerja dan bagian yang mulai terisi draf. Tunggu hingga tombol Setujui dan finalisasi aktif. Penyusunan simulasi dapat memerlukan beberapa detik.')
+step(2,'Pastikan dokumen memiliki empat bagian IEEE beserta subbagiannya. Buka panel konteks dan kualitas untuk memeriksa contoh potongan sumber yang diambil serta penjelasan pemeriksaan mutu.')
+step(3,'Setelah selesai, muat ulang dan buka kembali proyek dari daftar dokumen. Draf dan status proyek harus tetap tersimpan pada profil peramban yang sama.')
+step(4,'Untuk menguji pemulihan, buka proyek contoh yang gagal dari daftar awal, lalu pilih Lanjutkan penyusunan. Pendahuluan yang sudah selesai harus tetap tersedia saat bagian berikutnya disusun.')
+step(5,'Untuk pengujian kegagalan tambahan, buka alat pengembang dengan Ctrl Shift D. Pilih skenario retrieval, chapter3, guardrail, atau revision, lalu ulangi tindakan terkait. Kegagalan harus terlihat dan dapat dipulihkan. Kembalikan skenario ke none setelah pemeriksaan.')
+shot('03-generation','Gambar 4  Progres penyusunan pada ruang kerja simulasi',3.7)
+p('Pengujian lulus jika bagian yang selesai tetap tersedia setelah percobaan ulang dan dokumen dapat ditinjau. Ini merupakan pengujian antarmuka simulasi. Pengujian eksekusi workflow live dan penyambungan ulang SSE masih belum selesai.')
 
-page('4 Edit and save a section manually')
-step(1,'In the newly generated workspace, locate section 1.1 and click Edit. Read its Markdown before changing it.')
-step(2,'Append a separate paragraph: Catatan uji manual tersimpan. Click Selesai mengedit and confirm the sentence appears in the rendered manuscript.')
-step(3,'Refresh and check the sentence again. Open another section and confirm its text is unchanged. Manual editing should not start a generation or revision operation.')
-step(4,'Inspect requirement IDs in section 3.2. Keep IDs unique when adding a requirement. If the UI reports a duplicate, resolve it before finalization.')
-step(5,'Use the version or history controls to inspect available saved versions before restoring one. Restore only test content and confirm the intended document state is shown.')
-shot('05-edit','Figure 5  Markdown editing within the selected subsection',3.8)
-p('Pass when the exact sentence survives reload and unrelated sections remain unchanged. The automated journey also checks the exported Word file for this manual edit. Version restoration is an additional manual check, not part of the ten selected browser tests reported here.')
+page('4 Sunting dan simpan bagian secara manual')
+step(1,'Pada ruang kerja dokumen yang baru dibuat, cari bagian 1.1 dan klik Edit. Baca Markdown yang ada sebelum mengubahnya.')
+step(2,'Tambahkan paragraf terpisah: Catatan uji manual tersimpan. Klik Selesai mengedit dan pastikan kalimat tersebut muncul pada naskah.')
+step(3,'Muat ulang dan periksa kembali kalimat itu. Buka bagian lain dan pastikan teksnya tidak berubah. Penyuntingan manual tidak seharusnya memulai proses pembuatan atau revisi AI.')
+step(4,'Periksa ID kebutuhan pada bagian 3.2. Pastikan setiap ID tetap unik saat menambah kebutuhan. Jika antarmuka melaporkan duplikasi, selesaikan sebelum finalisasi.')
+step(5,'Gunakan kontrol versi atau riwayat untuk memeriksa versi tersimpan sebelum memulihkannya. Pulihkan hanya konten uji dan pastikan kondisi dokumen sesuai dengan versi yang dipilih.')
+shot('05-edit','Gambar 5  Penyuntingan Markdown pada subbagian terpilih',3.8)
+p('Pengujian lulus jika kalimat tetap ada setelah pemuatan ulang dan bagian lain tidak berubah. Pengujian otomatis juga memeriksa keberadaan suntingan ini pada berkas Word hasil ekspor. Pemulihan versi merupakan pemeriksaan manual tambahan di luar sepuluh pengujian peramban terpilih yang dilaporkan di sini.')
 
-page('5 Review an AI revision before accepting it')
-step(1,'Locate section 3.4 Security requirements and click Revisi AI. Choose Wajibkan 2-Factor Authentication dan enkripsi AES-256, then Kirim revisi.')
-step(2,'Wait for Tinjau usulan revisi. Inspect the original and proposed text. Confirm that the target subsection is 3.4 and that the proposal mentions TOTP.')
-step(3,'Click Terapkan perubahan. Confirm the revised security content appears in the manuscript and your manual sentence in 1.1 remains unchanged.')
-step(4,'Request another revision using Tambahkan audit trail pada autentikasi. Record the current security text first. In the resulting review dialog choose Batalkan; the manuscript must remain exactly as it was before that request.')
-step(5,'For isolation testing, request revisions for two different sections before accepting either. Accept each proposal separately and check that each updates its own section.')
-shot('06-revision','Figure 6  Explicit comparison and acceptance of a revision',3.8)
-p('Pass when accepting changes only the selected section and cancelling leaves its text unchanged. A suggested numeric target still needs author review; mock examples are not grounded research evidence.')
+page('5 Tinjau revisi AI sebelum menerapkannya')
+step(1,'Cari bagian 3.4 Security requirements dan klik Revisi AI. Pilih Wajibkan 2-Factor Authentication dan enkripsi AES-256, lalu Kirim revisi.')
+step(2,'Tunggu hingga Tinjau usulan revisi muncul. Bandingkan teks awal dan usulan. Pastikan targetnya adalah subbagian 3.4 dan usulan menyebutkan TOTP.')
+step(3,'Klik Terapkan perubahan. Pastikan revisi keamanan muncul pada naskah dan kalimat manual pada bagian 1.1 tetap sama.')
+step(4,'Ajukan revisi berikutnya dengan Tambahkan audit trail pada autentikasi. Catat teks keamanan sebelum permintaan. Pada dialog hasil revisi, pilih Batalkan. Naskah harus tetap sama seperti sebelum permintaan tersebut.')
+step(5,'Untuk menguji pemisahan perubahan, ajukan revisi pada dua bagian berbeda sebelum menerima salah satunya. Terima setiap usulan secara terpisah dan pastikan masing-masing hanya memperbarui bagiannya sendiri.')
+shot('06-revision','Gambar 6  Perbandingan dan persetujuan revisi secara eksplisit',3.8)
+p('Pengujian lulus jika penerimaan revisi hanya mengubah bagian terpilih dan pembatalan mempertahankan teksnya. Target angka yang disarankan tetap perlu ditinjau penulis. Contoh simulasi bukan bukti penelitian yang bersumber dari data nyata.')
 
-page('6 Finalize and export the document')
-step(1,'Review the draft, duplicate warnings and unresolved quality markers. Click Setujui dan finalisasi only after the content is ready for this test.')
-step(2,'In the confirmation dialog tick Saya telah meninjau dokumen ini and choose Finalisasi dokumen. Expect the export page.')
-step(3,'Click Unduh dokumen Word. Open the downloaded DOCX and search for Catatan uji manual tersimpan. Check section headings, requirement tables and the revised security text.')
-step(4,'Use the PDF or print action available on the page. In the browser print dialog select Save as PDF, preview the layout and save it. Compare headings and content with the Word file.')
-step(5,'Return to the workspace and confirm the finalized status. Do not treat browser print as verification of the future server-side Pandoc and LibreOffice compiler.')
-shot('08-export','Figure 7  Finalized document and export actions',3.8)
-p('Pass when Word downloads as an actual DOCX, opens and includes the edit. DOCX download and content were automated; browser PDF printing and detailed page-layout review remain manual checks.')
+page('6 Finalisasi dan ekspor dokumen')
+step(1,'Tinjau draf, peringatan duplikasi, dan penanda mutu yang belum diselesaikan. Klik Setujui dan finalisasi setelah konten siap untuk pengujian ini.')
+step(2,'Pada dialog konfirmasi, centang Saya telah meninjau dokumen ini dan pilih Finalisasi dokumen. Halaman ekspor harus terbuka.')
+step(3,'Klik Unduh dokumen Word. Buka DOCX yang diunduh dan cari Catatan uji manual tersimpan. Periksa judul bagian, tabel kebutuhan, serta hasil revisi keamanan.')
+step(4,'Gunakan tindakan PDF atau cetak yang tersedia. Pada dialog cetak peramban, pilih Save as PDF, tinjau tata letaknya, lalu simpan. Bandingkan judul dan isi dengan berkas Word.')
+step(5,'Kembali ke ruang kerja dan pastikan status sudah difinalisasi. Pencetakan peramban tidak membuktikan bahwa kompilator server Pandoc dan LibreOffice yang direncanakan sudah bekerja.')
+shot('08-export','Gambar 7  Dokumen yang difinalisasi dan tindakan ekspor',3.8)
+p('Pengujian lulus jika berkas Word benar-benar berformat DOCX, dapat dibuka, dan memuat suntingan. Pengunduhan DOCX dan pemeriksaan isinya telah diuji otomatis. Pencetakan PDF melalui peramban dan pemeriksaan tata letak terperinci tetap dilakukan secara manual.')
 
-page('7 Complete the SUS usability form')
-step(1,'Open /evaluation?tab=sus. This is test feedback in mock mode; use a browser profile reserved for testing.')
-step(2,'For items 1, 3, 5, 7 and 9 choose 5. For items 2, 4, 6, 8 and 10 choose 1. Submit with Kirim jawaban SUS.')
-step(3,'Expect a displayed score of 100.0. This is a scoring test with predetermined answers, not a real participant result.')
-step(4,'Reload and inspect the evaluation overview or stored result. Repeat with natural answers only when carrying out a properly prepared usability session.')
-step(5,'At a mobile width of 390 pixels the form presents one item at a time. Use Berikutnya until all ten are complete, then submit. The score should match the same desktop answers.')
-shot('09-sus','Figure 8  Submitted SUS form and scoring result',3.8)
-p('Pass when submission waits for all required answers and the golden answer pattern gives 100.0. The current live research persistence, consent and participant-code flow is unfinished; do not use this mock result in the thesis.')
+page('7 Isi formulir kegunaan SUS')
+step(1,'Buka /evaluation?tab=sus. Jawaban ini merupakan data uji dalam mode simulasi. Gunakan profil peramban khusus pengujian.')
+step(2,'Untuk butir 1, 3, 5, 7, dan 9, pilih 5. Untuk butir 2, 4, 6, 8, dan 10, pilih 1. Kirim menggunakan Kirim jawaban SUS.')
+step(3,'Skor yang ditampilkan harus 100.0. Ini adalah pengujian perhitungan dengan jawaban yang ditentukan sebelumnya, bukan hasil peserta sebenarnya.')
+step(4,'Muat ulang dan periksa ringkasan evaluasi atau hasil yang tersimpan. Gunakan jawaban berdasarkan pengalaman nyata hanya ketika melaksanakan sesi kegunaan yang sudah dipersiapkan dengan benar.')
+step(5,'Pada lebar layar 390 piksel, formulir menampilkan satu butir setiap langkah. Gunakan Berikutnya sampai sepuluh butir selesai, lalu kirim. Skornya harus sama dengan jawaban yang sama pada desktop.')
+shot('09-sus','Gambar 8  Hasil pengiriman dan perhitungan SUS',3.8)
+p('Pengujian lulus jika seluruh jawaban wajib harus diisi sebelum pengiriman dan pola jawaban uji menghasilkan 100.0. Penyimpanan penelitian live, persetujuan peserta, serta alur kode peserta masih belum selesai. Jangan gunakan hasil simulasi ini dalam skripsi.')
 
-page('8 Try the blind expert review and evaluation tabs')
-step(1,'On Evaluasi, select Penilaian pakar. Enter the pseudonym Pakar-07 in Nama samaran penilai.')
-step(2,'Review document A without trying to infer its source. Rate unambiguous, complete, correct and verifiable as 4 for this mechanical test. Provide a specific justification for each dimension.')
-step(3,'Click Kirim penilaian. Expect Penilaian tersimpan. Repeat for B if required by your review plan. Check that source disclosure follows submission rather than appearing during rating.')
-step(4,'Inspect the overview, ROUGE and statistical-results tabs. Imported data must match the contracts in packages/contracts/src/index.ts. Try an invalid JSON file once and confirm the form shows an error without replacing existing results.')
-step(5,'Export any test data using the available controls, then check row labels and values. These are local fixture or simulated results. Real ROUGE language guards, statistics and research exports belong to the unfinished backend stages.')
-shot('10-expert','Figure 9  Expert review dimensions and blinded example content',3.8)
-p('The selected automated test verified an expert submission and SUS scoring. Import/export edge cases in the other tabs are manual checks in this guide, not newly claimed automated results.')
+page('8 Uji penilaian pakar tersamar dan tab evaluasi')
+step(1,'Pada Evaluasi, pilih Penilaian pakar. Isi Nama samaran penilai dengan Pakar-07.')
+step(2,'Tinjau dokumen A tanpa menebak sumbernya. Untuk pengujian mekanis ini, beri nilai 4 pada dimensi tidak ambigu, lengkap, benar, dan dapat diuji. Tulis alasan yang spesifik untuk setiap dimensi.')
+step(3,'Klik Kirim penilaian. Tombol harus berubah menjadi Penilaian tersimpan. Ulangi untuk B bila diperlukan oleh rencana penilaian. Pastikan sumber baru diungkap setelah pengiriman, bukan selama pemberian nilai.')
+step(4,'Periksa ringkasan, ROUGE, dan bagian hasil statistik. Data impor harus sesuai dengan kontrak di packages/contracts/src/index.ts. Coba sekali berkas JSON tidak valid dan pastikan formulir menampilkan kesalahan tanpa mengganti hasil yang sudah ada.')
+step(5,'Ekspor data uji melalui kontrol yang tersedia, lalu periksa label dan nilainya. Data ini berasal dari contoh lokal atau simulasi. Pemeriksaan kesesuaian bahasa ROUGE, statistik, dan ekspor penelitian nyata termasuk tahap backend yang belum selesai.')
+shot('10-expert','Gambar 9  Dimensi penilaian pakar dan contoh dokumen tersamar',3.8)
+p('Pengujian otomatis terpilih telah memverifikasi pengiriman penilaian pakar dan perhitungan SUS. Kasus khusus impor dan ekspor pada bagian lain merupakan pemeriksaan manual dalam panduan ini, bukan hasil otomatis baru yang diklaim lulus.')
 
-page('9 Check the responsive interface')
-step(1,'Use browser developer tools to test widths 1440, 1024, 768 and 390 pixels. Repeat the ledger, intake, workspace, revision dialog, export and evaluation views.')
-step(2,'At each width inspect horizontal overflow, clipped buttons, readable dropdown options, keyboard focus and scroll access to every action. Test light and dark themes.')
-step(3,'At 390 pixels open SUS and verify that exactly five answer options are visible for the current item. Advance through all ten questions.')
-step(4,'Switch language to English and back. Confirm long labels wrap and no message keys such as backendErrors.unknown are displayed as raw text.')
-shot('12-mobile','Figure 10  Mobile SUS layout at 390 pixels',4.4)
-p('Pass when all content and actions remain reachable without horizontal scrolling. This screenshot is newly captured; the ten selected tests cover desktop flows in two themes, while this broader viewport checklist remains a manual acceptance pass.')
+page('9 Periksa tampilan responsif')
+step(1,'Gunakan alat pengembang peramban untuk mencoba lebar 1440, 1024, 768, dan 390 piksel. Periksa kembali daftar dokumen, formulir masukan, ruang kerja, dialog revisi, ekspor, serta evaluasi.')
+step(2,'Pada setiap lebar, periksa luapan horizontal, tombol terpotong, keterbacaan menu pilihan, fokus papan ketik, dan akses melalui gulir ke seluruh tindakan. Uji tema terang dan gelap.')
+step(3,'Pada lebar 390 piksel, buka SUS dan pastikan tepat lima pilihan jawaban terlihat untuk butir aktif. Lanjutkan sampai seluruh sepuluh butir selesai.')
+step(4,'Ganti bahasa ke English lalu kembali. Pastikan label panjang membungkus dengan baik dan kunci pesan seperti backendErrors.unknown tidak tampil sebagai teks mentah.')
+shot('12-mobile','Gambar 10  Tampilan SUS pada lebar 390 piksel',4.4)
+p('Pengujian lulus jika seluruh isi dan tindakan tetap dapat dijangkau tanpa gulir horizontal. Tangkapan layar ini diambil langsung dari aplikasi. Sepuluh pengujian terpilih mencakup alur desktop pada kedua tema, sedangkan daftar pemeriksaan berbagai lebar layar ini tetap merupakan pengujian manual.')
 
-page('10 Start live mode and inspect Settings')
-step(1,'In the app terminal press Ctrl C. Start the existing n8n setup and switch mode with the commands below. Keep using the same local browser address.')
+page('10 Jalankan mode live dan periksa Pengaturan')
+step(1,'Tekan Ctrl C pada terminal aplikasi. Jalankan penyiapan n8n yang sudah ada dan ganti mode menggunakan perintah berikut. Tetap gunakan alamat peramban lokal yang sama.')
 code('docker compose -f "C:\\Users\\didra\\Documents\\n8n-docker\\compose.yaml" start\n$env:NEXT_PUBLIC_DATA_MODE="live"\nnpx.cmd --yes pnpm@11.25.0 dev')
-step(2,'Open /settings directly. You should see DeepSeek, Embeddings and n8n rows. After a successful save/test the three indicators are Tersimpan, Tersinkron and Teruji. Saved keys show only a four-character hint.')
-step(3,'Use the existing local mock-provider configuration for automated tests. Open advanced settings and inspect its URL and model. Enter real keys only when intentionally performing a paid manual provider test.')
-step(4,'To test rotation, choose Ganti kunci and save a fresh dummy key against the mock provider. Expect the password field to clear after saving. Test Uji sambungan and confirm its successful-test timestamp updates.')
-shot('13-settings-live','Figure 11  Live Settings with synchronized provider credentials',3.4)
-p('Changing the server URL requires key re-entry. Never put an actual key into a screenshot, guide, URL or issue report. Deletion removes the stored key and requires a new save to restore that connection.')
+step(2,'Buka /settings secara langsung. Baris DeepSeek, Embeddings, dan n8n harus tersedia. Setelah penyimpanan dan pengujian berhasil, tiga indikator menunjukkan Tersimpan, Tersinkron, dan Teruji. Kunci tersimpan hanya menampilkan petunjuk empat karakter terakhir.')
+step(3,'Gunakan konfigurasi penyedia simulasi lokal yang sudah ada untuk pengujian otomatis. Buka pengaturan lanjutan dan periksa URL serta model. Masukkan kunci asli hanya saat sengaja melakukan pengujian manual berbayar pada penyedia nyata.')
+step(4,'Untuk menguji pergantian kunci, pilih Ganti kunci dan simpan kunci uji baru pada penyedia simulasi. Kolom kata sandi harus kosong setelah penyimpanan. Jalankan Uji sambungan dan pastikan waktu pengujian berhasil terakhir diperbarui.')
+shot('13-settings-live','Gambar 11  Pengaturan live dengan kredensial penyedia tersinkron',3.4)
+p('Perubahan URL server mengharuskan kunci dimasukkan kembali. Jangan masukkan kunci asli ke tangkapan layar, panduan, URL, atau laporan masalah. Penghapusan menghilangkan kunci tersimpan; sambungan perlu disimpan kembali dengan kunci baru untuk dipulihkan.')
 
-page('11 Check corpus status and readiness')
-step(1,'In live Settings scroll to Basis pengetahuan. The verified local development setup contains 150 chunks using text-embedding-3-small at 1536 dimensions. Its development-data banner must be visible.')
-step(2,'Check the workflow list and use Terapkan ulang sambungan after a missing-credential test. It rebuilds credentials from the encrypted store; do not delete Docker volumes as a routine test.')
-step(3,'Open /new-project in live mode. Generation currently remains disabled because the production generation/revision/error workflows are unfinished. Follow the Settings links in the readiness notice to inspect the reported reasons.')
-step(4,'To repeat corpus verification, start the local mock provider in a separate terminal, then use Python from the repository root. Use the project virtual environment if installed.')
+page('11 Periksa status korpus dan kesiapan sistem')
+step(1,'Pada Pengaturan live, gulir ke Basis pengetahuan. Penyiapan pengembangan lokal yang diverifikasi memiliki 150 potongan dengan model text-embedding-3-small berdimensi 1536. Penanda data pengembangan harus terlihat.')
+step(2,'Periksa daftar workflow dan gunakan Terapkan ulang sambungan setelah menguji kredensial yang hilang. Tindakan ini membangun ulang kredensial dari penyimpanan terenkripsi. Jangan menghapus volume Docker sebagai pengujian rutin.')
+step(3,'Buka /new-project pada mode live. Pembuatan dokumen saat ini tetap nonaktif karena workflow produksi untuk pembuatan, revisi, dan penanganan kesalahan belum selesai. Ikuti tautan Pengaturan pada pemberitahuan kesiapan untuk memeriksa penyebabnya.')
+step(4,'Untuk mengulangi verifikasi korpus, jalankan penyedia simulasi lokal pada terminal terpisah, lalu jalankan Python dari akar repositori. Gunakan lingkungan virtual proyek jika sudah dipasang.')
 code('node --env-file=apps/web/.env.local tools/mock-llm/server.mjs\n.venv\\Scripts\\python.exe -m ingestion verify --use-app-settings --require-mock')
-shot('14-knowledge','Figure 12  Development corpus status in live Settings',3.4)
-p('The development corpus is excluded from thesis metrics. Research extraction and licensing review is still required. Do not interpret a successful Settings smoke as proof that the full live generation workflow exists.')
+shot('14-knowledge','Gambar 12  Status korpus pengembangan pada Pengaturan live',3.4)
+p('Korpus pengembangan tidak disertakan dalam metrik skripsi. Ekstraksi sumber penelitian dan pemeriksaan lisensi masih perlu ditinjau. Keberhasilan uji sambungan Pengaturan tidak membuktikan bahwa seluruh workflow pembuatan dokumen live sudah tersedia.')
 
-page('12 Diagnose problems and record test results')
-doc.add_heading('Startup and recovery',level=2)
-p('pnpm is not recognized: use npx.cmd --yes pnpm@11.25.0 dev. If npx.ps1 is blocked, keep the .cmd suffix; changing the system execution policy is unnecessary. Port 3000 busy: stop the previous app terminal, then restart. After switching mock/live, restart the development server and reload the browser.')
-p('n8n unavailable: open Docker Desktop, start the existing compose services and check http://localhost:5678/healthz/readiness. Supabase unavailable: from the project root run npx.cmd --yes supabase@3.0.0 start --exclude realtime,imgproxy,edge-runtime,logflare,vector,supavisor. Never use reset or delete a volume to resolve a connection problem.')
-p('Mock examples missing: use a fresh browser profile, or load examples from Ctrl Shift D. Only reset a disposable test profile; reset deletes its local project data. A live not_implemented error on document/evaluation features is a known phase limitation, not a key configuration problem.')
-doc.add_heading('Commands for reproducible checks',level=2)
+page('12 Atasi masalah dan catat hasil pengujian')
+doc.add_heading('Menjalankan aplikasi dan memulihkan layanan',level=2)
+p('Jika pnpm tidak dikenali, gunakan npx.cmd --yes pnpm@11.25.0 dev. Jika npx.ps1 diblokir, tetap gunakan akhiran .cmd tanpa mengubah kebijakan eksekusi sistem. Jika port 3000 terpakai, hentikan terminal aplikasi sebelumnya lalu jalankan kembali. Setelah beralih antara mock dan live, mulai ulang server pengembangan dan muat ulang peramban.')
+p('Jika n8n tidak tersedia, buka Docker Desktop, jalankan layanan compose yang sudah ada, dan periksa http://localhost:5678/healthz/readiness. Jika Supabase tidak tersedia, dari akar proyek jalankan npx.cmd --yes supabase@3.0.0 start --exclude realtime,imgproxy,edge-runtime,logflare,vector,supavisor. Jangan menggunakan reset atau menghapus volume untuk memperbaiki masalah sambungan.')
+p('Jika contoh simulasi hilang, gunakan profil peramban baru atau muat contoh melalui Ctrl Shift D. Atur ulang hanya profil uji yang datanya boleh dihapus karena tindakan ini menghapus proyek lokal. Kesalahan not_implemented pada fitur dokumen atau evaluasi live merupakan keterbatasan tahap pengembangan yang diketahui, bukan masalah konfigurasi kunci.')
+doc.add_heading('Perintah untuk mengulangi pemeriksaan',level=2)
 code('npx.cmd --yes pnpm@11.25.0 typecheck\nnpx.cmd --yes pnpm@11.25.0 lint\nnpx.cmd --yes pnpm@11.25.0 test\nnpx.cmd --yes pnpm@11.25.0 test:e2e\nnode scripts/doctor.mjs')
-p('Run Playwright against the mock-mode app. The doctor checks live backend readiness and can correctly return a nonzero exit code while production workflows remain absent. The full Playwright suite includes more cases than the selected ten run for this guide.')
-doc.add_heading('Observed results',level=2)
-p('All ten selected browser cases passed in light and dark: concurrent revision isolation; text creation through editing, revision acceptance/rejection, finalization and real DOCX download; PDF plus notes; failed-run recovery; SUS plus expert submission. The illustrated walkthrough captured twelve fresh mock screenshots. Live Settings and readiness screenshots were captured separately.')
-p('Backend checks previously passed 43 TypeScript tests and seven Python tests. Credential lifecycle checks through real local n8n and Supabase passed with dummy provider keys. Full live generation, server exports, research APIs and live end-to-end acceptance remain pending.')
-doc.add_heading('Record each manual test',level=2)
-p('For each sequence record: date, mode, theme, browser width, project title, action, expected result, actual result and pass/fail. For a failure attach a screenshot with secrets hidden, the exact button pressed and the visible error code. Keep mock results separate from research observations.')
+p('Jalankan Playwright saat aplikasi memakai mode simulasi. Doctor memeriksa kesiapan backend live dan dapat mengembalikan kode keluar bukan nol selama workflow produksi belum tersedia. Seluruh rangkaian Playwright mencakup lebih banyak kasus daripada sepuluh kasus terpilih dalam panduan ini.')
+doc.add_heading('Hasil yang telah diamati',level=2)
+p('Sepuluh kasus peramban terpilih lulus pada tema terang dan gelap: pemisahan dua revisi bersamaan; pembuatan dari teks sampai penyuntingan, penerimaan dan penolakan revisi, finalisasi, serta pengunduhan DOCX asli; PDF beserta catatan; pemulihan proses gagal; serta SUS dan pengiriman penilaian pakar. Alur bergambar menggunakan dua belas tangkapan layar simulasi baru. Pengaturan dan kesiapan live diambil secara terpisah.')
+p('Pemeriksaan backend sebelumnya meluluskan 43 pengujian TypeScript dan tujuh pengujian Python. Pengujian siklus kredensial melalui n8n dan Supabase lokal yang nyata lulus dengan kunci penyedia uji. Pembuatan dokumen live penuh, ekspor server, API penelitian, serta pengujian menyeluruh mode live masih belum selesai.')
+doc.add_heading('Mencatat setiap pengujian manual',level=2)
+p('Untuk setiap urutan, catat tanggal, mode, tema, lebar peramban, judul proyek, tindakan, hasil yang diharapkan, hasil sebenarnya, dan status lulus atau gagal. Jika gagal, lampirkan tangkapan layar dengan rahasia disembunyikan, tombol yang ditekan, serta kode kesalahan yang terlihat. Pisahkan hasil simulasi dari pengamatan penelitian.')
 
 for style in doc.styles:
     for border in style.element.findall('.//' + qn('w:pBdr')):
