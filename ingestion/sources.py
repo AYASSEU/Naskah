@@ -152,7 +152,7 @@ def fetch_sources(data_dir, output_dir, sources):
                             result['download']=type(error).__name__
                 except Exception as error:
                     result = {'discovery':type(error).__name__}
-                issues.append({'dataset':source,'status':'identity_and_terms_unverified','discovery_url':discovery,**result,'candidate':'https://github.com/ftnrjnnh-m/Fault-proneSRSDataset','note':'No exact Kaggle record verified; see docs/research-notes.md.'})
+                issues.append({'dataset':source,'status':'identity_and_terms_unverified','discovery_url':discovery,**result,'candidate':'https://github.com/ftnrjnnh-m/Fault-proneSRSDataset','note':'Publisher license/author suitability require review; see docs/research-notes.md.'})
                 continue
             metadata = json.loads(sidecar.read_text(encoding='utf-8'))
             if not metadata.get('verified_by_author') or not metadata.get('license') or not metadata.get('source_url','').startswith('https://www.kaggle.com/datasets/'):
