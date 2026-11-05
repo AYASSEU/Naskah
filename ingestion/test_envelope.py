@@ -1,7 +1,7 @@
 import json
 import unittest
 from pathlib import Path
-from envelope import seal, unseal
+from ingestion.envelope import seal, unseal
 
 class EnvelopeTests(unittest.TestCase):
     def test_shared_node_vector(self):

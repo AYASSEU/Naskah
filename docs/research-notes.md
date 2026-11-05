@@ -7,3 +7,13 @@
 - Numeric targets absent from the input and retrieved evidence are assumptions. A clearer sentence is not evidence of a grounded requirement. Keep needs_confirmation visible and unresolved until the author confirms it.
 - Blind document-to-source assignments are server records. Do not expose them before review submission. Participant codes are pseudonymous; research forms require recorded consent.
 - PURE candidate: https://zenodo.org/records/7118517. The Kaggle title in the brief is not sufficient to establish a unique verified dataset; do not substitute unrelated fault-prediction datasets.
+# Corpus preparation observed on 2026-11-05
+
+The [PURE v7118517 record](https://zenodo.org/records/7118517) identifies CC BY 4.0. Both ZIPs downloaded and matched the publisher MD5 checksums; local manifests also record SHA-256. The [PROMISE_exp source](https://github.com/AleksandarMitrevski/se-requirements-classification/blob/master/0-datasets/PROMISE_exp/PROMISE_exp.arff) contains its CC BY-SA 3.0 notice and attribution instructions. Derived files remain local and retain that provenance. Do not infer licenses for other corpora from these sources.
+
+Extraction produced 65 PURE document representations and 47 PROMISE project groups. The deterministic preliminary split has 90 retrieval documents and 22 held-out documents. Chunking found 16 documents with statements over the size cap and stopped before embedding research material. The fetch manifest also lists 16 extraction/format gaps. Review legacy Word files, scanned/ambiguous extraction, and alternate document versions (notably EIRENE and PEPPOL) before freezing a thesis split. These counts describe a preliminary engineering import, not a validated experimental corpus.
+
+Kaggle's public discovery API identified [corpus4panwo/fault-prone-srs-dataset](https://www.kaggle.com/datasets/corpus4panwo/fault-prone-srs-dataset), last updated 2023-06-21, with license recorded as Unknown. This resolves the previously unverified URL but does not establish research reuse terms. The automatic download result is recorded separately; importing it requires author verification of terms and project grouping. The similarly named GitHub collection has not been substituted.
+
+Development verification used 150 synthetic chunks and deterministic mock embeddings. All 150 were reused on a second run; there were no duplicate hashes or held-out document IDs in retrieval. This is an implementation check only. Real research documents have not been embedded or used to generate thesis metrics.
+
