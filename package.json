@@ -8,12 +8,17 @@
     "dev": "pnpm --filter @naskah/web dev",
     "build": "pnpm --filter @naskah/web build",
     "start": "pnpm --filter @naskah/web start",
-    "typecheck": "pnpm --filter @naskah/web typecheck",
-    "lint": "eslint apps/web/src packages/contracts/src",
+    "typecheck": "pnpm --filter @naskah/core typecheck && tsc -p n8n/tsconfig.json && pnpm --filter @naskah/web typecheck",
+    "lint": "eslint apps/web/src packages/contracts/src packages/core/src",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "audit:slop": "node scripts/audit-slop.mjs",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "n8n:build": "tsx n8n/generate-schema.ts && node n8n/build.mjs",
+    "n8n:deploy": "node scripts/run-server-script.mjs deploy",
+    "test:b5": "node scripts/run-server-script.mjs test",
+    "n8n:verify-markdown": "node scripts/deploy-renderer.mjs",
+    "local:setup-mock": "node scripts/setup-local-mock.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

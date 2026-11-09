@@ -167,14 +167,14 @@ isOneToOne: false
                   ]
                 },"generation_events": {
                   Row: {
-                    "created_at": string,"event_id": string,"owner_id": string,"payload": NonNullable<Json>,"scope": string,"scope_ref": string | null,"seq": number,"session_id": string,"type": string
+                    "created_at": string,"event_id": string,"owner_id": string,"payload": NonNullable<Json>,"scope": string,"scope_ref": string | null,"seq": number,"session_id": string,"type": string,"workflow_key": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"event_id": string,"owner_id": string,"payload": NonNullable<Json>,"scope": string,"scope_ref"?: string | null,"seq"?: never,"session_id": string,"type": string
+                    "created_at"?: string,"event_id": string,"owner_id": string,"payload": NonNullable<Json>,"scope": string,"scope_ref"?: string | null,"seq"?: never,"session_id": string,"type": string,"workflow_key"?: string | null
                   }
                   Update: {
-                    "created_at"?: string,"event_id"?: string,"owner_id"?: string,"payload"?: NonNullable<Json>,"scope"?: string,"scope_ref"?: string | null,"seq"?: never,"session_id"?: string,"type"?: string
+                    "created_at"?: string,"event_id"?: string,"owner_id"?: string,"payload"?: NonNullable<Json>,"scope"?: string,"scope_ref"?: string | null,"seq"?: never,"session_id"?: string,"type"?: string,"workflow_key"?: string | null
                   }
                   Relationships: [
                     {
@@ -357,14 +357,14 @@ isOneToOne: false
                   ]
                 },"revision_proposals": {
                   Row: {
-                    "after_text": string | null,"base_section_version": number,"before_text": string,"created_at": string,"error_code": string | null,"guardrail": NonNullable<Json>,"id": string,"instruction": string,"n8n_execution_id": string | null,"owner_id": string,"project_id": string,"refined_query": string,"retrieved_chunks": NonNullable<Json>,"section_id": string,"session_id": string,"status": string,"updated_at": string
+                    "after_text": string | null,"base_section_version": number,"before_text": string,"callback_event_id": string | null,"cancel_requested": boolean,"created_at": string,"error_code": string | null,"guardrail": NonNullable<Json>,"id": string,"instruction": string,"metrics": NonNullable<Json>,"n8n_execution_id": string | null,"owner_id": string,"project_id": string,"refined_query": string,"retrieved_chunks": NonNullable<Json>,"section_id": string,"session_id": string,"status": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "after_text"?: string | null,"base_section_version": number,"before_text": string,"created_at"?: string,"error_code"?: string | null,"guardrail"?: NonNullable<Json>,"id"?: string,"instruction": string,"n8n_execution_id"?: string | null,"owner_id": string,"project_id": string,"refined_query"?: string,"retrieved_chunks"?: NonNullable<Json>,"section_id": string,"session_id": string,"status"?: string,"updated_at"?: string
+                    "after_text"?: string | null,"base_section_version": number,"before_text": string,"callback_event_id"?: string | null,"cancel_requested"?: boolean,"created_at"?: string,"error_code"?: string | null,"guardrail"?: NonNullable<Json>,"id"?: string,"instruction": string,"metrics"?: NonNullable<Json>,"n8n_execution_id"?: string | null,"owner_id": string,"project_id": string,"refined_query"?: string,"retrieved_chunks"?: NonNullable<Json>,"section_id": string,"session_id": string,"status"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "after_text"?: string | null,"base_section_version"?: number,"before_text"?: string,"created_at"?: string,"error_code"?: string | null,"guardrail"?: NonNullable<Json>,"id"?: string,"instruction"?: string,"n8n_execution_id"?: string | null,"owner_id"?: string,"project_id"?: string,"refined_query"?: string,"retrieved_chunks"?: NonNullable<Json>,"section_id"?: string,"session_id"?: string,"status"?: string,"updated_at"?: string
+                    "after_text"?: string | null,"base_section_version"?: number,"before_text"?: string,"callback_event_id"?: string | null,"cancel_requested"?: boolean,"created_at"?: string,"error_code"?: string | null,"guardrail"?: NonNullable<Json>,"id"?: string,"instruction"?: string,"metrics"?: NonNullable<Json>,"n8n_execution_id"?: string | null,"owner_id"?: string,"project_id"?: string,"refined_query"?: string,"retrieved_chunks"?: NonNullable<Json>,"section_id"?: string,"session_id"?: string,"status"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -443,14 +443,14 @@ isOneToOne: false
                   ]
                 },"srs_generation_logs": {
                   Row: {
-                    "cancel_requested": boolean,"completed_sections": NonNullable<Json>,"created_at": string,"current_stage": string | null,"domain": string,"embedding_model": string | null,"error_code": string | null,"error_message": string | null,"execution_time_seconds": number,"failure_stage": string | null,"finished_at": string | null,"guardrail_rewrite_count": number,"is_thesis_run": boolean,"metrics": NonNullable<Json>,"model": string | null,"n8n_execution_id": string | null,"owner_id": string,"project_id": string,"project_title": string,"retrieval_k": number | null,"run_id": string,"run_status_detail": string | null,"scenario_label": string | null,"session_id": string,"status": string,"structure_completeness_pct": number,"tokens_in": number,"tokens_out": number,"updated_at": string
+                    "callback_event_id": string | null,"cancel_requested": boolean,"completed_sections": NonNullable<Json>,"created_at": string,"current_stage": string | null,"domain": string,"embedding_model": string | null,"error_code": string | null,"error_message": string | null,"execution_time_seconds": number,"failure_stage": string | null,"finished_at": string | null,"guardrail_rewrite_count": number,"is_thesis_run": boolean,"metrics": NonNullable<Json>,"model": string | null,"n8n_execution_id": string | null,"owner_id": string,"project_id": string,"project_title": string,"retrieval_k": number | null,"run_id": string,"run_status_detail": string | null,"scenario_label": string | null,"session_id": string,"status": string,"structure_completeness_pct": number,"tokens_in": number,"tokens_out": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "cancel_requested"?: boolean,"completed_sections"?: NonNullable<Json>,"created_at"?: string,"current_stage"?: string | null,"domain": string,"embedding_model"?: string | null,"error_code"?: string | null,"error_message"?: string | null,"execution_time_seconds"?: number,"failure_stage"?: string | null,"finished_at"?: string | null,"guardrail_rewrite_count"?: number,"is_thesis_run"?: boolean,"metrics"?: NonNullable<Json>,"model"?: string | null,"n8n_execution_id"?: string | null,"owner_id": string,"project_id": string,"project_title": string,"retrieval_k"?: number | null,"run_id"?: string,"run_status_detail"?: string | null,"scenario_label"?: string | null,"session_id"?: string,"status"?: string,"structure_completeness_pct"?: number,"tokens_in"?: number,"tokens_out"?: number,"updated_at"?: string
+                    "callback_event_id"?: string | null,"cancel_requested"?: boolean,"completed_sections"?: NonNullable<Json>,"created_at"?: string,"current_stage"?: string | null,"domain": string,"embedding_model"?: string | null,"error_code"?: string | null,"error_message"?: string | null,"execution_time_seconds"?: number,"failure_stage"?: string | null,"finished_at"?: string | null,"guardrail_rewrite_count"?: number,"is_thesis_run"?: boolean,"metrics"?: NonNullable<Json>,"model"?: string | null,"n8n_execution_id"?: string | null,"owner_id": string,"project_id": string,"project_title": string,"retrieval_k"?: number | null,"run_id"?: string,"run_status_detail"?: string | null,"scenario_label"?: string | null,"session_id"?: string,"status"?: string,"structure_completeness_pct"?: number,"tokens_in"?: number,"tokens_out"?: number,"updated_at"?: string
                   }
                   Update: {
-                    "cancel_requested"?: boolean,"completed_sections"?: NonNullable<Json>,"created_at"?: string,"current_stage"?: string | null,"domain"?: string,"embedding_model"?: string | null,"error_code"?: string | null,"error_message"?: string | null,"execution_time_seconds"?: number,"failure_stage"?: string | null,"finished_at"?: string | null,"guardrail_rewrite_count"?: number,"is_thesis_run"?: boolean,"metrics"?: NonNullable<Json>,"model"?: string | null,"n8n_execution_id"?: string | null,"owner_id"?: string,"project_id"?: string,"project_title"?: string,"retrieval_k"?: number | null,"run_id"?: string,"run_status_detail"?: string | null,"scenario_label"?: string | null,"session_id"?: string,"status"?: string,"structure_completeness_pct"?: number,"tokens_in"?: number,"tokens_out"?: number,"updated_at"?: string
+                    "callback_event_id"?: string | null,"cancel_requested"?: boolean,"completed_sections"?: NonNullable<Json>,"created_at"?: string,"current_stage"?: string | null,"domain"?: string,"embedding_model"?: string | null,"error_code"?: string | null,"error_message"?: string | null,"execution_time_seconds"?: number,"failure_stage"?: string | null,"finished_at"?: string | null,"guardrail_rewrite_count"?: number,"is_thesis_run"?: boolean,"metrics"?: NonNullable<Json>,"model"?: string | null,"n8n_execution_id"?: string | null,"owner_id"?: string,"project_id"?: string,"project_title"?: string,"retrieval_k"?: number | null,"run_id"?: string,"run_status_detail"?: string | null,"scenario_label"?: string | null,"session_id"?: string,"status"?: string,"structure_completeness_pct"?: number,"tokens_in"?: number,"tokens_out"?: number,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -551,9 +551,18 @@ isOneToOne: false
         isSetofReturn: false
       } },
 "match_srs_chunks":
-{ Args: { "expected_model"?: string,"filter_domain"?: string,"filter_section"?: string,"match_count"?: number,"query_embedding": string }; Returns: {
+{ Args: { "expected_model"?: string,"filter_domain"?: string,"filter_section"?: string,"match_count"?: number,"owner_filter"?: string,"query_embedding": string }; Returns: {
               "content": string,"id": number,"metadata": Json,"similarity": number
             }[]
+                           },
+"naskah_workflow_context":
+{ Args: { "p_execution_id": string,"p_revision_id"?: string,"p_run_id"?: string,"p_session_id": string }; Returns: Json
+                           },
+"naskah_workflow_failure":
+{ Args: { "p_code"?: string,"p_execution_id": string,"p_revision_id"?: string,"p_run_id"?: string,"p_session_id"?: string,"p_stage"?: string }; Returns: Json
+                           },
+"naskah_workflow_progress":
+{ Args: { "p_completed_sections"?: Json,"p_event_key": string,"p_execution_id": string,"p_metrics"?: Json,"p_payload": Json,"p_revision_id": string,"p_run_id": string,"p_session_id": string,"p_type": string }; Returns: Json
                            },
 "save_section":
 { Args: { "p_data": Json,"p_owner": string,"p_project": string,"p_section": string,"p_version": number }; Returns: {

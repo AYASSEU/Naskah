@@ -1,3 +1,4 @@
+import { renderDocumentSections } from '@naskah/core';
 import { z } from 'zod';
 import {
   ProjectSchema,
@@ -359,14 +360,8 @@ export function createMockServices(): Services {
             domain: p.domain,
             status: 'success',
             execution_time_seconds: doc.metadata.generationSeconds,
-            structure_completeness_pct: checkStructure(
-              doc.sections
-                .map(
-                  (s) =>
-                    `# ${s.number.split('.')[0]}. ${s.title}\n## ${s.number} ${s.title}\n${s.markdown}`,
-                )
-                .join('\n'),
-            ).percentage,
+            structure_completeness_pct: checkStructure(renderDocumentSections(doc.sections))
+              .percentage,
             created_at: new Date().toISOString(),
           };
           await evaluation.logGeneration(log);

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CallbackBaseSchema } from './backend';
 export * from './ai-connection';
 export * from './backend';
 export const ProjectStatus = z.enum([
@@ -120,8 +121,19 @@ export const GenerateInputSchema = z.object({
   run_id: z.uuid().optional(),
   output_language: z.enum(['id', 'en']).optional(),
   template_id: z.string().optional(),
-  options: z.object({ retrieval_k: z.number().int().min(5).max(8).optional(), model: z.string().optional(), temperature: z.number().min(0).max(2).optional() }).optional(),
-  resume: z.object({ from_part: z.number().int().min(1).max(4), completed_sections: z.array(SectionSchema) }).optional(),
+  options: z
+    .object({
+      retrieval_k: z.number().int().min(5).max(8).optional(),
+      model: z.string().optional(),
+      temperature: z.number().min(0).max(2).optional(),
+    })
+    .optional(),
+  resume: z
+    .object({
+      from_part: z.number().int().min(1).max(17),
+      completed_sections: z.array(SectionSchema),
+    })
+    .optional(),
 });
 export type GenerateInput = z.infer<typeof GenerateInputSchema>;
 export const ReviseInputSchema = z.object({
@@ -221,3 +233,42 @@ export const TemplateSchema = z.object({
   ),
 });
 export type SrsTemplate = z.infer<typeof TemplateSchema>;
+
+export const ChapterDraftSchema = z.object({
+  number: z.string().regex(/^\d+$/),
+  title: z
+    .string()
+    .min(1)
+    .regex(/^[^\r\n]+$/),
+  sections: z
+    .array(
+      z.object({
+        number: z.string().regex(/^\d+\.\d+$/),
+        title: z
+          .string()
+          .min(1)
+          .regex(/^[^\r\n]+$/),
+        body: z.string(),
+        requirements: z.array(RequirementSchema).default([]),
+      }),
+    )
+    .min(1),
+});
+export type ChapterDraft = z.infer<typeof ChapterDraftSchema>;
+
+export const WorkflowReadyCallbackSchema = CallbackBaseSchema.extend({
+  execution_id: z.string().min(1).max(100),
+  markdown: z.string().min(1).max(4000000),
+  document: DocumentSchema,
+  metrics: z.record(z.string(), z.unknown()),
+});
+export const WorkflowRevisionCallbackSchema = CallbackBaseSchema.extend({
+  execution_id: z.string().min(1).max(100),
+  revision_id: z.uuid(),
+  base_section_version: z.number().int().positive(),
+  after: z.string().min(1).max(400000),
+  retrievalQuery: z.string().max(12000),
+  chunks: z.array(RetrievedChunkSchema),
+  guardrail: GuardrailSchema,
+  metrics: z.record(z.string(), z.unknown()),
+});

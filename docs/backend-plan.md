@@ -17,21 +17,38 @@ Started 2026-11-05. Source: `naskah_backend_phase2.md`. Phase 1 remains the UI/d
 
 Each stage records exact verification in `docs/backend-phase-reports.md`. Do not describe unexecuted acceptance tests as passing.
 
-| Stage | Deliverable | Acceptance |
-|---|---|---|
-| B0 | Inventory, decisions, research notes | baseline gates; verified service/API probes |
-| B1 | Local Supabase, migrations, seed, generated types | RLS, leakage, locking, version isolation, advisors |
-| B2 | Server environment, encryption, guards, errors, SSE | shared Node/Python crypto vectors; security unit tests |
-| B3 | Settings integration registry and n8n sync | credential lifecycle and authenticated smoke webhooks |
-| B4 | Corpus ingestion and development seed | disjoint splits, dimension/model consistency, retrieval |
-| B5 | Versioned workflows and deterministic provider | real webhook executions, repair/failure/resume/cancel |
-| B6 | Routes and HTTP ports | conformance, callback replay, SSE reconnect, revision isolation |
-| B7 | Parser and document compiler | parser soak; DOCX properties; rendered PDF/TOC inspection |
-| B8 | Research persistence and Python evaluation | shared scoring vectors, blinded sources, dev-data exclusion |
-| B9 | Live UI acceptance | real DB/n8n + mock provider; both themes; secrets scan |
-| B10 | Runbooks, traceability, thesis guide | instructions match observed results |
+| Stage | Deliverable                                         | Acceptance                                                      |
+| ----- | --------------------------------------------------- | --------------------------------------------------------------- |
+| B0    | Inventory, decisions, research notes                | baseline gates; verified service/API probes                     |
+| B1    | Local Supabase, migrations, seed, generated types   | RLS, leakage, locking, version isolation, advisors              |
+| B2    | Server environment, encryption, guards, errors, SSE | shared Node/Python crypto vectors; security unit tests          |
+| B3    | Settings integration registry and n8n sync          | credential lifecycle and authenticated smoke webhooks           |
+| B4    | Corpus ingestion and development seed               | disjoint splits, dimension/model consistency, retrieval         |
+| B5    | Versioned workflows and deterministic provider      | real webhook executions, repair/failure/resume/cancel           |
+| B6    | Routes and HTTP ports                               | conformance, callback replay, SSE reconnect, revision isolation |
+| B7    | Parser and document compiler                        | parser soak; DOCX properties; rendered PDF/TOC inspection       |
+| B8    | Research persistence and Python evaluation          | shared scoring vectors, blinded sources, dev-data exclusion     |
+| B9    | Live UI acceptance                                  | real DB/n8n + mock provider; both themes; secrets scan          |
+| B10   | Runbooks, traceability, thesis guide                | instructions match observed results                             |
 
 ## Boundaries
+
+### Destination laptop checkpoint, 2026-11-09
+
+The 2026-11-05 inventory above describes the source computer. On this laptop,
+the project is at `C:\Users\MSI1\OneDrive\文档\WebApp Skripsi`, n8n is 2.46.6 with
+matching runners, and its Compose is under `%LOCALAPPDATA%\n8n-docker`. Local
+Supabase and 150 synthetic development chunks are restored; the app runs in mock
+mode on 127.0.0.1:3000. No hosted Supabase project was changed.
+
+B5 is implemented on 2026-11-10: Generate SRS, Revise Section, Error Handler and
+Supabase smoke are deployed and active. Shared Markdown, credential adoption,
+generation/revision/failure/cancel/resume and Settings reapply are tested against
+real local services with the mock provider. The user-approved 14-scope backend
+REST key stays local. See `B5-workflows.md` and `backend-phase-reports.md` for exact
+acceptance and deviations. B6–B10 remain pending; the browser stays in mock mode.
+
+### Service and data boundaries
 
 Browser calls only same-origin APIs. Service credentials and encryption stay server-side. n8n HTTP nodes use credential references; no secrets in workflow parameters. Provider keys for automated tests are generated dummy values used only with the local mock provider. No paid provider calls are made by tests. Database changes are migration-based. Local-only ownership must reject nonlocal deployment until authenticated sessions are configured.
 

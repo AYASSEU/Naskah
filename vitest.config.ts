@@ -7,6 +7,7 @@ export default defineConfig({
       'server-only': path.resolve('tests/server-only.ts'),
       '@': path.resolve('apps/web/src'),
       '@naskah/contracts': path.resolve('packages/contracts/src/index.ts'),
+      '@naskah/core': path.resolve('packages/core/src/index.ts'),
     },
   },
 });

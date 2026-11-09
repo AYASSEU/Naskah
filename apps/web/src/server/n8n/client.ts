@@ -140,6 +140,37 @@ export class N8nClient {
       throw error;
     }
   }
+  async syncNamedCredential(
+    name: string,
+    type: string,
+    data: Record<string, string>,
+    boundId?: string | null,
+  ): Promise<CredentialRef> {
+    let current: (CredentialRef & { type: string }) | undefined;
+    if (boundId) {
+      try {
+        current = await this.request<CredentialRef & { type: string }>(
+          `credentials/${encodeURIComponent(boundId)}`,
+        );
+      } catch (error) {
+        if (!(error instanceof N8nApiError && error.httpStatus === 404)) throw error;
+      }
+    }
+    if (!current) {
+      // A fresh app database can be paired with an existing n8n instance. Adopt
+      // its uniquely named credential instead of creating duplicate names.
+      const matches = (await this.list<CredentialRef & { type: string }>('credentials')).filter(
+        (credential) => credential.name === name,
+      );
+      if (matches.length > 1) throw new AppError('credential_name_ambiguous', 409);
+      current = matches[0];
+    }
+    if (current && (current.name !== name || current.type !== type))
+      throw new AppError('credential_schema_mismatch', 409);
+    return current
+      ? this.updateCredential(current.id, name, type, data)
+      : this.createCredential(name, type, data);
+  }
   async putWorkflow(w: Workflow) {
     const body = {
       name: w.name,

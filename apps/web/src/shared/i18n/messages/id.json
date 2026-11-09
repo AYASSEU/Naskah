@@ -313,6 +313,7 @@
     "n8n_unreachable": "n8n tidak dapat dijangkau. Jalankan kontainer Docker lalu coba kembali.",
     "n8n_unauthorized": "n8n menolak kunci API. Perbarui sambungan n8n di Pengaturan.",
     "credential_schema_mismatch": "Format kredensial n8n belum didukung. Periksa versi yang terpasang.",
+    "credential_name_ambiguous": "Ada beberapa kredensial n8n dengan nama yang sama. Periksa binding sebelum sinkronisasi.",
     "stored_but_not_synced": "Kunci tersimpan terenkripsi, tetapi sinkronisasi gagal. Terapkan ulang sambungan.",
     "section_changed": "Bagian telah berubah sejak dibuka. Muat ulang sebelum menyimpan.",
     "section_locked": "Buka kunci bagian sebelum menyunting atau meminta revisi.",

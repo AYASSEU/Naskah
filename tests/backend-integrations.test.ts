@@ -50,4 +50,75 @@ describe('integration boundaries', () => {
     ).rejects.toMatchObject({ code: 'n8n_unauthorized' });
     expect(create).not.toHaveBeenCalled();
   });
+  it('adopts transferred credentials when the app binding is absent or stale', async () => {
+    for (const binding of [undefined, 'missing-id']) {
+      const client = new N8nClient('http://localhost:5680', 'in-memory-dummy');
+      vi.spyOn(client, 'request').mockRejectedValue(new N8nApiError(404));
+      vi.spyOn(client, 'list').mockResolvedValue([
+        { id: 'transferred-id', name: 'naskah/embeddings', type: 'httpHeaderAuth' },
+      ]);
+      const update = vi
+        .spyOn(client, 'updateCredential')
+        .mockResolvedValue({ id: 'transferred-id', name: 'naskah/embeddings' });
+      const create = vi.spyOn(client, 'createCredential');
+      await expect(
+        client.syncNamedCredential('naskah/embeddings', 'httpHeaderAuth', {}, binding),
+      ).resolves.toMatchObject({ id: 'transferred-id' });
+      expect(update).toHaveBeenCalledWith(
+        'transferred-id',
+        'naskah/embeddings',
+        'httpHeaderAuth',
+        {},
+      );
+      expect(create).not.toHaveBeenCalled();
+    }
+  });
+  it('refuses ambiguous names or incompatible credential types without writing', async () => {
+    const client = new N8nClient('http://localhost:5681', 'in-memory-dummy');
+    const list = vi.spyOn(client, 'list').mockResolvedValue([
+      { id: 'a', name: 'naskah/embeddings', type: 'httpHeaderAuth' },
+      { id: 'b', name: 'naskah/embeddings', type: 'httpHeaderAuth' },
+    ]);
+    const update = vi.spyOn(client, 'updateCredential'),
+      create = vi.spyOn(client, 'createCredential');
+    await expect(
+      client.syncNamedCredential('naskah/embeddings', 'httpHeaderAuth', {}),
+    ).rejects.toMatchObject({ code: 'credential_name_ambiguous' });
+    list.mockResolvedValue([{ id: 'a', name: 'naskah/embeddings', type: 'httpBasicAuth' }]);
+    await expect(
+      client.syncNamedCredential('naskah/embeddings', 'httpHeaderAuth', {}),
+    ).rejects.toMatchObject({ code: 'credential_schema_mismatch' });
+    expect(update).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+  });
+  it('protects foreign bindings and never treats permission denial as a missing credential', async () => {
+    const client = new N8nClient('http://localhost:5682', 'in-memory-dummy');
+    const request = vi
+      .spyOn(client, 'request')
+      .mockResolvedValue({ id: 'personal', name: 'personal/service', type: 'httpHeaderAuth' });
+    const list = vi.spyOn(client, 'list'),
+      update = vi.spyOn(client, 'updateCredential'),
+      create = vi.spyOn(client, 'createCredential');
+    await expect(
+      client.syncNamedCredential('naskah/embeddings', 'httpHeaderAuth', {}, 'personal'),
+    ).rejects.toMatchObject({ code: 'credential_schema_mismatch' });
+    request.mockRejectedValue(new N8nApiError(403));
+    await expect(
+      client.syncNamedCredential('naskah/embeddings', 'httpHeaderAuth', {}, 'personal'),
+    ).rejects.toMatchObject({ code: 'n8n_unauthorized' });
+    expect(list).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+  });
+  it('creates a credential only when neither binding nor matching name exists', async () => {
+    const client = new N8nClient('http://localhost:5683', 'in-memory-dummy');
+    vi.spyOn(client, 'list').mockResolvedValue([]);
+    const create = vi
+      .spyOn(client, 'createCredential')
+      .mockResolvedValue({ id: 'new', name: 'naskah/callback-bearer' });
+    await expect(
+      client.syncNamedCredential('naskah/callback-bearer', 'httpHeaderAuth', {}),
+    ).resolves.toMatchObject({ id: 'new' });
+    expect(create).toHaveBeenCalledOnce();
+  });
 });

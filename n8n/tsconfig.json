@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "paths": { "@/*": ["../apps/web/src/*"] }
+  },
+  "include": [
+    "src/*.ts",
+    "generate-schema.ts",
+    "../scripts/deploy-renderer.ts",
+    "../scripts/setup-local-mock.ts",
+    "../scripts/deploy-workflows.ts",
+    "../scripts/test-b5.ts"
+  ]
+}

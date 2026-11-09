@@ -40,6 +40,140 @@ Gates: typecheck, lint, 43 TypeScript tests, production build, design audit, 26 
 
 Deviations: token count is the documented characters/4 approximation. Whole-statement overlap may be below 10% to avoid cutting requirements. Development seed documents stay entirely in the development retrieval corpus and never become thesis references. Research preparation remains provisional until extraction gaps, oversized statements, alternate document versions and Kaggle terms are reviewed. These do not block generation implementation using the development corpus.
 
+## Laptop recovery and B5 progress — 2026-11-09
+
+Restored the runtime on the destination laptop at
+`C:\Users\MSI1\OneDrive\文档\WebApp Skripsi` with the existing repository and history.
+The old machine's database and encrypted credentials were not transferred. This
+laptop uses n8n 2.46.6 and matching external runners, the existing local n8n volume,
+and the transferred provider smoke workflows. The webapp responds HTTP 200 on
+127.0.0.1:3000 in mock mode; n8n readiness is HTTP 200 on localhost:5678. The n8n MCP
+connection successfully executed the transferred Hello World workflow and returned
+its successful result. Local Supabase CLI 3.0.0 applied the existing migrations;
+integrity/RLS checks for all 27 public tables and warning/error advisors passed.
+Seven Python tests and the synthetic ingestion pipeline passed: 150 development
+chunks, dimension 1536, no held-out leakage, and section retrieval checks passed.
+Research datasets remain provisional as described in B4.
+
+Started B5 with `packages/core`: shared IEEE template, lossless Markdown parser,
+requirement parser, deterministic rendering, structure scoring, traceability and
+rewrite markers, plus numeric-assumption and identifier-preservation checks.
+Existing frontend imports delegate to the shared implementation. Golden files
+cover all three Phase 1 manuscripts; Windows CRLF metadata, code fences, tables,
+section isolation and multiline requirement fields are checked. Mock generation
+now assembles each chapter heading once before scoring structure.
+
+Built the authenticated `Naskah / Smoke / Markdown` workflow from source. Its small
+Code-node bundle uses the same renderer and a JSON Schema validator generated from
+the Zod chapter contract. The build rejects unsupported schema keywords. Isolated
+execution tests confirm byte equality with the host renderer for all three mock
+manuscripts and agreement with Zod on malformed inputs. The generated SDK passes
+the live n8n MCP validator (two nodes). The deployment helper resolves credential
+IDs at runtime, rejects ambiguous names, and preserves existing node IDs, positions
+and groups. No provider keys or credential IDs are embedded in workflow artifacts.
+
+Verified: 61 TypeScript unit tests, strict typecheck for core/n8n/web, lint,
+production build, design audit and all 26 contrast pairs passed. Six selected
+Playwright tests passed across light/dark: concurrent revision isolation, full text
+intake through edit/revision/finalization/DOCX, and failed-generation resume.
+The portable Windows startup command was executed against the existing services;
+it retained the running web server and reused the containers. See
+`docs/local-laptop-setup.md` for the exact commands and current addresses.
+
+The user explicitly approved a new 30-day REST key with 14 scopes: credential
+list/read/create/update/delete, workflow list/read/create/update/activate/deactivate,
+and execution list/read/stop. Created `Naskah local backend`, expiring 9 December
+2026, and stored it in the Windows user environment, gitignored app configuration,
+and encrypted local Settings store. The earlier automatic approval block is
+resolved. GET workflows/credentials, credential creation/PATCH, and workflow
+create/update/activation now succeed. MCP OAuth remains limited to workflow:read,
+workflow:execute, execution:read.
+
+Created a consistent pre-deployment n8n backup at
+`%LOCALAPPDATA%\n8n-backups\20261109-210943-bdf69a`. Deployed and activated
+`Naskah / Smoke / Markdown` (local ID `RVzjRIskYWLWmFJf`). A real runner execution
+initially exposed esbuild's export getters: n8n disables Object.defineProperty,
+so the bundle returned undefined despite passing a normal VM test. Replaced the
+getter export with a plain local result container, added a hardened-sandbox
+regression, validated the rebuilt SDK, and reran the production webhook. All four
+fixtures returned HTTP 200 with byte-identical Markdown (18,952; 9,821; 2,592; and
+292 bytes); an invalid auth token was rejected. Repeated upserts retained the
+workflow ID and node groups. Evidence is in ignored
+`artifacts/n8n-markdown-verification.json`.
+
+Recovered Settings using only the local mock provider. Fixed credential sync to
+adopt an existing uniquely named/type-matching credential when the app binding is
+absent or stale, refuse ambiguous names and foreign bindings, and retain existing
+smoke-node positions and MCP visibility. Real setup verified all three transferred
+credential IDs remain unchanged, five required credential names are unique, both
+provider webhooks pass, and existing smoke IDs/layout/groups/MCP are preserved.
+New callback and Supabase credentials were created using the live API schemas;
+all app secrets use the existing AES-GCM envelope. The reusable command
+`pnpm local:setup-mock` refuses non-mock provider configurations. Evidence is in
+ignored `artifacts/local-mock-setup.json`. Database integrity was rechecked after
+these writes; all 27 tables passed.
+
+**At this 9 November checkpoint B5 was not complete.** W1 generation, W2 revision, W3 error handling, Supabase
+smoke, and failure/repair/cancel/resume acceptance remain pending. Doctor correctly
+returns not-ready because the three production workflows do not exist yet;
+provider integrations and the 150-chunk development corpus are ready. Save-data
+policies remain none; n8n may temporarily persist initial execution rows before
+its configured pruning removes them. Webhook responses are the acceptance evidence.
+
+## B5 — production workflows, 2026-11-10
+
+Implemented and activated Generate SRS (14 nodes), Revise Section (14), Error
+Handler (10), and Supabase smoke (15), using the live node catalog and successful
+MCP SDK validation. Shared builders emit credential-name placeholders; CLI and
+Settings reapply share one server deployer using the encrypted n8n connection.
+Idempotent upserts preserve IDs, positions, groups and MCP flags. Parent workflows
+point to the deployed error handler. Existing transfer workflows remain intact.
+
+Generation loads active template/prompts and owner-scoped RAG context, condenses
+long input with map/reduce, validates/repairs chapter JSON once, reflects with
+conservative literal rewrites, checkpoints each part, renders shared Markdown,
+and delivers an authenticated callback. Revision refines up to three queries,
+receives only target text and reserved IDs, and stores a pending proposal.
+The Error Trigger recovers safe parent metadata without saved execution bodies,
+persists a stable error/checkpoint and delivers the failure callback.
+
+Minimal transactional callback routes were brought forward from B6 to verify real
+delivery, idempotency, freshness, lock/version checks and proposal isolation.
+Explicit text-to-JSONB casts prevent postgres.js from double-serializing stored
+arrays/objects; real persisted section tests cover this. The CLI-generated B5
+migration adds runtime RPCs/event identity, trusted owner retrieval filtering and
+template data. Generated database types match the running schema. Invoker RPCs
+have an empty search path and service-only execution grants.
+
+The local mock matrix checks real production webhooks, callbacks, database
+events/checkpoints/metrics, byte-identical Markdown, and safe API execution
+metadata. It covers provider and validation failures, repair, retry/backoff,
+guardrails, long input, cancellation, resume, revision isolation, owner privacy,
+callback replay/conflict/freshness and callback failure recovery. The ignored
+`artifacts/b5-acceptance.json` holds exact case results. All provider calls use
+dummy keys and synthetic development data; no paid provider calls were made.
+
+Final gate: 26 real-webhook cases passed, with parent execution metadata inspected
+through the API while active. All 76 TypeScript unit tests, strict core/n8n/web
+typechecks, lint, production build, design audit and 26 contrast pairs passed.
+Six Playwright cases passed across light/dark: concurrent revisions, intake through
+edit/revision/finalization/DOCX, and failed-run resume. Database integrity/RLS for
+27 tables, invoker/RPC grant checks, and warning/error advisors passed. Reapply
+recovered all four deactivated workflows while preserving their layout and IDs.
+The app was restarted after the build and responds HTTP 200 in mock mode.
+
+See `B5-workflows.md` for the runbook, acceptance details and deviations: a pure
+single-item planner loop replaces a dedicated Loop Over Items node; corrected
+reflection objects are ignored in favor of validated literal rewrites; callbacks
+use five total attempts. The planner bundle is larger than the small-Code-node
+convention. Execution save policies remain none, but initial execution rows can
+temporarily contain headers before pruning. Durable acceptance uses database
+events and receipts; final execution body exports are deliberately absent.
+
 ## Remaining implementation
 
-B5–B10 are still pending: shared Markdown renderer/parser, generation/revision/error workflows and execution tests; complete application routes/adapters and callbacks; server PDF/DOCX compiler; research evaluation services/scripts; full live end-to-end acceptance; final runbooks. Only Settings and its supporting backend routes are live at this checkpoint. The frontend's default mode remains mock. Do not describe Phase 2 as complete.
+B6–B10 remain pending: full application routes/HTTP adapters, SSE and watchdogs,
+port conformance, server PDF/DOCX compilation, research evaluation, live UI
+acceptance, and final runbooks. Settings and workflow callbacks are live; the
+browser's generation/revision ports still use mock mode. Do not describe Phase 2
+as complete.

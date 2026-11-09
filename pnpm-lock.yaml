@@ -56,6 +56,9 @@ importers:
       '@naskah/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@naskah/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@radix-ui/react-alert-dialog':
         specifier: 1.2.1
         version: 1.2.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -159,6 +162,12 @@ importers:
       zod:
         specifier: 4.6.7
         version: 4.6.7
+
+  packages/core:
+    dependencies:
+      '@naskah/contracts':
+        specifier: workspace:*
+        version: link:../contracts
 
 packages:
 

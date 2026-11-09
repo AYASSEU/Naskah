@@ -1,0 +1,12 @@
+{
+  "name": "@naskah/core",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@naskah/contracts": "workspace:*"
+  }
+}

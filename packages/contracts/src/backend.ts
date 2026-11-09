@@ -25,6 +25,7 @@ export const BackendErrorCodes = [
   'n8n_unreachable',
   'n8n_unauthorized',
   'credential_schema_mismatch',
+  'credential_name_ambiguous',
   'stored_but_not_synced',
   'section_changed',
   'section_locked',

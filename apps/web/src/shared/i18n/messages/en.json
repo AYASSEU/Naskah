@@ -313,6 +313,7 @@
     "n8n_unreachable": "n8n cannot be reached. Start its Docker container and retry.",
     "n8n_unauthorized": "n8n rejected its API key. Update the n8n connection in Settings.",
     "credential_schema_mismatch": "The installed n8n credential format is unsupported. Check the installed version.",
+    "credential_name_ambiguous": "Several n8n credentials share this name. Review their bindings before syncing.",
     "stored_but_not_synced": "The key is encrypted and saved, but synchronization failed. Reapply connections.",
     "section_changed": "This section changed since you opened it. Reload before saving.",
     "section_locked": "Unlock this section before editing or requesting a revision.",

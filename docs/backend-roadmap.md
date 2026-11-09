@@ -57,5 +57,15 @@ must be checked against the provider's available models when wiring live calls.
    server keys in `apps/web/.env.local`, and implement the registry's HTTP
    collection. Re-run contract, isolation, and browser flows against real services.
 
-The route stubs remain 501 until their adapter is implemented. Do not make a
-stub pretend success. Live configuration errors must remain visible and actionable.
+The remaining route stubs stay 501 until their adapter is implemented. Live
+configuration errors must remain visible and actionable.
+
+## B5 checkpoint — 2026-11-10
+
+Generate SRS, Revise Section, Error Handler and Supabase smoke are deployed and
+tested with the local mock provider and real Supabase. Shared Markdown/core,
+transactional workflow callbacks, owner-scoped retrieval, checkpoints, cancellation,
+resume and Settings reapply are implemented. See `B5-workflows.md` and the phase
+report for executed acceptance and deviations. The browser still uses mock ports;
+full HTTP routes/adapters, SSE/watchdogs and conformance are B6. Compiler,
+evaluation and live UI acceptance follow in B7–B10.

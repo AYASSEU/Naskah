@@ -128,8 +128,12 @@ export async function ensureSmoke(
     w.id = existing.id;
     for (const node of w.nodes) {
       const old = full.nodes.find((n) => n.name === node.name);
-      if (old) node.id = old.id;
+      if (old) {
+        node.id = old.id;
+        node.position = old.position;
+      }
     }
+    w.settings.availableInMCP = full.settings.availableInMCP ?? false;
     const groups = full.nodeGroups as
       { id: string; name: string; nodeIds: string[]; description?: string }[] | undefined;
     w.nodeGroups =

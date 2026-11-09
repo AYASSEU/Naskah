@@ -11,6 +11,12 @@ begin
     if has_table_privilege('anon','public.'||t.tablename,'select,insert,update,delete') then raise exception 'TEST: anon privileges on %',t.tablename; end if;
   end loop;
   if has_table_privilege('authenticated','public.integration_secrets','select') then raise exception 'TEST: secrets readable'; end if;
+  if (select count(*) from pg_proc where pronamespace='public'::regnamespace and proname in ('naskah_workflow_context','naskah_workflow_progress','naskah_workflow_failure','match_srs_chunks'))<>4 then raise exception 'TEST: workflow RPC missing or ambiguous'; end if;
+  for t in select oid,proname,prosecdef,proconfig from pg_proc where pronamespace='public'::regnamespace and proname in ('naskah_workflow_context','naskah_workflow_progress','naskah_workflow_failure','match_srs_chunks') loop
+    if t.prosecdef or not coalesce(t.proconfig @> array['search_path=""'],false)
+      or has_function_privilege('anon',t.oid,'execute') or has_function_privilege('authenticated',t.oid,'execute')
+      or not has_function_privilege('service_role',t.oid,'execute') then raise exception 'TEST: unsafe workflow RPC %',t.proname; end if;
+  end loop;
   insert into public.projects(id,owner_id,session_id,title,domain) values(p,owner_a,sid,'Integrity test','Education');
   insert into public.sections(id,owner_id,project_id,section_id,number,title,markdown,status) values
     (s1,owner_a,p,'1.1','1.1','Purpose','original one','drafted'),(s2,owner_a,p,'1.2','1.2','Scope','original two','drafted');

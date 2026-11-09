@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "string",
+      "pattern": "^\\d+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "sections": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\r\\n]+$"
+          },
+          "body": {
+            "type": "string"
+          },
+          "requirements": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^REQ-[A-Z]-\\d+$"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "actor": {
+                  "type": "string"
+                },
+                "input": {
+                  "type": "string"
+                },
+                "process": {
+                  "type": "string"
+                },
+                "output": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": [
+                    "High",
+                    "Medium",
+                    "Low"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "description",
+                "actor",
+                "input",
+                "process",
+                "output",
+                "priority"
+              ]
+            }
+          }
+        },
+        "required": [
+          "number",
+          "title",
+          "body"
+        ]
+      }
+    }
+  },
+  "required": [
+    "number",
+    "title",
+    "sections"
+  ]
+}
