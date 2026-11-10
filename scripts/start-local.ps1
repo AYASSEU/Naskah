@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet('mock','live')][string]$Mode='mock',
+  [ValidateSet('mock','live')][string]$Mode='live',
   [switch]$SkipN8n,
   [switch]$WithDatabase,
   [string]$N8nDirectory=(Join-Path $env:LOCALAPPDATA 'n8n-docker')
@@ -24,10 +24,37 @@ if(-not (Test-Path -LiteralPath 'apps\web\node_modules\next\dist\bin\next')){
   if($LASTEXITCODE -ne 0){throw 'Pemasangan dependency gagal.'}
 }
 if(-not $SkipN8n){
+  & docker info --format '{{.ServerVersion}}' 2>$null | Out-Null
+  if($LASTEXITCODE -ne 0){
+    & docker desktop start --timeout 45
+    & docker info --format '{{.ServerVersion}}' 2>$null | Out-Null
+    if($LASTEXITCODE -ne 0){& docker desktop restart --timeout 60}
+    if($LASTEXITCODE -ne 0){throw 'Engine Docker Desktop belum siap. Periksa Docker Desktop.'}
+  }
   $composePath=Join-Path $N8nDirectory 'compose.yaml'
-  if(-not (Test-Path -LiteralPath $composePath)){throw 'Compose n8n lokal belum ditemukan; tentukan -N8nDirectory.'}
-  & docker compose --project-directory $N8nDirectory -f $composePath up -d --wait --wait-timeout 180
-  if($LASTEXITCODE -ne 0){throw 'n8n lokal belum siap. Periksa Docker Desktop.'}
+  if(Test-Path -LiteralPath $composePath){
+    & docker compose --project-directory $N8nDirectory -f $composePath up -d --wait --wait-timeout 180
+    if($LASTEXITCODE -ne 0){throw 'n8n lokal belum siap. Periksa Docker Desktop.'}
+  }else{
+    # A relocated laptop may retain the existing containers but not the private Compose file.
+    # Restart those containers without recreating volumes or changing their encryption key.
+    if($N8nDirectory -ne (Join-Path $env:LOCALAPPDATA 'n8n-docker')){throw 'Compose tidak ditemukan pada -N8nDirectory yang ditentukan.'}
+    foreach($containerName in @('n8n-local','n8n-local-runners','naskah-mock-llm')){
+      $running=& docker inspect --format '{{.State.Running}}' $containerName 2>$null
+      if($LASTEXITCODE -ne 0){throw "Container existing $containerName tidak ditemukan; pulihkan konfigurasi Compose lokal."}
+      if($running -ne 'true'){& docker start $containerName;if($LASTEXITCODE -ne 0){throw "Container $containerName gagal dimulai."}}
+    }
+    $servicesReady=$false
+    for($attempt=0;$attempt -lt 30;$attempt++){
+      try{
+        $n8nHealth=Invoke-WebRequest 'http://127.0.0.1:5678/healthz/readiness' -TimeoutSec 5
+        $mockHealth=Invoke-WebRequest 'http://127.0.0.1:4010/health' -TimeoutSec 5
+        if($n8nHealth.StatusCode -eq 200 -and $mockHealth.StatusCode -eq 200){$servicesReady=$true;break}
+      }catch{}
+      Start-Sleep -Milliseconds 500
+    }
+    if(-not $servicesReady){throw 'n8n atau mock provider belum siap. Periksa health container existing.'}
+  }
 }
 if($WithDatabase -or $Mode -eq 'live'){
   & $nodePath 'scripts/local-database.mjs' start

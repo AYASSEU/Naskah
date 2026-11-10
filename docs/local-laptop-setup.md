@@ -1,4 +1,4 @@
-# Penyiapan lokal laptop, 9 November 2026
+# Penyiapan lokal laptop, diperbarui 10 November 2026
 
 Proyek tetap di `C:\Users\MSI1\OneDrive\文档\WebApp Skripsi`. Remote dan history Git
 dipertahankan. Ini pemulihan lingkungan laptop tujuan, bukan pemulihan database
@@ -8,7 +8,7 @@ atau credentials dari komputer sumber.
 
 | Layanan         | Alamat                                | Keadaan terverifikasi                                                          |
 | --------------- | ------------------------------------- | ------------------------------------------------------------------------------ |
-| Naskah          | http://127.0.0.1:3000                 | Mode mock, HTTP 200                                                            |
+| Naskah          | http://127.0.0.1:3000                 | Backend live lokal, provider mock, HTTP 200                                     |
 | n8n 2.46.6      | http://localhost:5678                 | Healthy, existing volume `n8n_local_data`                                      |
 | MCP n8n         | http://localhost:5678/mcp-server/http | Discovery, detail, eksekusi manual Hello World, dan hasil sukses terverifikasi |
 | Mock provider   | http://localhost:4010/v1              | Container `naskah-mock-llm`, provider otomatis tanpa biaya                     |
@@ -24,18 +24,20 @@ dari komputer lain yang diasumsikan sudah dipindahkan.
 
 ## Menjalankan kembali
 
-Docker Desktop harus hidup. Dari PowerShell di folder proyek:
+Script akan mencoba menghidupkan engine Docker Desktop. Dari PowerShell di folder proyek:
 
 ```powershell
 ./scripts/start-local.ps1
 ```
 
-Script menjalankan Compose n8n existing di Local AppData dan webapp mode mock,
-memakai volume/key existing. Script tidak menjalankan scaffold Compose lama di
-`infra/`. Untuk ikut menyalakan database lokal:
+Default B6 adalah backend **live lokal**, dengan provider tetap mock. Script
+menjalankan Compose existing jika tersedia, atau memulai container existing saat
+file Compose privat tidak ada. Volume/key dipertahankan. Supabase ikut dinyalakan
+untuk mode live. Scaffold Compose lama di `infra/` tidak digunakan.
+Untuk menjalankan ulang mode simulasi Phase 1:
 
 ```powershell
-./scripts/start-local.ps1 -WithDatabase
+./scripts/start-local.ps1 -Mode mock
 ```
 
 Dalam terminal Codex yang memiliki pnpm:
@@ -53,7 +55,7 @@ Supabase tetap dipin ke 3.0.0. Jalur standar npm/npx masih tersedia sebagai fall
 Ctrl+C pada terminal startup menghentikan webapp. Untuk n8n dan mock provider:
 
 ```powershell
-docker compose --project-directory "$env:LOCALAPPDATA\n8n-docker" stop
+docker stop n8n-local-runners n8n-local naskah-mock-llm
 ```
 
 Untuk Supabase gunakan helper dari Node yang tersedia pada terminal Codex:
@@ -98,11 +100,19 @@ credential transfer dengan nama/type unik. Tiga ID credential transfer, ID dan
 posisi node, grup, serta visibilitas MCP sudah diverifikasi tetap sama. Lima nama
 credential yang diperlukan kini unik; kedua webhook provider lulus pengujian.
 
-Mode live penuh belum siap: routes/adapters backend dan compiler masih mengikuti
-ledger B6–B10. Workflow Generate SRS, Revise Section, Error Handler, dan smoke
-Supabase sudah aktif serta diuji dengan mock lokal. Jangan
-beralih ke live hanya karena webapp dan n8n sudah hidup. Gunakan Settings untuk
-key provider nyata hanya pada pengujian manual pengguna; tes otomatis selalu mock.
+B6 sudah menyambungkan Generate SRS, Revisi AI, penyimpanan dan history ke n8n
+serta Supabase lokal. `NEXT_PUBLIC_DATA_MODE=live` berarti backend/persistensi
+nyata; provider tetap mock. Parser/kompiler server dan evaluasi penelitian masih
+mengikuti B7–B10. Helper browser untuk parsing dan Word/print tetap digunakan.
+Gunakan key provider nyata hanya pada pengujian manual; tes otomatis selalu mock.
+
+## Alur UI B6
+
+Lihat [B6-local-ui.md](B6-local-ui.md) untuk penggunaan, endpoint, SSE/reconnect,
+accept/reject revisi, autosave/version conflict, cancel/resume dan batas fase.
+Pengujian backend UI dapat diulang dengan `pnpm.cmd test:b6`; laporan lokal ada
+di `artifacts/b6-acceptance.json`. Entri contoh membuat draft kosong dari input
+sintetis, bukan mengimpor hasil AI fixture sebagai dokumen live.
 
 ## Kemajuan B5
 

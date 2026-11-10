@@ -336,7 +336,9 @@
     "provider_invalid_response": "Penyedia mengembalikan respons tidak sesuai. Periksa model dan kompatibilitas API.",
     "timeout": "Operasi kehabisan waktu. Periksa layanan lokal lalu coba kembali.",
     "callback_conflict": "Callback bertentangan dengan hasil sebelumnya. Periksa proses sebelum mencoba kembali.",
-    "run_not_active": "Proses ini tidak lagi aktif. Buka hasil terakhir atau mulai kembali."
+    "run_not_active": "Proses ini tidak lagi aktif. Buka hasil terakhir atau mulai kembali.",
+    "generation_in_progress": "Pembuatan SRS masih berlangsung. Tunggu atau batalkan sebelum mengubah dokumen.",
+    "duplicate_requirement_id": "ID requirement sudah digunakan pada bagian lain. Periksa usulan sebelum menerapkannya."
   },
   "integrations": {
     "title": "Sambungan",
@@ -374,5 +376,8 @@
   },
   "serverNote": "Tersimpan di basis data server lokal",
   "liveMode": "Mode tersambung",
-  "liveDataDescription": "Konten proyek tersimpan di basis data Supabase lokal. Preferensi tampilan tetap di peramban ini."
+  "liveDataDescription": "Konten proyek tersimpan di basis data Supabase lokal. Preferensi tampilan tetap di peramban ini.",
+  "conflictCurrent": "Versi tersimpan terbaru",
+  "conflictDraft": "Draf perubahan Anda",
+  "conflictSaveDraft": "Simpan draf yang telah ditinjau"
 }

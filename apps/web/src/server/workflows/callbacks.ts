@@ -14,6 +14,7 @@ import { transaction } from '../db/client';
 import { assertFresh, requireCallback } from '../security/auth';
 import { AppError, errorResponse } from '../http/errors';
 import { json, readJson } from '../http/route';
+import { sectionDTO, type SectionRow } from '../application/data';
 
 const failedSchema = FailureCallbackSchema.extend({ execution_id: z.string().min(1).max(100) });
 const schemas = {
@@ -44,6 +45,7 @@ interface Run {
   is_thesis_run: boolean;
   created_at: Date;
   completed_sections: Section[];
+  metrics: Record<string, unknown>;
 }
 interface Revision {
   id: string;
@@ -125,21 +127,32 @@ export async function callbackRoute(request: Request, kind: Kind): Promise<Respo
           throw new AppError('dev_seed_excluded');
         for (const section of sections) {
           const [old] = await tx<
-            { id: string; version: number; locked: boolean; source: string }[]
-          >`select id,version,locked,source from public.sections where project_id=${run.project_id} and section_id=${section.id} and owner_id=${run.owner_id} for update`;
-          if (old?.locked) throw new AppError('section_locked', 409);
-          if (old && (old.version !== (section.version ?? 1) || old.source === 'human'))
+            SectionRow[]
+          >`select * from public.sections where project_id=${run.project_id} and section_id=${section.id} and owner_id=${run.owner_id} for update`;
+          if (old?.locked && old.markdown !== section.markdown)
+            throw new AppError('section_locked', 409);
+          if (
+            old &&
+            (old.version !== (section.version ?? 1) ||
+              (old.source === 'human' && old.markdown !== section.markdown))
+          )
             throw new AppError('section_changed', 409);
+          if (old && (old.source === 'human' || old.locked)) {
+            Object.assign(section, sectionDTO(old));
+            continue;
+          }
           const [saved] = await tx<
-            { id: string }[]
-          >`insert into public.sections(owner_id,project_id,section_id,number,title,markdown,status,source,requirements,guardrail)
-            values(${run.owner_id},${run.project_id},${section.id},${section.number},${section.title},${section.markdown},'drafted','ai',${JSON.stringify(section.requirements)}::text::jsonb,${JSON.stringify(section.guardrail)}::text::jsonb)
-            on conflict(project_id,section_id) do update set markdown=excluded.markdown,title=excluded.title,status='drafted',source='ai',requirements=excluded.requirements,guardrail=excluded.guardrail,updated_at=now() returning id`;
+            SectionRow[]
+          >`insert into public.sections(owner_id,project_id,section_id,number,title,markdown,status,source,requirements,guardrail,updated_at)
+            values(${run.owner_id},${run.project_id},${section.id},${section.number},${section.title},${section.markdown},'drafted','ai',${JSON.stringify(section.requirements)}::text::jsonb,${JSON.stringify(section.guardrail)}::text::jsonb,${section.updatedAt})
+            on conflict(project_id,section_id) do update set markdown=excluded.markdown,title=excluded.title,status='drafted',source='ai',requirements=excluded.requirements,guardrail=excluded.guardrail,version=public.sections.version+1,updated_at=now() returning *`;
+          Object.assign(section, sectionDTO(saved!));
           await tx`insert into public.guardrail_reports(owner_id,session_id,section_id,dimensions,rewrites)
             values(${run.owner_id},${run.session_id},${saved!.id},${JSON.stringify(section.guardrail.dimensions)}::text::jsonb,${JSON.stringify(section.guardrail.rewrites)}::text::jsonb)`;
         }
         const completeness = checkStructure(payload.markdown, template);
         const metrics: Record<string, unknown> = {
+          ...run.metrics,
           ...payload.metrics,
           markdown_sha256: createHash('sha256').update(payload.markdown).digest('hex'),
           missing_headings: completeness.missing,
@@ -209,7 +222,14 @@ export async function callbackRoute(request: Request, kind: Kind): Promise<Respo
         };
       } else {
         const payload = body as z.infer<typeof failedSchema>;
-        if (run.status === 'completed' && !revision) return { ok: true, ignored: true };
+        if (
+          (run.status === 'completed' ||
+            (run.status === 'cancelled' && payload.code !== 'cancelled')) &&
+          !revision
+        )
+          return { ok: true, ignored: true };
+        if (run.status === 'failed' && run.metrics?.watchdog_failed && !revision)
+          return { ok: true, ignored: true };
         const status = payload.code === 'cancelled' ? 'cancelled' : 'failed';
         if (revision) {
           if (['accepted', 'rejected', 'pending'].includes(revision.status))

@@ -11,8 +11,8 @@ begin
     if has_table_privilege('anon','public.'||t.tablename,'select,insert,update,delete') then raise exception 'TEST: anon privileges on %',t.tablename; end if;
   end loop;
   if has_table_privilege('authenticated','public.integration_secrets','select') then raise exception 'TEST: secrets readable'; end if;
-  if (select count(*) from pg_proc where pronamespace='public'::regnamespace and proname in ('naskah_workflow_context','naskah_workflow_progress','naskah_workflow_failure','match_srs_chunks'))<>4 then raise exception 'TEST: workflow RPC missing or ambiguous'; end if;
-  for t in select oid,proname,prosecdef,proconfig from pg_proc where pronamespace='public'::regnamespace and proname in ('naskah_workflow_context','naskah_workflow_progress','naskah_workflow_failure','match_srs_chunks') loop
+  if (select count(*) from pg_proc where pronamespace='public'::regnamespace and proname in ('naskah_workflow_context','naskah_workflow_progress','naskah_workflow_failure','match_srs_chunks','accept_revision'))<>5 then raise exception 'TEST: workflow RPC missing or ambiguous'; end if;
+  for t in select oid,proname,prosecdef,proconfig from pg_proc where pronamespace='public'::regnamespace and proname in ('naskah_workflow_context','naskah_workflow_progress','naskah_workflow_failure','match_srs_chunks','accept_revision') loop
     if t.prosecdef or not coalesce(t.proconfig @> array['search_path=""'],false)
       or has_function_privilege('anon',t.oid,'execute') or has_function_privilege('authenticated',t.oid,'execute')
       or not has_function_privilege('service_role',t.oid,'execute') then raise exception 'TEST: unsafe workflow RPC %',t.proname; end if;

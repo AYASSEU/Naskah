@@ -9,4 +9,6 @@ export async function register() {
   if (!serverConfigured()) return;
   const { startIntegrationDoctor } = await import('./server/integrations/doctor');
   await startIntegrationDoctor();
+  const { startRunWatchdog } = await import('./server/application/runs');
+  startRunWatchdog();
 }

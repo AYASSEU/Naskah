@@ -336,7 +336,9 @@
     "provider_invalid_response": "The provider returned an unexpected response. Check its model and API compatibility.",
     "timeout": "The operation timed out. Check the local services and retry.",
     "callback_conflict": "This callback conflicts with an earlier result. Inspect the run before retrying.",
-    "run_not_active": "This run is no longer active. Open its latest result or start again."
+    "run_not_active": "This run is no longer active. Open its latest result or start again.",
+    "generation_in_progress": "SRS generation is still running. Wait or cancel before changing the document.",
+    "duplicate_requirement_id": "A requirement ID is already used in another section. Review the proposal before applying it."
   },
   "integrations": {
     "title": "Connections",
@@ -374,5 +376,8 @@
   },
   "serverNote": "Stored in your local server database",
   "liveMode": "Connected mode",
-  "liveDataDescription": "Project content is stored in your local Supabase database. Appearance preferences stay in this browser."
+  "liveDataDescription": "Project content is stored in your local Supabase database. Appearance preferences stay in this browser.",
+  "conflictCurrent": "Latest saved version",
+  "conflictDraft": "Your draft changes",
+  "conflictSaveDraft": "Save reviewed draft"
 }

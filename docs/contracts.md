@@ -66,3 +66,22 @@ retryable flag, and localization key. No transport-specific data leaks into UI.
 The original generate/revise fields are retained. Optional generation fields now include `run_id`, `output_language`, `template_id`, `options` (K, model, temperature), and resume state. Revision requests add revision ID, base section version and output language. Projects add language/template; sections add version/lock; rewrites add `needs_confirmation`; retrieved chunks add source/model provenance and `dev_seed`; logs add thesis eligibility and metrics. Legacy mock payloads still parse.
 
 Settings uses `Services.integrations` in live mode. Its safe DTO contains config, last-four hint, stored/synced/tested, failure code, step and timestamps. `apiKey` is write-only. Changing the destination URL requires key re-entry. Routes live under `/api/settings/integrations/{id}` with test/reapply actions; `/api/system/status` returns readiness reasons and direct Settings links. Browser session bootstrap is `/api/auth/session` with `X-Naskah-Client: web`; mutations require the signed local-owner cookie and same origin.
+
+## B6 HTTP contracts
+
+The original webhook builders/payloads remain intact behind the server gateway.
+`ProjectCreateSchema`/`ProjectPatchSchema` constrain owner-independent input;
+`SectionWriteSchema` adds the project context for textual section identifiers.
+Section writes require `If-Match` and return a typed `section_changed` conflict
+with `detail.current`. `DocumentWriteSchema` supports versioned bulk saves.
+`GenerationAcceptedSchema` adds project/run IDs and `after_seq`; scoped SSE carries
+the shared `WorkflowEventSchema` with monotonic IDs and terminal events.
+`RevisionAcceptedSchema` identifies the proposal/scope; accept/reject are separate
+authenticated transactions. `SectionVersionSchema` and existing `VersionSchema`
+describe immutable history.
+
+Optional port methods `generation.resume`, `revision.acceptRevision`,
+`rejectRevision` and `listPending` keep the original mock adapter compatible.
+`PortError.detail` carries safe owner-specific conflict context. New error keys
+`generation_in_progress` and `duplicate_requirement_id` are localized in both
+languages. Full route and validation behavior: `B6-local-ui.md`.

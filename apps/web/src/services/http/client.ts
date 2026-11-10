@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { BackendErrorSchema } from '@naskah/contracts';
 import { PortError } from '../ports';
 let session: Promise<void> | undefined;
-export async function ensureSession() {
+export async function ensureSession(force = false) {
+  if (force) session = undefined;
   session ??= fetch('/api/auth/session', {
     credentials: 'same-origin',
     headers: { 'X-Naskah-Client': 'web' },
@@ -16,10 +17,15 @@ export async function ensureSession() {
     });
   return session;
 }
-async function throwResponse(response: Response): Promise<never> {
+export async function throwResponse(response: Response): Promise<never> {
   const parsed = BackendErrorSchema.safeParse(await response.json().catch(() => null));
   throw parsed.success
-    ? new PortError(parsed.data.code, parsed.data.retryable, parsed.data.userMessageKey)
+    ? new PortError(
+        parsed.data.code,
+        parsed.data.retryable,
+        parsed.data.userMessageKey,
+        parsed.data.detail,
+      )
     : new PortError('unknown', true, 'backendErrors.unknown');
 }
 export async function request<T>(

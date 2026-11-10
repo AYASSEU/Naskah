@@ -49,6 +49,8 @@ export const BackendErrorCodes = [
   'timeout',
   'callback_conflict',
   'run_not_active',
+  'generation_in_progress',
+  'duplicate_requirement_id',
 ] as const;
 export const BackendErrorSchema = z.object({
   code: z.string(),

@@ -69,3 +69,13 @@ resume and Settings reapply are implemented. See `B5-workflows.md` and the phase
 report for executed acceptance and deviations. The browser still uses mock ports;
 full HTTP routes/adapters, SSE/watchdogs and conformance are B6. Compiler,
 evaluation and live UI acceptance follow in B7–B10.
+
+## B6 checkpoint — 2026-11-10
+
+Project/document persistence and generation/revision HTTP ports now reach local
+Supabase and n8n. SSE reconnect/replay, checkpoints, versioned edits, histories,
+cancel/resume/watchdog and atomic accept/reject are implemented. The running UI
+uses live backend mode with the mock provider. Original mock mode remains
+available. See `B6-local-ui.md` and the phase report. Server parsing/compilation
+remain B7; research/evaluation remain B8. Browser parsing and document output
+are reused with real persisted documents.

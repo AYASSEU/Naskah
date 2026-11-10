@@ -256,6 +256,92 @@ export const ChapterDraftSchema = z.object({
 });
 export type ChapterDraft = z.infer<typeof ChapterDraftSchema>;
 
+export const ProjectCreateSchema = ProjectSchema.omit({
+  id: true,
+  ownerId: true,
+  sessionId: true,
+  createdAt: true,
+  updatedAt: true,
+})
+  .extend({
+    title: z.string().trim().min(1).max(300),
+    domain: z.string().trim().min(1).max(100),
+    version: z.string().min(1).max(30),
+    rawText: z.string().max(2 * 1024 * 1024),
+  })
+  .strict();
+export const ProjectPatchSchema = ProjectCreateSchema.partial().strict();
+export const SectionWriteSchema = z
+  .object({
+    projectId: z.uuid(),
+    section: SectionSchema.extend({ markdown: z.string().max(400000) }),
+  })
+  .strict();
+export const DocumentWriteSchema = z
+  .object({
+    sections: z.array(SectionSchema).min(1).max(128),
+    label: z.string().max(200).optional(),
+  })
+  .strict();
+export const GenerationRequestSchema = GenerateInputSchema.extend({
+  project_title: z.string().min(1).max(300),
+  domain: z.string().min(1).max(100),
+  raw_text: z
+    .string()
+    .min(1)
+    .max(2 * 1024 * 1024),
+});
+export const RevisionRequestSchema = ReviseInputSchema.extend({
+  target_section: z.string().min(1).max(200),
+  current_section_text: z.string().max(400000),
+  user_instructions: z.string().trim().min(1).max(8000),
+});
+export const GenerationAcceptedSchema = z.object({
+  accepted: z.literal(true),
+  session_id: z.uuid(),
+  run_id: z.uuid(),
+  project_id: z.uuid(),
+  after_seq: z.number().int().nonnegative(),
+  execution_id: z.string().nullable(),
+});
+export const RevisionAcceptedSchema = z.object({
+  accepted: z.literal(true),
+  revision_id: z.uuid(),
+  session_id: z.uuid(),
+  after_seq: z.number().int().nonnegative(),
+});
+export const OkSchema = z.object({ ok: z.literal(true) });
+export const SectionVersionSchema = z.object({
+  id: z.uuid(),
+  version: z.number().int().positive(),
+  label: z.string(),
+  createdAt: z.string(),
+  section: SectionSchema,
+});
+const EventFailureSchema = z.object({
+  code: z.string(),
+  retryable: z.boolean(),
+  userMessage: z.string().optional(),
+  userMessageKey: z.string().optional(),
+});
+export const WorkflowEventSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('stage'),
+    stage: z.enum(['retrieving_context', 'drafting', 'guardrail', 'assembling', 'ready']),
+    at: z.string(),
+    substage: z.string().optional(),
+  }),
+  z.object({ type: z.literal('section_started'), sectionId: z.string() }),
+  z.object({ type: z.literal('section_drafted'), sectionId: z.string(), markdown: z.string() }),
+  z.object({ type: z.literal('guardrail_report'), sectionId: z.string(), report: GuardrailSchema }),
+  z.object({ type: z.literal('retrieval_context'), chunks: z.array(RetrievedChunkSchema) }),
+  z.object({ type: z.literal('failed'), stage: z.string().optional(), error: EventFailureSchema }),
+  z.object({ type: z.literal('cancelled') }),
+  z.object({ type: z.literal('completed'), document: DocumentSchema, log: GenerationLogSchema }),
+  z.object({ type: z.literal('revision_ready'), revision: RevisionProposalSchema }),
+  z.object({ type: z.literal('callback_failed') }),
+]);
+
 export const WorkflowReadyCallbackSchema = CallbackBaseSchema.extend({
   execution_id: z.string().min(1).max(100),
   markdown: z.string().min(1).max(4000000),

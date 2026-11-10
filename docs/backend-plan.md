@@ -46,7 +46,15 @@ Supabase smoke are deployed and active. Shared Markdown, credential adoption,
 generation/revision/failure/cancel/resume and Settings reapply are tested against
 real local services with the mock provider. The user-approved 14-scope backend
 REST key stays local. See `B5-workflows.md` and `backend-phase-reports.md` for exact
-acceptance and deviations. B6–B10 remain pending; the browser stays in mock mode.
+acceptance and deviations.
+
+B6 connects the browser generation/revision ports to the local backend on
+2026-11-10: persistence, versioned edits/history, scoped SSE, resume/cancel/watchdog
+and atomic proposal accept/reject. Browser and shared mock/HTTP conformance checks
+use only the local mock provider. Startup defaults to live backend mode, with
+`-Mode mock` retained. See `B6-local-ui.md` and the phase report. Server
+parser/compiler and research/evaluation remain B7/B8; client helpers and explicit
+server placeholders are documented rather than claimed complete.
 
 ### Service and data boundaries
 

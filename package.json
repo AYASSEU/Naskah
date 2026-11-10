@@ -18,7 +18,8 @@
     "n8n:deploy": "node scripts/run-server-script.mjs deploy",
     "test:b5": "node scripts/run-server-script.mjs test",
     "n8n:verify-markdown": "node scripts/deploy-renderer.mjs",
-    "local:setup-mock": "node scripts/setup-local-mock.mjs"
+    "local:setup-mock": "node scripts/setup-local-mock.mjs",
+    "test:b6": "node scripts/run-server-script.mjs b6"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

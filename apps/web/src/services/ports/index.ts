@@ -16,7 +16,10 @@ import type {
   AiConnectionSave,
   AiConnectionSnapshot,
   AiConnectionTest,
-  IntegrationId, IntegrationSave, IntegrationState, SystemStatus,
+  IntegrationId,
+  IntegrationSave,
+  IntegrationState,
+  SystemStatus,
 } from '@naskah/contracts';
 import type { ExampleRepository } from './examples';
 export class PortError extends Error {
@@ -24,6 +27,7 @@ export class PortError extends Error {
     public code: string,
     public retryable: boolean,
     public userMessage: string,
+    public detail?: Record<string, unknown>,
   ) {
     super(userMessage);
   }
@@ -68,9 +72,13 @@ export interface DocumentRepository {
 }
 export interface GenerationService {
   start(input: GenerateInput): GenerationHandle;
+  resume?(input: GenerateInput): Promise<void>;
 }
 export interface RevisionService {
   requestRevision(input: ReviseInput): Promise<RevisionProposal>;
+  acceptRevision?(id: string): Promise<Section>;
+  rejectRevision?(id: string): Promise<void>;
+  listPending?(projectId: string): Promise<RevisionProposal[]>;
 }
 export interface ParsedDocument {
   name: string;
@@ -128,12 +136,12 @@ export interface SimulationConfig {
 }
 export interface Services {
   integrations?: {
-    status():Promise<SystemStatus>;
-    get(id:IntegrationId):Promise<IntegrationState>;
-    save(id:IntegrationId,input:IntegrationSave):Promise<IntegrationState>;
-    test(id:IntegrationId):Promise<IntegrationState>;
-    remove(id:IntegrationId):Promise<IntegrationState>;
-    reapply():Promise<void>;
+    status(): Promise<SystemStatus>;
+    get(id: IntegrationId): Promise<IntegrationState>;
+    save(id: IntegrationId, input: IntegrationSave): Promise<IntegrationState>;
+    test(id: IntegrationId): Promise<IntegrationState>;
+    remove(id: IntegrationId): Promise<IntegrationState>;
+    reapply(): Promise<void>;
   };
   aiConnection: AiConnectionService;
   projects: ProjectRepository;

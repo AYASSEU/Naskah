@@ -112,6 +112,39 @@ function requirementFromBlock(id: string, title: string, body: string): Requirem
 }
 
 /** Reads both canonical blocks and Phase 1's compact metadata; never invents actors. */
+/** Prose outside parsed metadata must remain visible in the structured manuscript view. */
+export function requirementAnnotations(markdown: string, id: string): string {
+  const lines = linesOutsideFences(markdown);
+  let active = false,
+    extras = false,
+    continuation = false;
+  const output: string[] = [];
+  for (const line of lines) {
+    const header = !line.fenced && /^\*\*(REQ-[A-Z]-\d+)[ \t]*[—:-]/.exec(line.text);
+    if (header) {
+      if (active) break;
+      active = header[1] === id;
+      continue;
+    }
+    if (!active) continue;
+    const metadata =
+      !line.fenced &&
+      /^(?:Prioritas:[ \t]*\[(?:High|Medium|Low)\][ \t]*$|(?:Aktor|Actor|Input|Proses|Process|Output):)/.test(
+        line.text,
+      );
+    if (metadata) {
+      extras = true;
+      continuation = true;
+      continue;
+    }
+    if (continuation && !line.fenced && /^ {2}\S/.test(line.text)) continue;
+    continuation = false;
+    if (!line.fenced && /^#{1,6}\s/.test(line.text)) extras = true;
+    if (extras) output.push(line.raw);
+  }
+  return output.join('').trim();
+}
+
 export function parseRequirements(markdown: string): Requirement[] {
   const lines = linesOutsideFences(markdown);
   const result: Requirement[] = [];

@@ -170,10 +170,56 @@ convention. Execution save policies remain none, but initial execution rows can
 temporarily contain headers before pruning. Durable acceptance uses database
 events and receipts; final execution body exports are deliberately absent.
 
+## B6 — local backend UI, 2026-11-10
+
+Connected project/document, generation and revision ports to local Supabase and
+n8n through same-origin authenticated routes. Added pending sections, versioned
+saves, histories/restores, duplicate-start serialization, scoped SSE replay,
+resume/cancel and a watchdog. Optional port methods support atomic proposal
+accept/reject and recovery after reload without changing mock-mode behavior.
+The running UI now uses live backend adapters; providers remain local mock.
+Docker's stopped engine was restarted and existing containers/volumes reused.
+
+Acceptance exposed and fixed pending-section callback versioning, atomic
+Markdown/requirements persistence, hidden revision annotations, input arriving
+during autosave, and explicit current-versus-draft conflict review. Resume retains
+human edits to completed checkpoints. Late callbacks cannot replace watchdog
+decisions. A CLI-generated migration extends revision acceptance compatibly and
+guards terminal RPC updates; database types were regenerated. The startup helper
+handles the missing private Compose file by starting existing containers and
+checking readiness, without replacing volumes or encryption keys.
+
+The same port lifecycle runs against mock and HTTP adapters. The real HTTP matrix
+checks cut/reconnected SSE, owner/origin denial, conflicts/locks/history, readiness,
+one-run dispatch, concurrent/stale revisions, human-edited resume, cancel and
+watchdog behavior. Live UI checks in both themes cover reload persistence, slow
+autosave, conflicting tab edits, pending proposal recovery, isolated accept/reject,
+finalization and real DOCX output. Automated tests use dummy keys and synthetic
+inputs. Exact evidence is in ignored `artifacts/b6-acceptance.json`; final gate
+results are recorded below.
+
+Deviations: fetch SSE provides explicit session/cursor control instead of
+EventSource. Server parser/compiler and research services stay with B7/B8; client
+helpers were extracted and reused with real persisted documents. Server stubs
+remain explicit. Unavailable execution-body exports use checkpoint resume.
+Manual writes during generation are blocked to protect human work. See
+`B6-local-ui.md` for operation, routes and remaining boundaries.
+
+Final gate: 83 unit tests, strict typecheck, lint, production build, design audit
+and 26 contrast pairs passed. All 9 B6 HTTP cases and all 26 B5 real-webhook
+regressions passed. Two live UI cases passed across light/dark, including delayed
+autosave, explicit conflict review and pending-proposal reload; six original
+mock UI cases also passed. Database/RLS checks for 27 tables, security checks for
+the five runtime/acceptance RPCs, and warning/error advisors passed. The strict
+B5 resume regression also caught a checkpoint timestamp change on callback insert;
+original chapter timestamps are now preserved. Startup was verified with the
+private Compose file absent. The webapp was restored to live backend mode after
+mock regression, with seven active workflows and the synthetic mock provider.
+Changed-file secret/credential-reference scans passed; environment and artifacts
+remain excluded from Git.
+
 ## Remaining implementation
 
-B6–B10 remain pending: full application routes/HTTP adapters, SSE and watchdogs,
-port conformance, server PDF/DOCX compilation, research evaluation, live UI
-acceptance, and final runbooks. Settings and workflow callbacks are live; the
-browser's generation/revision ports still use mock mode. Do not describe Phase 2
-as complete.
+B7–B10 remain pending: server parser/compiler, research/evaluation, broader live
+UI/research acceptance and final runbooks. Generate and Revise now work from the
+UI with local n8n/Supabase and a mock provider. Phase 2 is not entirely complete.

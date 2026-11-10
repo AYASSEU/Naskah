@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import type { Section, RevisionProposal, DocumentVersion } from '@naskah/contracts';
+import { SectionSchema } from '@naskah/contracts';
 import type { GenerationHandle, GenerationEvent } from '@/services/ports';
 import { PortError } from '@/services/ports';
 import { useServices, useAsyncData, ErrorState, Loading, useToast } from '@/shared/lib/providers';
@@ -27,6 +28,7 @@ import { Markdown } from '@/shared/ui/markdown';
 import { ieeeTemplate } from '@/entities/template/ieee';
 import { parseRequirements, duplicateIds } from '@/entities/requirement/parsing';
 import { applyRevision } from '@/entities/revision/apply';
+import { requirementAnnotations } from '@naskah/core';
 import { DiffViewer } from '@/features/revision';
 const ManuscriptEditor = dynamic(() => import('./manuscript-editor'), {
   ssr: false,
@@ -57,6 +59,12 @@ export function ManuscriptSection({ section: s }: { section: Section }) {
           <div className="requirement-priority">
             {t('priority')}: {t(r.priority.toLowerCase())}
           </div>
+          {requirementAnnotations(s.markdown, r.id) && (
+            <Markdown
+              text={requirementAnnotations(s.markdown, r.id)}
+              rewrites={s.guardrail.rewrites}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -88,20 +96,62 @@ export function Workspace({ id }: { id: string }) {
   const [elapsed, setElapsed] = useState(0);
   const [editing, setEditing] = useState<string>();
   const [editValue, setEditValue] = useState('');
+  const latestEdit = useRef('');
+  latestEdit.current = editValue;
+  const saveInFlight = useRef(false),
+    saveBlocked = useRef(false),
+    finishRequested = useRef(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [revisionTarget, setRevisionTarget] = useState<Section>();
   const [instruction, setInstruction] = useState('');
   const [pendingRevisions, setPendingRevisions] = useState<string[]>([]);
   const [proposals, setProposals] = useState<RevisionProposal[]>([]);
+  const resolvedProposals = useRef(new Set<string>());
   const proposal = proposals[0];
-  const enqueueProposal = (next: RevisionProposal) => setProposals((current) => [...current, next]);
+  const enqueueProposal = (next: RevisionProposal) =>
+    setProposals((current) =>
+      resolvedProposals.current.has(next.id) || current.some((item) => item.id === next.id)
+        ? current
+        : [...current, next],
+    );
   const dismissProposal = () => setProposals((current) => current.slice(1));
   const [actionBusy, setActionBusy] = useState(false);
   const [actionError, setActionError] = useState('');
   const [finalizeOpen, setFinalizeOpen] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [errorDialog, setErrorDialog] = useState('');
+  const [conflict, setConflict] = useState<{
+    current: Section;
+    draft: string;
+    mode: 'manual' | 'revision';
+  }>();
+  useEffect(() => {
+    if (!services.revision.listPending) return;
+    let stopped = false;
+    const recover = async () => {
+      try {
+        const pending = await services.revision.listPending!(id);
+        if (!stopped)
+          setProposals((current) => [
+            ...current,
+            ...pending.filter(
+              (next) =>
+                !resolvedProposals.current.has(next.id) &&
+                !current.some((item) => item.id === next.id),
+            ),
+          ]);
+      } catch {
+        /* The main document request presents connection errors. */
+      }
+    };
+    void recover();
+    const timer = setInterval(() => void recover(), 2000);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+    };
+  }, [id, services]);
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     const section = query.get('section');
@@ -149,30 +199,81 @@ export function Workspace({ id }: { id: string }) {
     data?.document.sections.find((s) => s.id === selected) || data?.document.sections[0];
   const editSection = data?.document.sections.find((s) => s.id === editing);
   async function persistEdit() {
-    if (!editSection || !dirty) return;
+    if (!editSection || !dirty) return true;
+    if (saveInFlight.current) return false;
+    saveInFlight.current = true;
+    const draft = latestEdit.current;
     setSaving(true);
     try {
       await services.documents.saveSection(id, {
         ...editSection,
-        markdown: editValue,
-        requirements: parseRequirements(editValue),
+        markdown: draft,
+        requirements: parseRequirements(draft),
         status: 'edited',
         source: 'human',
         updatedAt: new Date().toISOString(),
       });
-      setDirty(false);
+      saveBlocked.current = false;
+      if (latestEdit.current === draft) setDirty(false);
       await refresh();
+      return latestEdit.current === draft;
     } catch (e) {
+      saveBlocked.current = true;
+      const current = SectionSchema.safeParse(
+        e instanceof PortError ? e.detail?.current : undefined,
+      );
+      setConflict(
+        current.success
+          ? { current: current.data, draft: latestEdit.current, mode: 'manual' }
+          : undefined,
+      );
       setErrorDialog(t(e instanceof PortError ? e.userMessage : 'storageError'));
+      return false;
     } finally {
+      saveInFlight.current = false;
       setSaving(false);
     }
   }
   useEffect(() => {
-    if (!dirty || !editing) return;
+    if (!dirty || !editing || saving || saveBlocked.current) return;
     const timer = setTimeout(() => void persistEdit(), 800);
     return () => clearTimeout(timer);
-  }, [editValue, editing, dirty]);
+  }, [editValue, editing, dirty, saving]);
+  useEffect(() => {
+    if (finishRequested.current && !dirty && !saving) {
+      finishRequested.current = false;
+      setEditing(undefined);
+    }
+  }, [dirty, saving]);
+  async function saveReviewedDraft() {
+    if (!conflict || conflict.mode !== 'manual' || saveInFlight.current) return;
+    saveInFlight.current = true;
+    setSaving(true);
+    try {
+      await services.documents.saveSection(id, {
+        ...conflict.current,
+        markdown: conflict.draft,
+        requirements: parseRequirements(conflict.draft),
+        status: 'edited',
+        source: 'human',
+      });
+      setEditValue(conflict.draft);
+      setDirty(false);
+      saveBlocked.current = false;
+      setConflict(undefined);
+      setErrorDialog('');
+      await refresh();
+    } catch (e) {
+      const current = SectionSchema.safeParse(
+        e instanceof PortError ? e.detail?.current : undefined,
+      );
+      if (current.success) setConflict({ ...conflict, current: current.data });
+      setErrorDialog(t(e instanceof PortError ? e.userMessage : 'storageError'));
+    } finally {
+      saveInFlight.current = false;
+      setSaving(false);
+    }
+  }
   function navigate(sectionId: string, p = panel) {
     setSelected(sectionId);
     setPanel(p);
@@ -231,6 +332,7 @@ export function Workspace({ id }: { id: string }) {
         target_section: `${target.id} ${target.title}`,
         current_section_text: target.markdown,
         user_instructions: instruction,
+        base_section_version: target.version,
       });
       setRevisionTarget((current) => (current?.id === target.id ? undefined : current));
       enqueueProposal(next);
@@ -244,17 +346,29 @@ export function Workspace({ id }: { id: string }) {
     if (!proposal) return;
     setActionBusy(true);
     try {
-      const latest = await services.documents.getDocument(id);
-      await services.documents.saveSections(
-        id,
-        applyRevision(latest.sections, proposal),
-        t('applied'),
-      );
+      if (services.revision.acceptRevision) await services.revision.acceptRevision(proposal.id);
+      else {
+        const latest = await services.documents.getDocument(id);
+        await services.documents.saveSections(
+          id,
+          applyRevision(latest.sections, proposal),
+          t('applied'),
+        );
+      }
+      resolvedProposals.current.add(proposal.id);
       dismissProposal();
       toast(t('applied'));
       await refresh();
     } catch (e) {
-      setErrorDialog(e instanceof Error ? e.message : t('storageError'));
+      const current = SectionSchema.safeParse(
+        e instanceof PortError ? e.detail?.current : undefined,
+      );
+      setConflict(
+        current.success
+          ? { current: current.data, draft: proposal.after, mode: 'revision' }
+          : undefined,
+      );
+      setErrorDialog(t(e instanceof PortError ? e.userMessage : 'storageError'));
     } finally {
       setActionBusy(false);
     }
@@ -278,11 +392,40 @@ export function Workspace({ id }: { id: string }) {
   }
   async function resume() {
     if (!data) return;
-    services.simulation.failure = 'none';
-    setEvents([]);
-    setElapsed(0);
-    await services.projects.update(id, { status: 'generating' });
-    await refresh();
+    try {
+      services.simulation.failure = 'none';
+      setEvents([]);
+      setElapsed(0);
+      if (services.generation.resume) {
+        const p = data.project;
+        await services.generation.resume({
+          session_id: p.sessionId,
+          project_title: p.title,
+          domain: p.domain,
+          raw_text: p.rawText,
+        });
+      } else await services.projects.update(id, { status: 'generating' });
+      await refresh();
+    } catch (e) {
+      setErrorDialog(t(e instanceof PortError ? e.userMessage : 'storageError'));
+    }
+  }
+  async function rejectProposal() {
+    if (!proposal || actionBusy) return;
+    if (proposal.status !== 'pending') {
+      dismissProposal();
+      return;
+    }
+    setActionBusy(true);
+    try {
+      if (services.revision.rejectRevision) await services.revision.rejectRevision(proposal.id);
+      resolvedProposals.current.add(proposal.id);
+      dismissProposal();
+    } catch (e) {
+      setErrorDialog(t(e instanceof PortError ? e.userMessage : 'storageError'));
+    } finally {
+      setActionBusy(false);
+    }
   }
   async function restore(version: DocumentVersion) {
     try {
@@ -570,7 +713,13 @@ export function Workspace({ id }: { id: string }) {
                           }}
                           saving={saving || dirty}
                           finish={() => {
-                            void persistEdit().then(() => setEditing(undefined));
+                            finishRequested.current = true;
+                            void persistEdit().then((saved) => {
+                              if (saved) {
+                                finishRequested.current = false;
+                                setEditing(undefined);
+                              }
+                            });
                           }}
                         />
                       ) : (
@@ -816,7 +965,7 @@ export function Workspace({ id }: { id: string }) {
       <DiffViewer
         proposal={proposal}
         onAccept={() => void apply()}
-        onReject={dismissProposal}
+        onReject={() => void rejectProposal()}
         busy={actionBusy}
       />
       <Modal
@@ -854,8 +1003,49 @@ export function Workspace({ id }: { id: string }) {
           </Button>
         </div>
       </Modal>
-      <Modal open={!!errorDialog} onOpenChange={() => setErrorDialog('')} title={t('errorTitle')}>
+      <Modal
+        open={!!errorDialog}
+        onOpenChange={() => {
+          setErrorDialog('');
+          setConflict(undefined);
+        }}
+        title={t('errorTitle')}
+        wide={!!conflict}
+      >
         <p className="inline-error">{errorDialog}</p>
+        {conflict && (
+          <>
+            <div className="diff-grid">
+              <div>
+                <h3>{t('conflictCurrent')}</h3>
+                <Markdown text={conflict.current.markdown} />
+              </div>
+              <div>
+                <h3>{t('conflictDraft')}</h3>
+                <Markdown text={conflict.draft} />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <Button
+                onClick={() => {
+                  setErrorDialog('');
+                  setConflict(undefined);
+                }}
+              >
+                {t('back')}
+              </Button>
+              {conflict.mode === 'manual' && (
+                <Button
+                  variant="primary"
+                  disabled={saving}
+                  onClick={() => void saveReviewedDraft()}
+                >
+                  {t('conflictSaveDraft')}
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </Modal>
     </main>
   );

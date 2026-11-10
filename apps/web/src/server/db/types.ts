@@ -528,7 +528,7 @@ isOneToOne: false
           }
           Functions: {
             "accept_revision":
-{ Args: { "p_owner": string,"p_revision": string }; Returns: {
+{ Args: { "p_owner": string,"p_requirements"?: Json,"p_revision": string }; Returns: {
               "guardrail": NonNullable<Json>,
 "id": string,
 "locked": boolean,

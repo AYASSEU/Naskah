@@ -26,3 +26,12 @@ and `tests/b5-workflows.test.ts` verify schema, IDs, numeric guardrails and rend
 These backend checks use synthetic inputs and mock provider responses. Existing
 browser ports stay mocked until B6; they do not imply live UI integration or
 research validation. See `B5-workflows.md` and `backend-phase-reports.md`.
+
+B6 (2026-11-10): FR-IN-01 and FR-HITL-01/02/03/04 now run through authenticated
+HTTP adapters with real local n8n/Supabase. Shared mock/HTTP port conformance,
+SSE reconnect, owner/version/lock checks, human-edited checkpoint resume, and
+both-theme live UI acceptance cover the integration. Manual drafts survive slow
+autosave and explicit conflict review; pending revisions survive reload. Client
+DOCX export uses the persisted document. Server parsing/compilation and research
+evaluation remain B7/B8. Providers and acceptance data remain synthetic mock;
+these tests are not thesis findings. See `B6-local-ui.md`.
