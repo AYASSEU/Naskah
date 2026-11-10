@@ -95,9 +95,17 @@ export async function templateTx(tx: Transaction, id: string): Promise<SrsTempla
 }
 export async function documentTx(tx: Transaction, owner: string, id: string) {
   const p = await projectTx(tx, owner, id);
-  const [doc] = await tx<
+  let [doc] = await tx<
     Tables['documents']['Row'][]
   >`select * from public.documents where project_id=${id} and owner_id=${owner}`;
+  if (!doc) {
+    // Older workflow-only runs may have a project/checkpoint without a document.
+    // Backfill only missing rows; existing sections and human content stay intact.
+    await ensurePendingTx(tx, p);
+    [doc] = await tx<
+      Tables['documents']['Row'][]
+    >`select * from public.documents where project_id=${id} and owner_id=${owner}`;
+  }
   if (!doc) throw new AppError('not_found', 404);
   const rows = await tx<
     SectionRow[]

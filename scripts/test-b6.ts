@@ -187,6 +187,37 @@ async function main() {
     assert.equal(invalid.status, 400);
     assert.ok(!(await invalid.text()).includes('private-invalid-marker'));
   });
+  await run('legacy-project-checkpoint-recovery', async () => {
+    const legacyId = randomUUID(),
+      session = randomUUID(),
+      now = new Date().toISOString();
+    const checkpoint = {
+      id: '1.1',
+      number: '1.1',
+      title: 'Purpose (Tujuan)',
+      markdown: 'Legacy checkpoint must remain intact.',
+      status: 'drafted',
+      source: 'ai',
+      requirements: [],
+      guardrail: { dimensions: [], rewrites: [] },
+      updatedAt: now,
+      version: 1,
+      locked: false,
+    };
+    await sql()`insert into public.projects(id,owner_id,session_id,title,domain,status,raw_text) values(${legacyId},${cfg.LOCAL_OWNER_ID},${session},'B6 synthetic legacy recovery','Healthcare','failed','Synthetic legacy input.')`;
+    const legacy = await services.projects.get(legacyId);
+    created.push(legacy);
+    await sql()`insert into public.srs_generation_logs(session_id,owner_id,project_id,project_title,domain,status,completed_sections) values(${session},${cfg.LOCAL_OWNER_ID},${legacyId},${legacy.title},${legacy.domain},'failed',${JSON.stringify([checkpoint])}::text::jsonb)`;
+    const recovered = await services.documents.getDocument(legacyId);
+    assert.equal(recovered.sections.length, 15);
+    assert.equal(recovered.sections[0]!.markdown, checkpoint.markdown);
+    assert.equal(recovered.sections.filter((section) => section.status === 'pending').length, 14);
+    const [persisted] = await sql()<
+      { n: number }[]
+    >`select count(*)::int as n from public.documents where project_id=${legacyId} and owner_id=${cfg.LOCAL_OWNER_ID}`;
+    assert.equal(persisted!.n, 1);
+    assert.equal((await captures()).length, 0);
+  });
   await run('optimistic-save-lock-and-history', async () => {
     const p = await project('optimistic writes'),
       doc = await services.documents.getDocument(p.id),

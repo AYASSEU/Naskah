@@ -80,6 +80,11 @@ versions and preserve matching human/locked checkpoints. The manuscript renderer
 now displays annotations after requirement metadata instead of silently omitting
 them.
 
+Legacy workflow-only projects may lack a document row. Owner-scoped document
+reads initialize only missing template/document rows and display retained
+checkpoints; existing sections and human content are preserved. This recovery
+does not call a provider.
+
 ## Acceptance
 
 ```powershell

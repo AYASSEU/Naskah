@@ -206,7 +206,7 @@ Manual writes during generation are blocked to protect human work. See
 `B6-local-ui.md` for operation, routes and remaining boundaries.
 
 Final gate: 83 unit tests, strict typecheck, lint, production build, design audit
-and 26 contrast pairs passed. All 9 B6 HTTP cases and all 26 B5 real-webhook
+and 26 contrast pairs passed. All 10 B6 HTTP cases and all 26 B5 real-webhook
 regressions passed. Two live UI cases passed across light/dark, including delayed
 autosave, explicit conflict review and pending-proposal reload; six original
 mock UI cases also passed. Database/RLS checks for 27 tables, security checks for
@@ -217,6 +217,11 @@ private Compose file absent. The webapp was restored to live backend mode after
 mock regression, with seven active workflows and the synthetic mock provider.
 Changed-file secret/credential-reference scans passed; environment and artifacts
 remain excluded from Git.
+
+The final homepage check also found legacy workflow-only projects without a
+document row. Owner-scoped reads now backfill only missing template/document rows
+and display retained checkpoints without replacing existing sections. The added
+HTTP recovery case passes and makes prior local projects usable in the ledger.
 
 ## Remaining implementation
 
