@@ -1,0 +1,5 @@
+Catatan lokal
+Sistem harus menyimpan data pasien.
+Page 1
+Teks de-
+ngan kontrol.

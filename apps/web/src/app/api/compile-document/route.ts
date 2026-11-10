@@ -1,13 +1,13 @@
 import { CompileInputSchema } from '@naskah/contracts';
+import { ownerRoute, readJson, json } from '@/server/http/route';
+import { compileDocument } from '@/server/documents/compiler';
+export const runtime = 'nodejs';
+export const maxDuration = 120;
 export async function POST(request: Request) {
-  const result = CompileInputSchema.safeParse(await request.json().catch(() => null));
-  if (!result.success)
-    return Response.json(
-      { error: 'invalid_request', issues: result.error.issues },
-      { status: 400 },
-    );
-  return Response.json(
-    { error: 'not_implemented', phase: 2, doc: 'docs/backend-roadmap.md' },
-    { status: 501 },
+  return ownerRoute(
+    request,
+    async (owner) =>
+      json(await compileDocument(owner, await readJson(request, CompileInputSchema))),
+    'compile',
   );
 }

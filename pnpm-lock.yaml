@@ -92,6 +92,9 @@ importers:
       docx:
         specifier: 9.13.0
         version: 9.13.0
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
       idb-keyval:
         specifier: 6.3.0
         version: 6.3.0

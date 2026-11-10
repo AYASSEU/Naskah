@@ -79,3 +79,11 @@ uses live backend mode with the mock provider. Original mock mode remains
 available. See `B6-local-ui.md` and the phase report. Server parsing/compilation
 remain B7; research/evaluation remain B8. Browser parsing and document output
 are reused with real persisted documents.
+
+## B7 checkpoint — 2026-11-10
+
+Server PDF/TXT parsing and DOCX/PDF compilation now replace the temporary live
+browser helpers. The UI downloads real private files with updated TOC, captions
+and page numbers. Six HTTP groups, a 200-call measured parser soak, five worker
+tests and four UI cases across both themes pass. See B7-documents.md.
+B8–B10 remain pending; the running backend continues to use the mock provider.

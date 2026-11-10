@@ -178,6 +178,8 @@ export const ParseInputSchema = z.object({
 export const CompileInputSchema = z.object({
   documentId: z.uuid(),
   format: z.enum(['docx', 'pdf']),
+  author: z.string().trim().max(200).optional(),
+  institution: z.string().trim().max(200).optional(),
 });
 export const ExpertReviewSchema = z.object({
   id: z.uuid(),
@@ -358,3 +360,23 @@ export const WorkflowRevisionCallbackSchema = CallbackBaseSchema.extend({
   guardrail: GuardrailSchema,
   metrics: z.record(z.string(), z.unknown()),
 });
+
+export const ParsedDocumentSchema = z.object({
+  name: z.string().max(255),
+  text: z.string().max(2 * 1024 * 1024),
+  pages: z.number().int().min(1).max(200),
+  before: z.number().int().nonnegative(),
+  after: z.number().int().nonnegative(),
+  removed: z.number().int().nonnegative(),
+  size: z.number().int().nonnegative(),
+});
+export const CompiledArtifactSchema = z.object({
+  url: z.string().startsWith('/api/exports/'),
+  filename: z.string(),
+  size: z.number().int().positive(),
+  format: z.enum(['docx', 'pdf']),
+});
+export const CompileResultSchema = z.discriminatedUnion('mode', [
+  CompiledArtifactSchema.extend({ mode: z.literal('server') }),
+  z.object({ mode: z.literal('client') }),
+]);

@@ -326,10 +326,10 @@
     "stale_callback": "The callback expired. Check system clocks and retry delivery.",
     "internal_error": "The server could not finish. Retry and check its status if the problem persists.",
     "too_large": "The file or request is too large. Split it into smaller parts.",
-    "no_text_layer": "This PDF has no text layer. Use OCR or upload a text file.",
-    "invalid_file": "Upload a valid PDF or UTF-8 text file.",
+    "no_text_layer": "No readable text found. Run OCR on the scanned PDF and upload it again.",
+    "invalid_file": "Invalid file. Upload a text-layer PDF or UTF-8 TXT.",
     "parse_timeout": "Text extraction timed out. Try a smaller document.",
-    "compiler_unavailable": "Start the compiler container, then retry the export.",
+    "compiler_unavailable": "Document service is unavailable. Run start-local and retry.",
     "research_consent_required": "Participant consent is required before recording research responses.",
     "dev_seed_excluded": "Development seed data cannot be used for thesis metrics. Import a research corpus.",
     "language_mismatch": "Use references and generated documents in the same language.",
@@ -338,7 +338,16 @@
     "callback_conflict": "This callback conflicts with an earlier result. Inspect the run before retrying.",
     "run_not_active": "This run is no longer active. Open its latest result or start again.",
     "generation_in_progress": "SRS generation is still running. Wait or cancel before changing the document.",
-    "duplicate_requirement_id": "A requirement ID is already used in another section. Review the proposal before applying it."
+    "duplicate_requirement_id": "A requirement ID is already used in another section. Review the proposal before applying it.",
+    "invalid_encoding": "TXT must use UTF-8 encoding. Save the file as UTF-8 and retry.",
+    "page_limit": "PDF exceeds 200 pages. Split it into smaller files.",
+    "encrypted_pdf": "PDF is password protected. Remove protection before uploading.",
+    "document_timeout": "Document processing timed out. Try a smaller file.",
+    "document_busy": "The document service is busy. Try again shortly.",
+    "compiler_failed": "Document compilation failed. Check the local compiler service and retry.",
+    "unsafe_document": "Images or external content are unsupported. Use text and tables.",
+    "export_storage_failed": "Local export storage is unavailable. Check Supabase and retry.",
+    "document_not_finalized": "Finalize the document before exporting."
   },
   "integrations": {
     "title": "Connections",
@@ -379,5 +388,9 @@
   "liveDataDescription": "Project content is stored in your local Supabase database. Appearance preferences stay in this browser.",
   "conflictCurrent": "Latest saved version",
   "conflictDraft": "Your draft changes",
-  "conflictSaveDraft": "Save reviewed draft"
+  "conflictSaveDraft": "Save reviewed draft",
+  "exportAuthor": "Author (optional)",
+  "exportInstitution": "Institution (optional)",
+  "serverExportNote": "Word includes a cover, populated contents, chapters, tables, and page numbers.",
+  "serverPdfNote": "PDF is compiled on the local server and downloaded as a file."
 }

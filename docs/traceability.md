@@ -35,3 +35,12 @@ autosave and explicit conflict review; pending revisions survive reload. Client
 DOCX export uses the persisted document. Server parsing/compilation and research
 evaluation remain B7/B8. Providers and acceptance data remain synthetic mock;
 these tests are not thesis findings. See `B6-local-ui.md`.
+
+## B7 document counterpart
+
+FR-IN-03 maps to POST /api/parse-pdf and shared cleanPages, with synthetic
+multipage/scanned/encrypted/limit fixtures, browser/server parity and a 200-call
+measured soak. Export maps to POST /api/compile-document, the local Docker service
+and authenticated GET /api/exports/{uuid}. Hospital OOXML/PDF assertions, all-page
+raster review, private download/cache checks and both-theme live UI tests cover
+DOCX/PDF output. Mock helpers remain selectable. See B7-documents.md.

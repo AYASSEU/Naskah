@@ -33,6 +33,11 @@ test('live UI generates, persists, edits, reviews revisions and exports local da
   try {
     await page.goto('/new-project');
     await page
+      .locator('input[type="file"]')
+      .setInputFiles(['tests/fixtures/documents/text.pdf', 'tests/fixtures/documents/notes.txt']);
+    await expect(page.locator('.uploaded-file')).toHaveCount(2);
+    await expect(page.locator('.uploaded-file').filter({ hasText: 'text.pdf' })).toContainText('3');
+    await page
       .getByLabel('Nama dokumen', { exact: true })
       .fill(`B6 synthetic UI ${info.project.name}`);
     await page
@@ -146,11 +151,23 @@ test('live UI generates, persists, edits, reviews revisions and exports local da
     await page.getByLabel('Saya telah meninjau dokumen ini').check();
     await page.getByRole('button', { name: 'Finalisasi dokumen', exact: true }).click();
     await expect(page).toHaveURL(/export\//);
+    await page.getByLabel('Penulis (opsional)').fill('Penguji UI');
+    await page.getByLabel('Institusi (opsional)').fill('Naskah');
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Unduh dokumen Word', exact: true }).click();
     const file = await download,
       zip = unzipSync(new Uint8Array(await readFile((await file.path())!)));
     expect(strFromU8(zip['word/document.xml']!)).toContain('Catatan manual B6 dari UI.');
+    const pdfDownload = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Simpan sebagai PDF', exact: true }).click();
+    const pdfFile = await pdfDownload,
+      pdfBytes = await readFile((await pdfFile.path())!);
+    expect(pdfBytes.subarray(0, 5).toString()).toBe('%PDF-');
+    expect(pdfBytes.length).toBeGreaterThan(1000);
+    await page.screenshot({
+      path: 'artifacts/b7-' + info.project.name + '-export.png',
+      fullPage: true,
+    });
     expect(
       requests.filter((url) =>
         /https?:\/\/(?:localhost|127\.0\.0\.1|host\.docker\.internal):(?:5678|54321|4010)/.test(

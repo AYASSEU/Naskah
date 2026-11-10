@@ -63,3 +63,8 @@ Browser calls only same-origin APIs. Service credentials and encryption stay ser
 ## MCP capability inventory
 
 The complete tool-name inventory is in `backend-mcp-tools.json`, captured before implementation. Supabase provides hosted SQL, migrations, table/extension lists, advisors, type generation and documentation search; local operations require CLI fallback. n8n provides discovery, workflow validation/creation/update/publication/execution and execution inspection, but no credential creation tool: use the authenticated public API with live credential schemas.
+
+B7 completed on 2026-11-10: local Docker PDF parser and Pandoc/LibreOffice compiler,
+shared cleaning, bounded child processes, private exports and both-theme UI
+acceptance. See B7-documents.md. Research/evaluation and final runbooks remain
+B8–B10; AI providers remain mock.

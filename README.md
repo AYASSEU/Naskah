@@ -9,7 +9,7 @@ Penyusun draf SRS berstandar IEEE 830
 A manuscript workspace for drafting, reviewing, and exporting software requirements.
 Built for a human reviewer to stay in control, one section at a time.
 
-![Stage: Phase 1 UI](https://img.shields.io/badge/stage-Phase_1_UI-e6b422?style=flat-square&labelColor=232018)
+![Stage: Phase 2 B7](https://img.shields.io/badge/stage-Phase_2_B7-e6b422?style=flat-square&labelColor=232018)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-15130e?style=flat-square)
 ![React 19](https://img.shields.io/badge/React-19-15130e?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-15130e?style=flat-square)
@@ -21,7 +21,9 @@ Built for a human reviewer to stay in control, one section at a time.
 
 ![Naskah manuscript workspace showing numbered requirements, chapter navigation, and the review inspector](docs/screenshots/dark-workspace-detail-1440.png)
 
-> **Current release: a functioning local UI with simulated AI.** Editing, browser storage, PDF text extraction, Word export, and evaluation calculations work locally. Generation, retrieval, guardrails, and AI revision use deterministic examples. Live AI and backend services are planned for Phase 2.
+> **Current checkpoint: local backend through B7, using the mock AI provider.** Generate and Revise run through local n8n and Supabase. PDF/TXT parsing and DOCX/PDF compilation run on the local server, with private downloads and a refreshed table of contents. The original browser-only mock mode remains available. Research persistence/evaluation and final runbooks remain B8–B10.
+
+On this configured Windows laptop, run `powershell -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode live`, then open `http://127.0.0.1:3000`. See [local document setup and acceptance](docs/B7-documents.md).
 
 ## Why Naskah
 
@@ -42,10 +44,10 @@ flowchart LR
     E --> F[Compare and accept / reject]
     F --> D
     D --> G[Approve and finalize]
-    G --> H[Export Word / print to PDF]
+    G --> H[Export Word / PDF]
 ```
 
-_Chapter drafting and AI revision currently run through the mock service layer._
+_Live backend mode uses local n8n workflows with the mock provider. Mock UI mode retains the browser service layer._
 
 | Workspace               | What you can do                                                                                                                                                |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |

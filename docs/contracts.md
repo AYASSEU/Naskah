@@ -85,3 +85,14 @@ Optional port methods `generation.resume`, `revision.acceptRevision`,
 `PortError.detail` carries safe owner-specific conflict context. New error keys
 `generation_in_progress` and `duplicate_requirement_id` are localized in both
 languages. Full route and validation behavior: `B6-local-ui.md`.
+
+## B7 document contracts
+
+Parse uploads use multipart file rather than the original placeholder JSON
+ParseInputSchema. The response is ParsedDocumentSchema (name, size, cleaned text,
+page/character counts and removed lines). CompileInputSchema retains documentId
+and format and adds optional literal author/institution. CompileResultSchema is
+server artifact metadata plus mode, or an explicit client-fallback choice.
+Artifacts use an authenticated same-origin /api/exports/{uuid} URL; a private
+60-second Storage signature is created only inside the download API. See
+B7-documents.md for limits, error codes and cache/storage behavior.

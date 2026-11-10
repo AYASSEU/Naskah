@@ -225,6 +225,51 @@ HTTP recovery case passes and makes prior local projects usable in the ledger.
 
 ## Remaining implementation
 
-B7–B10 remain pending: server parser/compiler, research/evaluation, broader live
-UI/research acceptance and final runbooks. Generate and Revise now work from the
+B8–B10 remain pending: research/evaluation, broader live UI/research acceptance
+and final runbooks. B7 server parsing/compilation is complete as described below. Generate and Revise now work from the
 UI with local n8n/Supabase and a mock provider. Phase 2 is not entirely complete.
+
+## B7 — local parser and compiler, 2026-11-10
+
+Multipart PDF/TXT routes and HTTP adapters now use a bounded local Docker parser
+and shared Phase 1 cleaning. Fresh PDF worker processes pass 200 measured calls
+after 20 warm-up calls; persistent RSS band was 6,684,672 bytes. Scanned, encrypted,
+malformed, encoding, byte/page limits and origin/session/internal-bearer guards
+pass. Five worker tests exercise timeout/output limits and failure mapping.
+
+Finalized owner-scoped snapshots compile through Pandoc/reference DOCX/Lua
+captions and Python/UNO to refreshed DOCX and real PDF. The UI accepts optional
+cover author/institution and downloads both files through authenticated private
+Storage streaming. Cache reuse/coalescing, attachment/privacy checks and removal
+of project export objects are implemented. Existing tables/grants suffice.
+
+Hospital acceptance: 22 A4 pages, 3 captioned tables, all 39 requirement IDs,
+12 pt Times New Roman body/tables, 1.5 spacing, 4/4/3/3 cm margins, and TOC chapter
+starts 4/6/8/18 matching the PDF. All 22 final rasterized pages were inspected;
+continuation table headers and footers are intact. Six HTTP groups, four final
+live UI cases across both themes and all ten B6 HTTP regressions passed. Standard
+gates and mock UI regression are recorded with final verification below.
+
+Deviations: cover fields use python-docx instead of Lua; the validated-AST DOCX
+writer omits --sandbox because Debian Pandoc 2.17 cannot read DOCX resources in
+that mode. The reader remains sandboxed. Private signed Storage URLs stay behind
+the same-origin API. Work is bounded to two local jobs rather than a durable
+distributed queue. Windows QA used the packaged renderer in a network-disabled
+container since no bundled Windows LibreOffice exists. Full details and commands
+are in B7-documents.md. No paid provider or real research data was used.
+
+Final B7 gate: strict typecheck, lint, 83 unit tests, production build, design
+audit and all 26 contrast pairs pass. All 20 original mock UI cases pass across
+light/dark (the four live-only cases are skipped in that run). Local database/RLS
+checks pass for 27 tables and warning/error advisors report no issues. The five
+final process-worker cases also cover a failed parent leaving no descendant.
+Generated screenshots from mock regression were restored to avoid unrelated
+baseline changes. Temporary acceptance projects were removed; UI and startup
+were restored to live backend mode with the local mock provider. Secrets and
+portable credential-reference scans pass; runtime tokens/fonts/artifacts stay
+out of Git. No push was performed.
+
+The final Windows PowerShell 5 startup probe found its HTML parser requirement;
+health probes now use -UseBasicParsing. The documented startup command succeeds
+with existing containers and an already-running UI. Final HTTP checks: UI 200,
+backend ready, compiler healthy and provider restricted to local mock port 4010.

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import {
+  ParsedDocumentSchema,
+  CompileResultSchema,
   ProjectSchema,
   ProjectCreateSchema,
   ProjectPatchSchema,
@@ -22,7 +24,6 @@ import type { Services, GenerationHandle, GenerationEvent } from '../ports';
 import { NotImplementedError, PortError } from '../ports';
 import { request } from './client';
 import { watchEvents, eventError } from './stream';
-import { parser } from '../client/parser';
 import { createCompiler } from '../client/compiler';
 import { fixtureProjects } from '../mock/fixtures';
 export const endpoints = {
@@ -259,8 +260,24 @@ export function createHttpServices(): Services {
       listPending: (id) =>
         request(`/api/revisions?projectId=${id}`, z.array(RevisionProposalSchema)),
     },
-    parser,
-    compiler: createCompiler(documents, projects),
+    parser: {
+      async extractText(file) {
+        const body = new FormData();
+        body.set('file', file);
+        return request(endpoints.parser, ParsedDocumentSchema, { method: 'POST', body });
+      },
+    },
+    compiler: {
+      async compile(documentId, format, cover) {
+        const result = await request(endpoints.compiler, CompileResultSchema, {
+          method: 'POST',
+          body: JSON.stringify({ documentId, format, ...cover }),
+        });
+        return result.mode === 'client'
+          ? createCompiler(documents, projects).compile(documentId, format)
+          : result;
+      },
+    },
     aiConnection: {
       getSettings: unavailable,
       saveSettings: unavailable,

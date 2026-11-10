@@ -181,3 +181,11 @@ node scripts/test-database.mjs
 Hasil dan status fase dicatat di `docs/backend-phase-reports.md`. Backup n8n dan
 prosedur rollback tetap berada di `%LOCALAPPDATA%\n8n-docker` dan
 `%LOCALAPPDATA%\n8n-backups`, di luar Git dan sinkronisasi OneDrive.
+
+## B7 parser dan ekspor server
+
+Start-local -Mode live kini menyalakan container naskah-compiler pada
+127.0.0.1:8000. Parser PDF/TXT dipakai dari formulir proyek; Word dan PDF asli
+diunduh setelah finalisasi. Provider tetap mock. Token layanan dan font Windows
+disiapkan otomatis secara lokal. Petunjuk operasi, fallback COMPILER_MODE=client,
+batas unggahan, serta pengujian: [B7-documents.md](B7-documents.md).

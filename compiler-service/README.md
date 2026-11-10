@@ -1,8 +1,22 @@
-# Phase 2 compiler plan
-Replace browser CompilerService with a queued server compiler. Validate document
-contracts, render a versioned IEEE template via python-docx/Pandoc, then convert
-using LibreOffice headless or WeasyPrint. Provide a cover, automatic contents,
-hierarchical heading numbering, captioned tables, page numbers, A4 paper,
-Times New Roman 12pt, 1.5 line spacing and 4/4/3/3 cm top/left/right/bottom
-margins. Return short-lived artifact URLs. Sanitize source and isolate the
-conversion process. This folder is documentation only; no service is started.
+# Local parser and compiler
+
+Run `pnpm.cmd local:compiler` from the repository root with Docker Desktop active.
+`scripts/start-local.ps1 -Mode live` starts this automatically. Full operation,
+security boundaries, acceptance commands and limitations: [B7 documents](../docs/B7-documents.md).
+
+The Node HTTP service has unauthenticated `GET /health` and bearer-protected
+`POST /parse` (PDF bytes) / `POST /compile` (Markdown and literal cover metadata).
+Compile returns a ZIP containing refreshed `document.docx` and `document.pdf`.
+Only the web server calls these internal endpoints. The web API owns auth,
+shared text cleaning, persisted snapshots, private Storage and downloads.
+
+`template.py` generates `template_ieee830.docx` during image build. `format.lua`
+adds table captions. `compile.py` validates the Pandoc AST, formats the cover and
+tables, then uses an isolated LibreOffice UNO profile to update the TOC and
+produce both formats. `parse.mjs` releases PDF.js resources in a fresh child
+process. `worker.mjs` bounds output/time and kills the complete job process group.
+`docker exec naskah-compiler node --test worker.test.mjs` tests these bounds.
+
+The helper supplies a private named font build context; do not copy font binaries
+or populated environment files into this repository. Build-time QA intermediates
+belong in ignored `artifacts/` or `compiler-service/output/`.

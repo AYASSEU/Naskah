@@ -24,6 +24,8 @@ export function ExportDocument({ id }: { id: string }) {
     docx: 'idle',
     pdf: 'idle',
   });
+  const [author, setAuthor] = useState('');
+  const [institution, setInstitution] = useState('');
   const [artifact, setArtifact] = useState('');
   const [downloaded, setDownloaded] = useState(false);
   const [compileError, setCompileError] = useState('');
@@ -31,8 +33,8 @@ export function ExportDocument({ id }: { id: string }) {
     setState((s) => ({ ...s, [format]: 'compiling' }));
     setCompileError('');
     try {
-      const result = await services.compiler.compile(id, format);
-      if (format === 'pdf') {
+      const result = await services.compiler.compile(id, format, { author, institution });
+      if (format === 'pdf' && !result.url.startsWith('/api/exports/')) {
         window.open(result.url, '_blank', 'noopener,noreferrer');
       } else {
         const a = document.createElement('a');
@@ -40,7 +42,8 @@ export function ExportDocument({ id }: { id: string }) {
         a.download = result.filename;
         a.click();
         setArtifact(`${result.filename} / ${(result.size / 1024).toFixed(1)} KB`);
-        setTimeout(() => URL.revokeObjectURL(result.url), 60000);
+        if (result.url.startsWith('blob:'))
+          setTimeout(() => URL.revokeObjectURL(result.url), 60000);
       }
       setState((s) => ({ ...s, [format]: 'ready' }));
       setDownloaded(true);
@@ -133,6 +136,18 @@ export function ExportDocument({ id }: { id: string }) {
               <span>{d.metadata.generationSeconds.toFixed(1)} s</span>
             </div>
           </div>
+          <label className="field">
+            {t('exportAuthor')}
+            <input value={author} maxLength={200} onChange={(e) => setAuthor(e.target.value)} />
+          </label>
+          <label className="field">
+            {t('exportInstitution')}
+            <input
+              value={institution}
+              maxLength={200}
+              onChange={(e) => setInstitution(e.target.value)}
+            />
+          </label>
           <div className="export-actions">
             <Button
               variant="primary"
@@ -147,7 +162,7 @@ export function ExportDocument({ id }: { id: string }) {
               onClick={() => void download('pdf')}
             >
               <Printer />
-              {t('downloadPdf')}
+              {t(state.pdf === 'compiling' ? 'compiling' : 'downloadPdf')}
             </Button>
           </div>
           {p.status !== 'finalized' && (
@@ -157,9 +172,11 @@ export function ExportDocument({ id }: { id: string }) {
           )}
           {artifact && <p className="help-note mono">{artifact}</p>}
           {compileError && <p className="inline-error">{compileError}</p>}
-          <p className="help-note">{t('exportNote')}</p>
+          <p className="help-note">
+            {t(services.mode === 'live' ? 'serverExportNote' : 'exportNote')}
+          </p>
           <div className="rule" />
-          <p className="help-note">{t('pdfNote')}</p>
+          <p className="help-note">{t(services.mode === 'live' ? 'serverPdfNote' : 'pdfNote')}</p>
           {research && downloaded && (
             <div className="research-prompt">
               <p>{t('researchInvite')}</p>

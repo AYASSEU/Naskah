@@ -47,8 +47,8 @@ if(-not $SkipN8n){
     $servicesReady=$false
     for($attempt=0;$attempt -lt 30;$attempt++){
       try{
-        $n8nHealth=Invoke-WebRequest 'http://127.0.0.1:5678/healthz/readiness' -TimeoutSec 5
-        $mockHealth=Invoke-WebRequest 'http://127.0.0.1:4010/health' -TimeoutSec 5
+        $n8nHealth=Invoke-WebRequest 'http://127.0.0.1:5678/healthz/readiness' -UseBasicParsing -TimeoutSec 5
+        $mockHealth=Invoke-WebRequest 'http://127.0.0.1:4010/health' -UseBasicParsing -TimeoutSec 5
         if($n8nHealth.StatusCode -eq 200 -and $mockHealth.StatusCode -eq 200){$servicesReady=$true;break}
       }catch{}
       Start-Sleep -Milliseconds 500
@@ -62,6 +62,10 @@ if($WithDatabase -or $Mode -eq 'live'){
 }
 if($Mode -eq 'live' -and -not (Test-Path -LiteralPath 'apps\web\.env.local')){
   throw 'Mode live membutuhkan konfigurasi lokal. Lihat docs/local-laptop-setup.md.'
+}
+if($Mode -eq 'live'){
+  & $nodePath 'scripts/local-compiler.mjs'
+  if($LASTEXITCODE -ne 0){throw 'Layanan dokumen lokal gagal dijalankan.'}
 }
 $listener=Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue
 if($listener){

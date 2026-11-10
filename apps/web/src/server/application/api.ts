@@ -17,7 +17,7 @@ import {
   GenerationLogSchema,
 } from '@naskah/contracts';
 import { parseRequirements } from '@naskah/core';
-import { transaction } from '../db/client';
+import { transaction, db } from '../db/client';
 import { ownerRoute, readJson, json } from '../http/route';
 import { AppError } from '../http/errors';
 import {
@@ -182,6 +182,15 @@ export function api(
             const rows = await tx<
               { id: string | null }[]
             >`select n8n_execution_id as id from public.srs_generation_logs where project_id=${projectId} and owner_id=${owner} and status in ('queued','running') union select n8n_execution_id as id from public.revision_proposals where project_id=${projectId} and owner_id=${owner} and status='generating'`;
+            const exports = await tx<
+              { object_path: string }[]
+            >`select object_path from public.exports where project_id=${projectId} and owner_id=${owner}`;
+            if (exports.length) {
+              const removed = await db()
+                .storage.from('exports')
+                .remove(exports.map((row) => row.object_path));
+              if (removed.error) throw new AppError('export_storage_failed', 503, true);
+            }
             await tx`delete from public.projects where id=${projectId} and owner_id=${owner}`;
             return rows;
           });

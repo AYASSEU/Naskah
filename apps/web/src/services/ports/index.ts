@@ -99,7 +99,11 @@ export interface CompiledArtifact {
   format: 'docx' | 'pdf';
 }
 export interface CompilerService {
-  compile(documentId: string, format: 'docx' | 'pdf'): Promise<CompiledArtifact>;
+  compile(
+    documentId: string,
+    format: 'docx' | 'pdf',
+    cover?: { author?: string; institution?: string },
+  ): Promise<CompiledArtifact>;
 }
 export interface EvaluationRepository {
   importStatisticalResults(results: StatisticalResult[]): Promise<void>;

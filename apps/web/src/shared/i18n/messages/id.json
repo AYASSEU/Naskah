@@ -326,10 +326,10 @@
     "stale_callback": "Callback kedaluwarsa. Periksa jam sistem lalu ulangi pengiriman.",
     "internal_error": "Server belum dapat menyelesaikan operasi. Coba kembali dan periksa statusnya jika berulang.",
     "too_large": "Berkas atau permintaan terlalu besar. Bagi menjadi beberapa bagian.",
-    "no_text_layer": "PDF ini tidak memiliki lapisan teks. Gunakan OCR atau unggah berkas teks.",
-    "invalid_file": "Unggah PDF atau berkas teks UTF-8 yang valid.",
+    "no_text_layer": "Tidak ditemukan teks yang dapat dibaca. Jalankan OCR pada PDF hasil pindai, lalu unggah ulang.",
+    "invalid_file": "Berkas tidak valid. Unggah PDF dengan lapisan teks atau TXT UTF-8.",
     "parse_timeout": "Ekstraksi teks kehabisan waktu. Coba dokumen yang lebih kecil.",
-    "compiler_unavailable": "Jalankan kontainer kompilator, lalu ulangi ekspor.",
+    "compiler_unavailable": "Layanan dokumen belum siap. Jalankan skrip start-local lalu coba lagi.",
     "research_consent_required": "Persetujuan peserta diperlukan sebelum merekam jawaban penelitian.",
     "dev_seed_excluded": "Data seed pengembangan tidak dapat dipakai untuk metrik skripsi. Impor korpus penelitian.",
     "language_mismatch": "Gunakan referensi dan dokumen hasil dalam bahasa yang sama.",
@@ -338,7 +338,16 @@
     "callback_conflict": "Callback bertentangan dengan hasil sebelumnya. Periksa proses sebelum mencoba kembali.",
     "run_not_active": "Proses ini tidak lagi aktif. Buka hasil terakhir atau mulai kembali.",
     "generation_in_progress": "Pembuatan SRS masih berlangsung. Tunggu atau batalkan sebelum mengubah dokumen.",
-    "duplicate_requirement_id": "ID requirement sudah digunakan pada bagian lain. Periksa usulan sebelum menerapkannya."
+    "duplicate_requirement_id": "ID requirement sudah digunakan pada bagian lain. Periksa usulan sebelum menerapkannya.",
+    "invalid_encoding": "TXT harus memakai encoding UTF-8. Simpan ulang berkas sebagai UTF-8.",
+    "page_limit": "PDF melebihi 200 halaman. Pisahkan menjadi berkas lebih kecil.",
+    "encrypted_pdf": "PDF dilindungi kata sandi. Buka proteksinya sebelum mengunggah.",
+    "document_timeout": "Pemrosesan dokumen melewati batas waktu. Coba berkas yang lebih kecil.",
+    "document_busy": "Layanan dokumen sedang sibuk. Coba lagi sesaat.",
+    "compiler_failed": "Kompilasi dokumen gagal. Periksa layanan compiler lokal lalu coba lagi.",
+    "unsafe_document": "Dokumen memuat gambar atau konten eksternal yang tidak didukung. Gunakan teks dan tabel.",
+    "export_storage_failed": "Penyimpanan ekspor lokal belum siap. Periksa Supabase lalu coba lagi.",
+    "document_not_finalized": "Finalisasi dokumen sebelum mengekspor."
   },
   "integrations": {
     "title": "Sambungan",
@@ -379,5 +388,9 @@
   "liveDataDescription": "Konten proyek tersimpan di basis data Supabase lokal. Preferensi tampilan tetap di peramban ini.",
   "conflictCurrent": "Versi tersimpan terbaru",
   "conflictDraft": "Draf perubahan Anda",
-  "conflictSaveDraft": "Simpan draf yang telah ditinjau"
+  "conflictSaveDraft": "Simpan draf yang telah ditinjau",
+  "exportAuthor": "Penulis (opsional)",
+  "exportInstitution": "Institusi (opsional)",
+  "serverExportNote": "Word mencakup sampul, daftar isi terisi, bab, tabel, dan nomor halaman.",
+  "serverPdfNote": "PDF dikompilasi di server lokal dan diunduh sebagai berkas."
 }
