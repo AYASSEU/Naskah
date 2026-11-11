@@ -189,3 +189,11 @@ Start-local -Mode live kini menyalakan container naskah-compiler pada
 diunduh setelah finalisasi. Provider tetap mock. Token layanan dan font Windows
 disiapkan otomatis secara lokal. Petunjuk operasi, fallback COMPILER_MODE=client,
 batas unggahan, serta pengujian: [B7-documents.md](B7-documents.md).
+
+## B8 evaluasi lokal
+
+Start-local -Mode live juga menyalakan naskah-evaluation di 127.0.0.1:8010,
+dengan token server-only yang dibuat otomatis. Buka /evaluation untuk persetujuan
+peserta, penilaian ahli A/B, SUS, ROUGE, statistik dan ekspor JSON/CSV. Data uji
+dan penelitian terpisah; mock tidak memenuhi syarat penelitian. Perintah Python,
+backup input privat, batas dan asumsi: [B8-evaluation.md](B8-evaluation.md).

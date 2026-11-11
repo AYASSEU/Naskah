@@ -1,0 +1,12 @@
+{
+ "template":{"id":"golden","name":"Golden headings","chapters":[{"number":"1","title":"Introduction","prompt":"","subsections":[{"number":"1.1","title":"Purpose","required":true},{"number":"1.2","title":"Scope","required":true}]},{"number":"2","title":"Description","prompt":"","subsections":[{"number":"2.1","title":"Context","required":true}]}]},
+ "sus":[{"answers":[5,1,5,1,5,1,5,1,5,1],"score":100},{"answers":[1,5,1,5,1,5,1,5,1,5],"score":0},{"answers":[3,3,3,3,3,3,3,3,3,3],"score":50},{"answers":[4,2,4,1,3,2,5,1,4,2],"score":80}],
+ "structure":[
+  {"name":"complete","markdown":"# 1. Intro\n## 1.1 Purpose\n## 1.2 Scope\n# 2. Description\n## 2.1 Context\n","percentage":100,"missing":[]},
+  {"name":"partial","markdown":"# 1. Intro\r\n## 1.1 Purpose\r\n","percentage":40,"missing":["1.2","2","2.1"]},
+  {"name":"fenced","markdown":"# 1. Intro\n```md\n## 1.1 Ignored\n```\n## 1.2 Scope\n# 2. Description\n## 2.1 Context\n","percentage":80,"missing":["1.1"]},
+  {"name":"duplicate","markdown":"# 1. Intro\n## 1.1 First\n## 1.1 Duplicate","error":"markdown_duplicate_section"},
+  {"name":"wrong level","markdown":"# 1.1 Not a chapter","error":"markdown_heading_level"},
+  {"name":"empty","markdown":"An ordinary interview transcript.","percentage":0,"missing":["1","1.1","1.2","2","2.1"]}
+ ]
+}

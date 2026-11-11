@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { research } from './research';
 import {
   ParsedDocumentSchema,
   CompileResultSchema,
@@ -18,6 +19,10 @@ import {
   RevisionProposalSchema,
   OkSchema,
   GenerationLogSchema,
+  StatisticalResultSchema,
+  ExpertReviewSchema,
+  SusResponseSchema,
+  RougeSchema,
   type GenerateInput,
 } from '@naskah/contracts';
 import type { Services, GenerationHandle, GenerationEvent } from '../ports';
@@ -284,19 +289,47 @@ export function createHttpServices(): Services {
       removeApiKey: unavailable,
       testConnection: unavailable,
     },
+    research,
     evaluation: {
       listGenerationLogs: () => request('/api/evaluation/logs', z.array(GenerationLogSchema)),
       async logGeneration() {
         /* Workflow callbacks own generation logs. */
       },
-      importStatisticalResults: unavailable,
-      listStatisticalResults: unavailable,
-      saveExpertReview: unavailable,
-      listExpertReviews: unavailable,
-      saveSusResponse: unavailable,
-      listSusResponses: unavailable,
-      importRougeResults: unavailable,
-      listRougeResults: unavailable,
+      importStatisticalResults: async (results) => {
+        await request('/api/evaluation/legacy-import?scope=dev', OkSchema, {
+          method: 'POST',
+          body: JSON.stringify({ kind: 'statistics', results }),
+        });
+      },
+      listStatisticalResults: () =>
+        request('/api/evaluation/statistics-legacy?scope=dev', z.array(StatisticalResultSchema)),
+      saveExpertReview: async (review) => {
+        const c = (await research.cases('dev'))[0];
+        if (!c) throw new PortError('not_found', false, 'backendErrors.not_found');
+        const assignment = (await research.blind('dev', c.id)).find(
+          (d) => d.label === review.label,
+        );
+        if (!assignment) throw new PortError('not_found', false, 'backendErrors.not_found');
+        await research.saveReview('dev', {
+          assignmentId: assignment.id,
+          ratings: review.ratings,
+          justifications: review.justifications,
+          comments: review.comments,
+        });
+      },
+      listExpertReviews: () =>
+        request('/api/evaluation/reviews?scope=dev', z.array(ExpertReviewSchema)),
+      saveSusResponse: async (response) => {
+        await research.saveSus('dev', response);
+      },
+      listSusResponses: () => request('/api/evaluation/sus?scope=dev', z.array(SusResponseSchema)),
+      importRougeResults: async (results) => {
+        await request('/api/evaluation/legacy-import?scope=dev', OkSchema, {
+          method: 'POST',
+          body: JSON.stringify({ kind: 'rouge', results }),
+        });
+      },
+      listRougeResults: () => request('/api/evaluation/rouge?scope=dev', z.array(RougeSchema)),
     },
     examples: {
       async listSamples() {
@@ -307,8 +340,21 @@ export function createHttpServices(): Services {
           rawText,
         }));
       },
-      getBlindDocuments: unavailable,
-      getBlindMapping: unavailable,
+      async getBlindDocuments() {
+        const cases = await research.cases('dev');
+        return cases[0]
+          ? (await research.blind('dev', cases[0].id)).map(({ label, markdown }) => ({
+              label,
+              markdown,
+            }))
+          : [];
+      },
+      async getBlindMapping() {
+        const cases = await research.cases('dev');
+        if (!cases[0]) throw new PortError('not_found', false, 'backendErrors.not_found');
+        const mapping = await research.mapping('dev', cases[0].id);
+        return { A: mapping.A ?? '', B: mapping.B ?? '' };
+      },
     },
     auth: {
       getCurrentUser: () =>

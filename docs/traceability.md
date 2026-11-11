@@ -44,3 +44,15 @@ measured soak. Export maps to POST /api/compile-document, the local Docker servi
 and authenticated GET /api/exports/{uuid}. Hospital OOXML/PDF assertions, all-page
 raster review, private download/cache checks and both-theme live UI tests cover
 DOCX/PDF output. Mock helpers remain selectable. See B7-documents.md.
+
+## B8 evaluation counterpart — 2026-11-11
+
+RQ1 uses owner/scoped logs and summaries, RQ2 uses frozen case snapshots,
+participant-bound random blind assignments and immutable four-dimension reviews,
+and RQ3 uses consented SUS answers with core/server/database recomputation.
+The ResearchService HTTP port connects the UI to local Supabase and Python.
+Shared SUS/heading goldens, numerical/reference tests, HTTP isolation/import/
+export checks and both-theme live flows cover the implementation. Research scope
+excludes mock/dev_seed runs; all executed acceptance is synthetic. Participant
+means avoid pseudoreplication, with explicit paired/independent analysis design.
+See B8-evaluation.md for limits, assumptions and CLI reproduction.

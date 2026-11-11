@@ -1,12 +1,18 @@
-# Phase 2 evaluation scripts
-Implement Python tools for rouge-score (ROUGE-1, ROUGE-2, ROUGE-L precision,
-recall, F1), heading structure checks, SciPy Wilcoxon signed-rank for matched
-ratings or Mann–Whitney U for independent groups (record study design first),
-and SUS. SUS: odd items response minus 1, even items 5 minus response; total
-times 2.5. Preserve participant pseudonyms and pairing. Export JSON matching
-RougeSchema and a separate report with sample size, test, statistic, p-value,
-effect size and correction assumptions. No scripts execute in Phase 1.
+# Local evaluation tools
 
-`apps/web/public/samples/rouge-results.json` is synthetic demonstration input.
-Do not report it as measured research data. Benchmark/interpretation references:
-Brooke (1996), Bangor/Kortum/Miller (2009), Sauro (2011).
+B8 implements SUS, expert descriptions, heading completeness, ROUGE-1/2/L,
+Wilcoxon/Mann–Whitney with effect sizes/Holm correction, and pseudonymized local
+API exports. These tools never call an AI provider. Examples are synthetic dev
+data and must not be used as research findings.
+
+From the repository root, run `pnpm local:evaluation`, then
+`pnpm evaluation sus --input evaluation-scripts/examples/sus.json`.
+Use `expert`, `stats`, `structure`, `rouge`, or `export` for other operations.
+Numerical commands use the pinned Docker image without network access; the
+exporter uses host Python stdlib and the local owner API, without a database key.
+
+For standalone Python use `pip install -r requirements.txt`, then
+`python -m evaluation_scripts --help` from this directory. Verify with
+`pnpm test:python` from the repository root. See
+[B8 evaluation](../docs/B8-evaluation.md) for input schemas, UI flow, separation,
+limits, assumptions, reproducibility, and research eligibility.

@@ -1,0 +1,10 @@
+{
+  "data_scope": "dev",
+  "design": "paired",
+  "reviews": [
+    {"participant":"synthetic-01","case_id":"synthetic-case","source":"system","ratings":[4,4,3,4],"is_thesis_run":false},
+    {"participant":"synthetic-01","case_id":"synthetic-case","source":"human","ratings":[3,4,3,3],"is_thesis_run":false},
+    {"participant":"synthetic-02","case_id":"synthetic-case","source":"system","ratings":[5,4,4,4],"is_thesis_run":false},
+    {"participant":"synthetic-02","case_id":"synthetic-case","source":"human","ratings":[4,3,4,3],"is_thesis_run":false}
+  ]
+}

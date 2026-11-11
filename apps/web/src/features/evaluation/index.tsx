@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { LiveEvaluation } from './live';
 import { useTranslations, useLocale } from 'next-intl';
 import * as Tabs from '@radix-ui/react-tabs';
 import { z } from 'zod';
@@ -43,6 +44,10 @@ function Rating({
   );
 }
 export function Evaluation() {
+  const services = useServices();
+  return services.mode === 'live' ? <LiveEvaluation /> : <MockEvaluation />;
+}
+function MockEvaluation() {
   const t = useTranslations();
   const locale = useLocale();
   const services = useServices();

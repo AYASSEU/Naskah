@@ -1,0 +1,7 @@
+{
+  "data_scope": "dev",
+  "responses": [
+    {"participant": "synthetic-01", "answers": [5,1,5,1,5,1,5,1,5,1], "is_thesis_run": false},
+    {"participant": "synthetic-02", "answers": [3,3,3,3,3,3,3,3,3,3], "is_thesis_run": false}
+  ]
+}

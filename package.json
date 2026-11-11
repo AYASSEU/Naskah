@@ -8,10 +8,10 @@
     "dev": "pnpm --filter @naskah/web dev",
     "build": "pnpm --filter @naskah/web build",
     "start": "pnpm --filter @naskah/web start",
-    "typecheck": "pnpm --filter @naskah/core typecheck && tsc -p n8n/tsconfig.json && pnpm --filter @naskah/web typecheck",
+    "typecheck": "pnpm --filter @naskah/core typecheck && tsc -p n8n/tsconfig.json && pnpm --filter @naskah/web typecheck && tsc -p tests/tsconfig.json",
     "lint": "eslint apps/web/src packages/contracts/src packages/core/src",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/test-ui-safe.mjs",
     "audit:slop": "node scripts/audit-slop.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
     "n8n:build": "tsx n8n/generate-schema.ts && node n8n/build.mjs",
@@ -21,7 +21,11 @@
     "local:setup-mock": "node scripts/setup-local-mock.mjs",
     "test:b6": "node scripts/run-server-script.mjs b6",
     "local:compiler": "node scripts/local-compiler.mjs",
-    "test:b7": "node scripts/test-b7.mjs"
+    "test:b7": "node scripts/test-b7.mjs",
+    "local:evaluation": "node scripts/local-evaluation.mjs",
+    "test:b8": "node scripts/test-b8.mjs",
+    "test:python": "node scripts/test-python-evaluation.mjs",
+    "evaluation": "node scripts/evaluate.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

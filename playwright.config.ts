@@ -11,7 +11,7 @@ export default defineConfig({
     channel: process.env.PLAYWRIGHT_CHANNEL || 'msedge',
     headless: true,
     viewport: { width: 1440, height: 1000 },
-    trace: 'retain-on-failure',
+    trace: process.env.NASKAH_E2E_TRACE === '1' ? 'retain-on-failure' : 'off',
   },
   projects: [
     { name: 'dark', use: { colorScheme: 'dark' } },

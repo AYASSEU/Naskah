@@ -1,0 +1,12 @@
+{
+  "data_scope": "dev",
+  "pairs": [{
+    "case_id": null,
+    "scenario": "Synthetic overlap example",
+    "prediction": "Sistem harus mencatat data dan memverifikasi hasil.",
+    "reference": "Sistem harus mencatat data dan memeriksa hasil.",
+    "language": "id",
+    "reference_language": "id",
+    "is_thesis_run": false
+  }]
+}

@@ -87,3 +87,12 @@ browser helpers. The UI downloads real private files with updated TOC, captions
 and page numbers. Six HTTP groups, a 200-call measured parser soak, five worker
 tests and four UI cases across both themes pass. See B7-documents.md.
 B8–B10 remain pending; the running backend continues to use the mock provider.
+
+## B8 checkpoint — 2026-11-11
+
+Evaluation HTTP ports now persist consent, scoped participant sessions, immutable
+case snapshots, randomized blind reviews, server-scored SUS and derived reports.
+The local Python engine provides descriptive expert summaries, ROUGE and explicit
+paired/independent statistics with effect sizes and Holm correction. UI and
+pseudonymized JSON/CSV exports keep dev/research separate; mock runs cannot enter
+research cases. See B8-evaluation.md. B9–B10 and real-study validation remain pending.

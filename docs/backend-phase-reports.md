@@ -225,8 +225,8 @@ HTTP recovery case passes and makes prior local projects usable in the ledger.
 
 ## Remaining implementation
 
-B8–B10 remain pending: research/evaluation, broader live UI/research acceptance
-and final runbooks. B7 server parsing/compilation is complete as described below. Generate and Revise now work from the
+B9–B10 remain pending: broader live UI/research acceptance and final runbooks.
+B8 evaluation is implemented below using synthetic development acceptance. B7 server parsing/compilation is complete as described below. Generate and Revise now work from the
 UI with local n8n/Supabase and a mock provider. Phase 2 is not entirely complete.
 
 ## B7 — local parser and compiler, 2026-11-10
@@ -273,3 +273,59 @@ The final Windows PowerShell 5 startup probe found its HTML parser requirement;
 health probes now use -UseBasicParsing. The documented startup command succeeds
 with existing containers and an already-running UI. Final HTTP checks: UI 200,
 backend ready, compiler healthy and provider restricted to local mock port 4010.
+
+## B8 — local research evaluation, 2026-11-11
+
+Evaluation now persists through owner-scoped HTTP ports, with dev/research
+participants, consented signed browser identities, frozen system/baseline cases,
+random A/B mapping and immutable expert reviews/SUS. True source maps are stored
+separately. Paired cases require both reviews before source summaries/export;
+independent participants keep their randomized source across cases. Unblinding
+is an explicit post-submission action. Server and database recompute SUS and
+reject forged identities/scores or cross-scope records.
+
+A pinned nonroot Docker Python service computes expert descriptions, SUS,
+heading completeness, ROUGE-1/2/L and design-specific Wilcoxon/Mann–Whitney.
+Participant means avoid pseudoreplication. Methods, ties/zeros, participant counts,
+effect size/approximate bootstrap CI, Holm correction, seed and engine/input
+provenance are retained. Imported reports are recomputed against owned current
+inputs. JSON/CSV export uses scoped HMAC pseudonyms and excludes free text and
+source documents; study design and safe calculation provenance remain available.
+Numerical CLI operations disable container networking; the stdlib exporter uses
+only the local owner API. No AI provider is called by evaluation.
+
+Research cases/SUS require successful explicitly enrolled non-mock runs without
+dev_seed retrieval. All acceptance uses synthetic dev data and research remains
+empty. This does not validate a real study. Public respondent Auth, participant
+recovery, study enrollment and a real research corpus remain future work. Local
+single-owner blinding does not prevent the laptop operator inspecting the DB.
+Finish planned cases before unblinding. Reader/input limits reject oversized
+datasets explicitly; pagination for larger studies remains future work.
+
+Security/performance advisors at warn/error report no issues for the local DB;
+29-table integrity/anonymous-denial checks and evaluation trigger rollback tests
+pass. Separate PL/pgSQL type lint reports three pre-existing implicit text-to-jsonb
+return warnings in B5 naskah_workflow_failure; B8 evaluation functions are clean.
+Migration replay produces an empty schema diff and local migration history is
+aligned. The user-facing UI stays on the mock provider. See B8-evaluation.md.
+
+Final B8 gate: strict typecheck, lint, 95 unit tests, production build, design
+audit and all 26 contrast pairs pass. Python passes 19 tests, including shared
+goldens and 100 randomized ROUGE-L reference comparisons. All seven B8 HTTP
+groups pass, including consent/owner/origin boundaries, immutable blinding/SUS,
+research exclusion, both study designs and verified offline import/export.
+The final SUS/expert/statistics/ROUGE CLI examples and local exporter run.
+
+All four B8 live browser cases pass across both themes, including late-response
+scope switching and saved SUS after reload. Both B6 live generation/revision/
+export cases, both B7 parser cases, all ten B6 HTTP regressions, and all twenty
+original mock browser cases pass. An earlier parallel build locked Windows dev
+files and interrupted workflow browser checks; the dev server was stopped for
+a clean final build, then workflow checks passed after restart. Temporary test
+participants/projects/reports were cleaned and generated baseline screenshots
+restored. Secrets and portable credential-reference scans pass.
+
+Windows PowerShell 5 startup succeeds with all local services. Final UI HTTP 200,
+backend ready, seven active workflows, compiler/evaluation healthy, provider and
+embeddings restricted to local mock port 4010, and research export empty. The
+webapp is restored to live backend mode; no push or real study run was performed.

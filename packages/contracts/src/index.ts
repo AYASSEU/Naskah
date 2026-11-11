@@ -380,3 +380,184 @@ export const CompileResultSchema = z.discriminatedUnion('mode', [
   CompiledArtifactSchema.extend({ mode: z.literal('server') }),
   z.object({ mode: z.literal('client') }),
 ]);
+
+// B8 evaluation uses explicit scopes; legacy mock DTOs remain compatible.
+export const EvaluationScopeSchema = z.enum(['dev', 'research']);
+export type EvaluationScope = z.infer<typeof EvaluationScopeSchema>;
+export const EvaluationConsentSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z0-9_-]{3,40}$/),
+  role: z.enum(['expert', 'participant']),
+  consent: z.literal(true),
+});
+export const EvaluationContextSchema = z.object({
+  scope: EvaluationScopeSchema,
+  participant: z
+    .object({
+      code: z.string(),
+      role: z.enum(['expert', 'participant']),
+      consentedAt: z.string(),
+      sus: z
+        .object({ id: z.uuid(), score: z.number().min(0).max(100), projectId: z.uuid().nullable() })
+        .nullable()
+        .default(null),
+    })
+    .nullable(),
+});
+export const EvaluationCaseSchema = z.object({
+  id: z.uuid(),
+  projectId: z.uuid(),
+  title: z.string(),
+  language: z.enum(['id', 'en']),
+  referenceLanguage: z.enum(['id', 'en']),
+  design: z.enum(['paired', 'independent']),
+  is_thesis_run: z.boolean(),
+  createdAt: z.string(),
+});
+export type EvaluationCase = z.infer<typeof EvaluationCaseSchema>;
+export const EvaluationCaseInputSchema = z.object({
+  projectId: z.uuid(),
+  title: z.string().trim().min(1).max(150),
+  baselineMarkdown: z.string().trim().min(1).max(100000),
+  referenceLanguage: z.enum(['id', 'en']),
+  provenanceNote: z.string().trim().min(8).max(2000),
+  design: z.enum(['paired', 'independent']).default('paired'),
+});
+export const BlindDocumentSchema = z.object({
+  id: z.uuid(),
+  caseId: z.uuid(),
+  label: z.enum(['A', 'B']),
+  markdown: z.string(),
+  submitted: z.boolean(),
+});
+export const EvaluationReviewInputSchema = z.object({
+  assignmentId: z.uuid(),
+  ratings: z.array(z.number().int().min(1).max(5)).length(4),
+  justifications: z.array(z.string().trim().min(1).max(4000)).length(4),
+  comments: z.string().max(8000).default(''),
+});
+export const EvaluationSusInputSchema = z.object({
+  projectId: z.uuid().optional(),
+  answers: z.array(z.number().int().min(1).max(5)).length(10),
+  score: z.number().optional(),
+  comment: z.string().max(8000).default(''),
+});
+const EvaluationDescriptionSchema = z.object({
+  n: z.number().int().nonnegative(),
+  mean: z.number().nullable(),
+  median: z.number().nullable(),
+  sd: z.number().nullable(),
+});
+export const EvaluationOverviewSchema = z.object({
+  scope: EvaluationScopeSchema,
+  design:z.enum(['paired','independent']).default('paired'),
+  counts: z.object({
+    logs: z.number(),
+    reviews: z.number(),
+    sus: z.number(),
+    cases: z.number(),
+    excludedDev: z.number(),
+  }),
+  duration: EvaluationDescriptionSchema,
+  completeness: EvaluationDescriptionSchema,
+  sus: EvaluationDescriptionSchema,
+  dimensions: z.array(
+    z.object({
+      source: z.enum(['system', 'human']),
+      dimension: z.string(),
+      statistics: EvaluationDescriptionSchema,
+    }),
+  ),
+  eligibleProjects: z.array(z.object({ id: z.uuid(), title: z.string() })),
+});
+export const EvaluationProvenanceSchema = z.object({
+  engine: z.string(),
+  input_digest: z.string().regex(/^[a-f0-9]{64}$/),
+  python: z.string(),
+  numpy: z.string(),
+  scipy: z.string(),
+  rouge_score: z.string(),
+});
+export const EvaluatedRougeSchema = RougeSchema.extend({
+  case_id: z.uuid().nullable(),
+  language: z.enum(['id', 'en']),
+  reference_language: z.enum(['id', 'en']),
+  valid_comparison: z.boolean(),
+  override_reason: z.string().nullable(),
+  use_stemmer: z.boolean(),
+  tokenizer: z.string(),
+});
+export const RougeReportSchema = z.object({
+  schema_version: z.literal(1),
+  kind: z.literal('rouge'),
+  data_scope: EvaluationScopeSchema,
+  results: z.array(EvaluatedRougeSchema).min(1).max(10),
+  provenance: EvaluationProvenanceSchema,
+});
+export type RougeReport = z.infer<typeof RougeReportSchema>;
+export const EvaluatedStatisticSchema = StatisticalResultSchema.extend({
+  n_system: z.number().int().positive(),
+  n_human: z.number().int().positive(),
+  p_adjusted: z.number().min(0).max(1),
+  significant: z.boolean(),
+  effect_name: z.enum(['paired_rank_biserial', 'cliffs_delta']),
+  effect_ci: z
+    .object({ low: z.number(), high: z.number(), level: z.literal(0.95), method: z.string() })
+    .nullable(),
+  ci_unavailable_reason: z.string().nullable(),
+  method: z.string(),
+  ties: z.boolean(),
+  zeros: z.boolean(),
+  warnings: z.array(z.string()),
+  descriptive: z.object({
+    system: EvaluationDescriptionSchema,
+    human: EvaluationDescriptionSchema,
+  }),
+});
+export const StatisticsReportSchema = z.object({
+  schema_version: z.literal(1),
+  kind: z.literal('statistics'),
+  data_scope: EvaluationScopeSchema,
+  design: z.enum(['paired', 'independent']),
+  unit: z.literal('participant_mean_across_cases'),
+  alternative: z.literal('two-sided'),
+  correction: z.literal('holm_4_dimensions'),
+  alpha: z.literal(0.05),
+  seed: z.number().int(),
+  results: z.array(EvaluatedStatisticSchema).length(4),
+  provenance: EvaluationProvenanceSchema,
+  limitations: z.array(z.string()),
+});
+export type StatisticsReport = z.infer<typeof StatisticsReportSchema>;
+export const EvaluationComputeSchema = z.object({
+  caseIds: z.array(z.uuid()).min(1).max(10),
+  allowLanguageMismatch: z.boolean().default(false),
+  overrideReason: z.string().max(2000).default(''),
+  useStemmer: z.boolean().default(false),
+});
+export const EvaluationStatisticsInputSchema = z.object({
+  design: z.enum(['paired', 'independent']),
+  seed: z.number().int().min(0).max(2147483647).default(20261110),
+});
+export const EvaluationExportSchema = z.object({
+  schema_version: z.literal(1),
+  data_scope: EvaluationScopeSchema,
+  created_at: z.string(),
+  datasets: z.record(z.string(), z.array(z.record(z.string(), z.unknown()))),
+  stats_input: z.object({
+    data_scope: EvaluationScopeSchema,
+    design: z.enum(['paired', 'independent']),
+    reviews: z.array(
+      z.object({
+        participant: z.string(),
+        case_id: z.string(),
+        source: z.enum(['system', 'human']),
+        ratings: z.array(z.number()).length(4),
+        is_thesis_run: z.boolean(),
+      }),
+    ),
+  }),
+  privacy: z.string(),
+});

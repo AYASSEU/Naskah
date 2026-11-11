@@ -41,3 +41,10 @@ content-visibility containment. Fonts are built and self-hosted with next/font.
 
 The URL controls selected section and inspector panel. Preferences use small
 Zustand selectors. IndexedDB is the source of truth for application entities.
+
+B8 live evaluation uses an optional ResearchService port, same-origin thin routes
+and owner-scoped Supabase transactions. HttpOnly signed participant cookies bind
+consented identities to dev/research scope. Stored blind snapshots keep source
+maps in a separate table. Python jobs run in a bounded local Docker service;
+only the server knows its token. Derived imports are recomputed against owned
+inputs before persistence. Phase 1 IndexedDB evaluation remains the mock adapter.

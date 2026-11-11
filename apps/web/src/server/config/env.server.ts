@@ -13,6 +13,8 @@ export const ServerEnvSchema = z.object({
   N8N_INTERNAL_APP_URL: z.url().default('http://host.docker.internal:3000'),
   N8N_INTERNAL_SUPABASE_URL: z.url().default('http://host.docker.internal:54321'),
   COMPILER_SERVICE_URL: z.url().default('http://localhost:8000'),
+  EVALUATION_SERVICE_URL: z.url().default('http://127.0.0.1:8010'),
+  EVALUATION_SERVICE_TOKEN: z.string().min(32).optional(),
   COMPILER_SERVICE_TOKEN: z.string().min(32).optional(),
   COMPILER_MODE: z.enum(['server','client']).default('server'),
   ALLOW_LOCAL_PROVIDER_URLS: bool(process.env.NODE_ENV !== 'production'),

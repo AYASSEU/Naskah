@@ -139,6 +139,7 @@ export interface SimulationConfig {
   failure: 'none' | 'retrieval' | 'chapter3' | 'guardrail' | 'revision';
 }
 export interface Services {
+  research?: import('../research').ResearchService;
   integrations?: {
     status(): Promise<SystemStatus>;
     get(id: IntegrationId): Promise<IntegrationState>;

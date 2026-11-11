@@ -377,11 +377,12 @@ export function api(
         );
       }
       if (resource === 'logs') {
+        const scope=z.enum(['dev','research']).parse(new URL(request.url).searchParams.get('scope')??'dev');
         const rows = await transaction(
           (tx) =>
             tx<
               RunRow[]
-            >`select * from public.srs_generation_logs where owner_id=${owner} and status in ('completed','failed','cancelled') order by created_at desc`,
+            >`select * from public.srs_generation_logs where owner_id=${owner} and is_thesis_run=${scope==='research'} and status in ('completed','failed','cancelled') order by created_at desc`,
         );
         return reply(
           z.array(GenerationLogSchema),

@@ -1,4 +1,3 @@
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -35,14 +34,14 @@ export type Database = {
                   ]
                 },"blind_assignments": {
                   Row: {
-                    "id": string,"is_thesis_run": boolean,"label": string,"markdown": string,"owner_id": string,"participant_id": string,"project_id": string,"source": string
+                    "case_id": string | null,"id": string,"is_thesis_run": boolean,"label": string,"markdown": string,"owner_id": string,"participant_id": string,"project_id": string,"source": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "id"?: string,"is_thesis_run"?: boolean,"label": string,"markdown": string,"owner_id": string,"participant_id": string,"project_id": string,"source": string
+                    "case_id"?: string | null,"id"?: string,"is_thesis_run"?: boolean,"label": string,"markdown": string,"owner_id": string,"participant_id": string,"project_id": string,"source": string
                   }
                   Update: {
-                    "id"?: string,"is_thesis_run"?: boolean,"label"?: string,"markdown"?: string,"owner_id"?: string,"participant_id"?: string,"project_id"?: string,"source"?: string
+                    "case_id"?: string | null,"id"?: string,"is_thesis_run"?: boolean,"label"?: string,"markdown"?: string,"owner_id"?: string,"participant_id"?: string,"project_id"?: string,"source"?: string
                   }
                   Relationships: [
                     {
@@ -56,6 +55,32 @@ isOneToOne: false
       columns: ["project_id","owner_id"]
 isOneToOne: false
       referencedRelation: "projects"
+      referencedColumns: ["id","owner_id"]
+    },{
+      foreignKeyName: "blind_case_owner"
+      columns: ["case_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "evaluation_cases"
+      referencedColumns: ["id","owner_id"]
+    }
+                  ]
+                },"blind_source_maps": {
+                  Row: {
+                    "assignment_id": string,"owner_id": string,"source": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "assignment_id": string,"owner_id": string,"source": string
+                  }
+                  Update: {
+                    "assignment_id"?: string,"owner_id"?: string,"source"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "blind_source_maps_assignment_id_owner_id_fkey"
+      columns: ["assignment_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "blind_assignments"
       referencedColumns: ["id","owner_id"]
     }
                   ]
@@ -113,6 +138,26 @@ isOneToOne: false
                   Relationships: [
                     {
       foreignKeyName: "documents_project_id_owner_id_fkey"
+      columns: ["project_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id","owner_id"]
+    }
+                  ]
+                },"evaluation_cases": {
+                  Row: {
+                    "created_at": string,"human_markdown": string,"id": string,"is_thesis_run": boolean,"language": string,"owner_id": string,"project_id": string,"provenance": NonNullable<Json>,"reference_language": string,"study_design": string,"system_markdown": string,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"human_markdown": string,"id"?: string,"is_thesis_run"?: boolean,"language": string,"owner_id": string,"project_id": string,"provenance"?: NonNullable<Json>,"reference_language": string,"study_design"?: string,"system_markdown": string,"title": string
+                  }
+                  Update: {
+                    "created_at"?: string,"human_markdown"?: string,"id"?: string,"is_thesis_run"?: boolean,"language"?: string,"owner_id"?: string,"project_id"?: string,"provenance"?: NonNullable<Json>,"reference_language"?: string,"study_design"?: string,"system_markdown"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "evaluation_cases_project_id_owner_id_fkey"
       columns: ["project_id","owner_id"]
 isOneToOne: false
       referencedRelation: "projects"
@@ -269,14 +314,14 @@ isOneToOne: false
                   ]
                 },"participants": {
                   Row: {
-                    "code": string,"consent": boolean,"consent_at": string,"created_at": string,"id": string,"owner_id": string,"role": string
+                    "code": string,"consent": boolean,"consent_at": string,"created_at": string,"id": string,"is_thesis_run": boolean,"owner_id": string,"role": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "code": string,"consent": boolean,"consent_at": string,"created_at"?: string,"id"?: string,"owner_id": string,"role": string
+                    "code": string,"consent": boolean,"consent_at": string,"created_at"?: string,"id"?: string,"is_thesis_run"?: boolean,"owner_id": string,"role": string
                   }
                   Update: {
-                    "code"?: string,"consent"?: boolean,"consent_at"?: string,"created_at"?: string,"id"?: string,"owner_id"?: string,"role"?: string
+                    "code"?: string,"consent"?: boolean,"consent_at"?: string,"created_at"?: string,"id"?: string,"is_thesis_run"?: boolean,"owner_id"?: string,"role"?: string
                   }
                   Relationships: [
                     
@@ -383,17 +428,23 @@ isOneToOne: false
                   ]
                 },"rouge_results": {
                   Row: {
-                    "created_at": string,"id": string,"is_thesis_run": boolean,"language": string,"language_mismatch_override": boolean,"owner_id": string,"project_id": string | null,"provenance": NonNullable<Json>,"reference_language": string,"rouge_l": NonNullable<Json>,"rouge1": NonNullable<Json>,"rouge2": NonNullable<Json>,"scenario": string
+                    "case_id": string | null,"created_at": string,"id": string,"is_thesis_run": boolean,"language": string,"language_mismatch_override": boolean,"owner_id": string,"project_id": string | null,"provenance": NonNullable<Json>,"reference_language": string,"rouge_l": NonNullable<Json>,"rouge1": NonNullable<Json>,"rouge2": NonNullable<Json>,"scenario": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"is_thesis_run"?: boolean,"language": string,"language_mismatch_override"?: boolean,"owner_id": string,"project_id"?: string | null,"provenance"?: NonNullable<Json>,"reference_language": string,"rouge_l": NonNullable<Json>,"rouge1": NonNullable<Json>,"rouge2": NonNullable<Json>,"scenario": string
+                    "case_id"?: string | null,"created_at"?: string,"id"?: string,"is_thesis_run"?: boolean,"language": string,"language_mismatch_override"?: boolean,"owner_id": string,"project_id"?: string | null,"provenance"?: NonNullable<Json>,"reference_language": string,"rouge_l": NonNullable<Json>,"rouge1": NonNullable<Json>,"rouge2": NonNullable<Json>,"scenario": string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"is_thesis_run"?: boolean,"language"?: string,"language_mismatch_override"?: boolean,"owner_id"?: string,"project_id"?: string | null,"provenance"?: NonNullable<Json>,"reference_language"?: string,"rouge_l"?: NonNullable<Json>,"rouge1"?: NonNullable<Json>,"rouge2"?: NonNullable<Json>,"scenario"?: string
+                    "case_id"?: string | null,"created_at"?: string,"id"?: string,"is_thesis_run"?: boolean,"language"?: string,"language_mismatch_override"?: boolean,"owner_id"?: string,"project_id"?: string | null,"provenance"?: NonNullable<Json>,"reference_language"?: string,"rouge_l"?: NonNullable<Json>,"rouge1"?: NonNullable<Json>,"rouge2"?: NonNullable<Json>,"scenario"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "rouge_case_owner"
+      columns: ["case_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "evaluation_cases"
+      referencedColumns: ["id","owner_id"]
+    },{
       foreignKeyName: "rouge_results_project_id_owner_id_fkey"
       columns: ["project_id","owner_id"]
 isOneToOne: false
@@ -550,6 +601,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"calculate_sus_score":
+{ Args: { "answers": Json }; Returns: number
+                           },
 "match_srs_chunks":
 { Args: { "expected_model"?: string,"filter_domain"?: string,"filter_section"?: string,"match_count"?: number,"owner_filter"?: string,"query_embedding": string }; Returns: {
               "content": string,"id": number,"metadata": Json,"similarity": number

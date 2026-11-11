@@ -64,6 +64,8 @@ if($Mode -eq 'live' -and -not (Test-Path -LiteralPath 'apps\web\.env.local')){
   throw 'Mode live membutuhkan konfigurasi lokal. Lihat docs/local-laptop-setup.md.'
 }
 if($Mode -eq 'live'){
+  & $nodePath 'scripts/local-evaluation.mjs'
+  if($LASTEXITCODE -ne 0){throw 'Layanan evaluasi lokal gagal dijalankan.'}
   & $nodePath 'scripts/local-compiler.mjs'
   if($LASTEXITCODE -ne 0){throw 'Layanan dokumen lokal gagal dijalankan.'}
 }

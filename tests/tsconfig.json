@@ -1,0 +1,12 @@
+{
+  "extends": "../n8n/tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "paths": {
+      "@naskah/core": ["../packages/core/src/index.ts"],
+      "@naskah/contracts": ["../packages/contracts/src/index.ts"],
+      "@/*": ["../apps/web/src/*"]
+    }
+  },
+  "include": ["./e2e/live-evaluation.spec.ts", "./evaluation-golden.test.ts"]
+}

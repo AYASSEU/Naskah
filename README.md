@@ -9,7 +9,7 @@ Penyusun draf SRS berstandar IEEE 830
 A manuscript workspace for drafting, reviewing, and exporting software requirements.
 Built for a human reviewer to stay in control, one section at a time.
 
-![Stage: Phase 2 B7](https://img.shields.io/badge/stage-Phase_2_B7-e6b422?style=flat-square&labelColor=232018)
+![Stage: Phase 2 B8](https://img.shields.io/badge/stage-Phase_2_B8-e6b422?style=flat-square&labelColor=232018)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-15130e?style=flat-square)
 ![React 19](https://img.shields.io/badge/React-19-15130e?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-15130e?style=flat-square)
@@ -21,9 +21,9 @@ Built for a human reviewer to stay in control, one section at a time.
 
 ![Naskah manuscript workspace showing numbered requirements, chapter navigation, and the review inspector](docs/screenshots/dark-workspace-detail-1440.png)
 
-> **Current checkpoint: local backend through B7, using the mock AI provider.** Generate and Revise run through local n8n and Supabase. PDF/TXT parsing and DOCX/PDF compilation run on the local server, with private downloads and a refreshed table of contents. The original browser-only mock mode remains available. Research persistence/evaluation and final runbooks remain B8–B10.
+> **Current checkpoint: local backend through B8, using the mock AI provider.** Generate and Revise use local n8n/Supabase; PDF/TXT parsing, DOCX/PDF compilation and research evaluation run locally. Evaluation includes consent, blind expert reviews, SUS, ROUGE, statistics and pseudonymized exports, with dev/research isolation. All acceptance data remains synthetic; B9–B10 and real research validation remain pending. The browser-only mock mode remains available.
 
-On this configured Windows laptop, run `powershell -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode live`, then open `http://127.0.0.1:3000`. See [local document setup and acceptance](docs/B7-documents.md).
+On this configured Windows laptop, run `powershell -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode live`, then open `http://127.0.0.1:3000`. See [local document setup](docs/B7-documents.md) and [B8 evaluation](docs/B8-evaluation.md).
 
 ## Why Naskah
 
@@ -284,7 +284,7 @@ $env:PLAYWRIGHT_BASE_URL = "http://127.0.0.1:3002"
 pnpm test:e2e
 ```
 
-Screenshot flows write to `docs/screenshots/`. Failure traces are retained according to `playwright.config.ts`.
+Screenshot flows write to `docs/screenshots/`. Failure traces are off by default to protect local session data; `NASKAH_E2E_TRACE=1` opts into private debugging. The test runner redacts credentials from terminal output.
 
 </details>
 
@@ -300,11 +300,12 @@ Developer controls are available through Settings or **Ctrl + Shift + D** when e
 - [x] Indonesian/English interface, light/dark themes, and theme-aware dropdowns.
 - [x] AI Settings UI, shared schemas, service port, and explicit API placeholders.
 - [x] Research evaluation screens and automated verification tooling.
-- [ ] Authenticated backend and owner-scoped persistence.
-- [ ] Secure server storage of AI credentials and real provider connection tests.
-- [ ] n8n orchestration, live chapter generation, and targeted AI revision.
-- [ ] Supabase/pgvector retrieval with document-level training/evaluation separation.
-- [ ] Server document compilation and reproducible research evaluation.
+- [x] Local-owner backend and owner-scoped persistence.
+- [x] Encrypted server credential storage and local mock connection tests.
+- [x] Local n8n orchestration, chapter generation, and targeted revision with mock provider.
+- [x] Local Supabase/pgvector retrieval and source-level split guards (synthetic corpus).
+- [x] Server document compilation and reproducible local evaluation tools.
+- [ ] Real research corpus/provider runs, participant study and B9–B10 acceptance/runbooks.
 
 The [backend roadmap](docs/backend-roadmap.md) defines the implementation order and acceptance checks. Backend work should replace adapters behind the existing ports, then validate the contracts and browser flows against real services.
 
@@ -314,6 +315,7 @@ The [backend roadmap](docs/backend-roadmap.md) defines the implementation order 
 | ----------------------------------------------- | ------------------------------------------------------------------- |
 | [Architecture](docs/architecture.md)            | Module boundaries, persistence, events, and adapter selection.      |
 | [Shared contracts](docs/contracts.md)           | Request/response schemas and integration boundaries.                |
+| [Evaluation runbook](docs/B8-evaluation.md) | Local evaluation UI, Python CLI, research separation and statistical assumptions. |
 | [Backend roadmap](docs/backend-roadmap.md)      | Phase 2 services, credential handling, and acceptance checks.       |
 | [Functional traceability](docs/traceability.md) | Requirement-to-screen, port, and verification mapping.              |
 | [Implementation report](docs/phase-report.md)   | Delivered scope, verification history, simulations, and known gaps. |
