@@ -3,6 +3,10 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir bert-score==0.3.13 transformers==4.56.2
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('distilbert/distilbert-base-multilingual-cased',revision='45c032ab32cc946ad88a166f7cb282f58c753c2e',allow_patterns=['config.json','model.safetensors','tokenizer.json','tokenizer_config.json','vocab.txt'],local_dir='/opt/bert-model')"
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 COPY . .
 ARG SOURCE_HASH
 ENV EVALUATION_ID=$SOURCE_HASH

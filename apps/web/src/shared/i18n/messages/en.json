@@ -208,6 +208,8 @@
   "evaluationDescription": "Draft structure, expert assessment, and usability in one research record.",
   "expert": "Expert assessment",
   "sus": "SUS",
+  "bertscore": "BERTScore",
+  "bertLocal": "Start the local backend to compute BERTScore for a manuscript and its reference.",
   "rouge": "ROUGE",
   "successRate": "Success rate",
   "meanDuration": "Mean duration",

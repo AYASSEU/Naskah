@@ -23,7 +23,7 @@ class Handler(BaseHTTPRequestHandler):
             if not 0<length<=2*1024*1024:return self.send_json(413,{'error':'evaluation_too_large'})
             payload=self.rfile.read(length)
             if len(payload)!=length:return self.send_json(400,{'error':'invalid_input'})
-            result=subprocess.run([sys.executable,'-m','evaluation_scripts','worker'],input=payload,capture_output=True,timeout=45)
+            result=subprocess.run([sys.executable,'-m','evaluation_scripts','worker'],input=payload,capture_output=True,timeout=120)
             if len(result.stdout)>4*1024*1024:return self.send_json(413,{'error':'evaluation_too_large'})
             try:output=json.loads(result.stdout)
             except ValueError:return self.send_json(500,{'error':'evaluation_failed'})

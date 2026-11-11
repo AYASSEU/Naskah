@@ -40,6 +40,8 @@ function Scale({
   );
 }
 export function LiveEvaluation() {
+  const [bertResult, setBertResult] = useState('');
+  const [bertBusy, setBertBusy] = useState(false);
   const services = useServices(),
     research = services.research!,
     t = useTranslations('researchEvaluation'),
@@ -69,19 +71,15 @@ export function LiveEvaluation() {
     [baseline, setBaseline] = useState(''),
     [referenceLanguage, setReferenceLanguage] = useState<'id' | 'en'>('id'),
     [provenance, setProvenance] = useState('');
-  const [override, setOverride] = useState(false),
-    [overrideReason, setOverrideReason] = useState(''),
-    [stemmer, setStemmer] = useState(false);
   const [report, setReport] = useState<StatisticsReport>();
   const page = useScopedData(async () => {
-    const [context, overview, cases, rouge, statistics] = await Promise.all([
+    const [context, overview, cases, statistics] = await Promise.all([
       research.context(scope),
       research.overview(scope, design),
       research.cases(scope),
-      research.rouge(scope),
       research.statistics(scope),
     ]);
-    return { context, overview, cases, rouge, statistics };
+    return { context, overview, cases, statistics };
   }, [scope, design]);
   const person = page.data?.context.scope === scope ? page.data.context.participant : null;
   const blind = useScopedData(
@@ -138,10 +136,11 @@ export function LiveEvaluation() {
         <span>{t('dataScope')}</span>
         <select
           aria-label={t('dataScope')}
-          disabled={action || (!page.data && !page.previousData)}
+          disabled={bertBusy || action || (!page.data && !page.previousData)}
           value={scope}
           onChange={(e) => {
             setScope(e.target.value as EvaluationScope);
+            setBertResult('');
             setCaseId('');
             setMapping({});
             setReport(undefined);
@@ -189,9 +188,9 @@ export function LiveEvaluation() {
         }}
       >
         <Tabs.List className="evaluation-tabs" aria-label={root('evaluation')}>
-          {['summary', 'expert', 'sus', 'rouge'].map((value) => (
+          {['summary', 'expert', 'sus', 'bertscore'].map((value) => (
             <Tabs.Trigger key={value} value={value}>
-              {root(value)}
+              {value === 'bertscore' ? 'BERTScore' : root(value)}
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -741,14 +740,17 @@ export function LiveEvaluation() {
             </form>
           )}
         </Tabs.Content>
-        <Tabs.Content value="rouge">
-          <div className="evaluation-tools">
-            <p className="help-note">{t('rougeGuard')}</p>
-            {exportButtons('rouge')}
-          </div>
+        <Tabs.Content value="bertscore">
           <label className="field">
-            <span>{t('case')}</span>
-            <select value={caseId} onChange={(e) => setCaseId(e.target.value)}>
+            {t('case')}
+            <select
+              disabled={bertBusy}
+              value={caseId}
+              onChange={(e) => {
+                setBertResult('');
+                setCaseId(e.target.value);
+              }}
+            >
               <option value="">{t('chooseCase')}</option>
               {data.cases.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -757,122 +759,45 @@ export function LiveEvaluation() {
               ))}
             </select>
           </label>
-          {currentCase && (
-            <p>
-              {t('languages', {
-                prediction: currentCase.language,
-                reference: currentCase.referenceLanguage,
-              })}
-            </p>
-          )}
-          {scope === 'dev' &&
-            currentCase &&
-            currentCase.language !== currentCase.referenceLanguage && (
-              <>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={override}
-                    onChange={(e) => setOverride(e.target.checked)}
-                  />
-                  {t('allowMismatch')}
-                </label>
-                <label className="field">
-                  <span>{t('overrideReason')}</span>
-                  <textarea
-                    minLength={12}
-                    maxLength={2000}
-                    value={overrideReason}
-                    onChange={(e) => setOverrideReason(e.target.value)}
-                  />
-                </label>
-              </>
-            )}
-          {currentCase?.language === 'en' && currentCase.referenceLanguage === 'en' && (
-            <label>
-              <input
-                type="checkbox"
-                checked={stemmer}
-                onChange={(e) => setStemmer(e.target.checked)}
-              />
-              {t('stemmer')}
-            </label>
-          )}
-          <div className="evaluation-actions">
-            <Button
-              variant="primary"
-              disabled={action || !caseId}
-              onClick={() =>
-                void perform(async () => {
-                  await research.scoreRouge(scope, {
-                    caseIds: [caseId],
-                    allowLanguageMismatch: override,
-                    overrideReason,
-                    useStemmer:
-                      stemmer &&
-                      currentCase?.language === 'en' &&
-                      currentCase.referenceLanguage === 'en',
-                  });
-                  await page.refresh();
-                })
+          <button
+            disabled={!currentCase || bertBusy}
+            onClick={async () => {
+              setBertBusy(true);
+              setBertResult('');
+              try {
+                const response = await fetch('/api/evaluation/bertscore?scope=' + scope, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'X-Naskah-Client': 'web' },
+                  body: JSON.stringify({ caseId }),
+                });
+                const report = await response.json();
+                if (!response.ok) throw new Error(report.code);
+                const row = report.results[0];
+                setBertResult(
+                  'Precision ' +
+                    row.precision.toFixed(4) +
+                    ' · Recall ' +
+                    row.recall.toFixed(4) +
+                    ' · F1 ' +
+                    row.f1.toFixed(4),
+                );
+              } catch (error) {
+                setBertResult(error instanceof Error ? error.message : 'evaluation_failed');
+              } finally {
+                setBertBusy(false);
               }
-            >
-              {t('computeRouge')}
-            </Button>
-            <label className="text-link">
-              {t('importReport')}
-              <input
-                type="file"
-                accept=".json"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f)
-                    void perform(async () => {
-                      if (f.size > 2 * 1024 * 1024)
-                        throw new PortError('too_large', false, 'backendErrors.too_large');
-                      await research.importReport(scope, JSON.parse(await f.text()));
-                      await page.refresh();
-                      setNotice(t('verifiedImport'));
-                    });
-                }}
-              />
-            </label>
-          </div>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>{root('scenario')}</th>
-                  {['ROUGE-1', 'ROUGE-2', 'ROUGE-L'].map((metric) => (
-                    <th key={metric}>
-                      {metric}
-                      <br />P / R / F1
-                    </th>
-                  ))}
-                  <th>{t('comparison')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.rouge.length === 0 && (
-                  <tr>
-                    <td colSpan={5}>{t('emptyScope')}</td>
-                  </tr>
-                )}
-                {data.rouge.map((row, index) => (
-                  <tr key={index}>
-                    <td>{row.scenario}</td>
-                    {(['rouge1', 'rouge2', 'rougeL'] as const).map((key) => (
-                      <td key={key}>
-                        {row[key].precision.toFixed(3)} / {row[key].recall.toFixed(3)} /{' '}
-                        {row[key].f1.toFixed(3)}
-                      </td>
-                    ))}
-                    <td>{t(row.valid_comparison ? 'matchedLanguage' : 'invalidLanguage')}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            }}
+          >
+            {bertBusy ? '…' : 'BERTScore'}
+          </button>
+          <p aria-live="polite">{bertResult}</p>
+          <a href={'/api/evaluation/export?scope=' + scope + '&format=json'}>
+            {locale === 'id' ? 'Ekspor JSON' : 'Export JSON'}
+          </a>{' '}
+          ·{' '}
+          <a href={'/api/evaluation/export?scope=' + scope + '&format=csv&dataset=bertscore'}>
+            CSV · BERTScore
+          </a>
         </Tabs.Content>
       </Tabs.Root>
       {action && (

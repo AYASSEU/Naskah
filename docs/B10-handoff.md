@@ -1,4 +1,12 @@
-# B10 — dokumentasi final dan serah terima lokal
+# B10 — serah terima SRequeS
+
+## Pembaruan final evaluasi
+
+Tab evaluasi lokal menghitung BERTScore antara snapshot SRS dan baseline manusia. Model DistilBERT multilingual cased tersimpan di image Docker. Inferensi berjalan di CPU dengan provider generasi dan embeddings SRS tetap mock. Precision, recall dan F1 disimpan terpisah dari arsip ROUGE. CSV dan snapshot JSON menyertakan hasil serta provenance model. [Metode dan reproduksi BAB IV](thesis-data-guide.md)
+
+Empat pengujian Playwright evaluasi lulus pada tema terang dan gelap. Precision, recall dan F1 dua pasangan teks pendek cocok dengan pustaka bert-score dalam toleransi 0,00001. Ekspor CSV dan JSON lokal cocok. Typecheck dan lint lulus. Uji ini memakai data pengembangan.
+
+## Catatan checkpoint dokumentasi sebelumnya
 
 11 November 2026. Scope: menyelaraskan dokumentasi dengan implementasi B0–B9,
 menyiapkan panduan Windows/operasi/data penelitian dan daftar pekerjaan pengguna.

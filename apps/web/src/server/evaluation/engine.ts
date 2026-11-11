@@ -17,7 +17,7 @@ export async function evaluate<T>(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ operation, input }),
-      signal: AbortSignal.timeout(50000),
+      signal: AbortSignal.timeout(125000),
       cache: 'no-store',
       redirect: 'error',
     });

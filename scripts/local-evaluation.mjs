@@ -81,7 +81,7 @@ else {
       '--security-opt',
       'no-new-privileges',
       '--memory',
-      '768m',
+      '3g',
       '--cpus',
       '2',
       '--pids-limit',

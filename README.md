@@ -66,7 +66,7 @@ flowchart LR
 | PDF/TXT | Parser server dan shared cleaning | Parser browser |
 | Word/PDF | Pandoc + LibreOffice, Storage privat, download terautentikasi | DOCX browser dan print-to-PDF |
 | Settings | Key terenkripsi, sinkron credential, smoke melalui n8n | Key di memori tab, tes simulasi |
-| Evaluasi | Consent, blind review, SUS, ROUGE/statistik Python, ekspor pseudonim | Contoh UI/data demonstrasi |
+| Evaluasi | Consent, blind review, SUS, BERTScore/statistik Python, ekspor pseudonim | Contoh UI/data demonstrasi |
 
 Mock provider menghasilkan jawaban deterministik. Jalur integrasi yang lulus
 tidak membuktikan kualitas generasi AI nyata. Review hasil sebelum digunakan.
@@ -107,7 +107,7 @@ evaluator mempunyai health terpisah; detail ada di runbook.
 | `pnpm test:python` | Golden dan numerik Python |
 | `pnpm n8n:build`, `pnpm n8n:deploy` | Build dan pasang ulang workflow milik Naskah |
 | `pnpm local:compiler`, `pnpm local:evaluation` | Siapkan layanan lokal terkait |
-| `pnpm evaluation …` | SUS, ahli, ROUGE, statistik dan ekspor |
+| `pnpm evaluation …` | SUS, ahli, BERTScore, statistik dan ekspor |
 | `pnpm scan:secrets` | Scan repo/artifacts/public bundle tanpa mencetak key |
 | `pnpm build`, `pnpm start` | Build dan serve webapp; hentikan dev dahulu |
 

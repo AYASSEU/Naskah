@@ -4,14 +4,13 @@ import { LiveEvaluation } from './live';
 import { useTranslations, useLocale } from 'next-intl';
 import * as Tabs from '@radix-ui/react-tabs';
 import { z } from 'zod';
-import { RougeSchema, StatisticalResultSchema } from '@naskah/contracts';
-import { Download, Upload, Check } from 'lucide-react';
+import { StatisticalResultSchema } from '@naskah/contracts';
+import { Download, Check } from 'lucide-react';
 import { useServices, useAsyncData, ErrorState, Loading, useToast } from '@/shared/lib/providers';
 import { Button } from '@/shared/ui';
 import { Markdown } from '@/shared/ui/markdown';
 import { downloadData } from '@/shared/lib/download';
 import { scoreSus, statistics } from '@/entities/evaluation/sus';
-import { parseRougeImport } from '@/entities/evaluation/rouge';
 import items from '@/shared/i18n/sus-items.json';
 function Rating({
   name,
@@ -70,20 +69,17 @@ function MockEvaluation() {
   const statsInput = useRef<HTMLInputElement>(null);
   const [formBusy, setFormBusy] = useState(false);
   const [formError, setFormError] = useState('');
-  const fileInput = useRef<HTMLInputElement>(null);
   const { data, error, busy, refresh } = useAsyncData(async () => {
-    const [logs, reviews, sus, rouge, projects, blindDocuments, statisticsResults] =
-      await Promise.all([
-        services.evaluation.listGenerationLogs(),
-        services.evaluation.listExpertReviews(),
-        services.evaluation.listSusResponses(),
-        services.evaluation.listRougeResults(),
-        services.projects.list(),
-        services.examples.getBlindDocuments(),
-        services.evaluation.listStatisticalResults(),
-      ]);
+    const [logs, reviews, sus, projects, blindDocuments, statisticsResults] = await Promise.all([
+      services.evaluation.listGenerationLogs(),
+      services.evaluation.listExpertReviews(),
+      services.evaluation.listSusResponses(),
+      services.projects.list(),
+      services.examples.getBlindDocuments(),
+      services.evaluation.listStatisticalResults(),
+    ]);
     const doc = projects[0] ? await services.documents.getDocument(projects[0].id) : undefined;
-    return { logs, reviews, sus, rouge, doc, blindDocuments, statisticsResults };
+    return { logs, reviews, sus, doc, blindDocuments, statisticsResults };
   }, []);
   useEffect(() => {
     const initial = new URLSearchParams(window.location.search).get('tab');
@@ -144,26 +140,9 @@ function MockEvaluation() {
       setFormBusy(false);
     }
   }
-  async function importRouge(file: File) {
-    try {
-      const results = parseRougeImport(
-        await file.text(),
-        file.name.endsWith('.csv') ? 'csv' : 'json',
-      );
-      await services.evaluation.importRougeResults(results);
-      await refresh();
-    } catch {
-      setFormError(t('importError'));
-    }
-  }
-  async function sample() {
-    const response = await fetch('/samples/rouge-results.json');
-    await services.evaluation.importRougeResults(z.array(RougeSchema).parse(await response.json()));
-    await refresh();
-  }
   if (error) return <ErrorState error={error} retry={refresh} />;
   if (busy || !data) return <Loading />;
-  const { logs, reviews, sus, rouge } = data;
+  const { logs, reviews, sus } = data;
   const dimensions = ['unambiguous', 'complete', 'correct', 'verifiable'];
   const currentReview = reviewValues[label];
   return (
@@ -176,7 +155,7 @@ function MockEvaluation() {
       </div>
       <Tabs.Root value={tab} onValueChange={changeTab}>
         <Tabs.List className="evaluation-tabs" aria-label={t('evaluation')}>
-          {['summary', 'expert', 'sus', 'rouge'].map((v) => (
+          {['summary', 'expert', 'sus', 'bertscore'].map((v) => (
             <Tabs.Trigger key={v} value={v}>
               {t(v)}
             </Tabs.Trigger>
@@ -534,66 +513,8 @@ function MockEvaluation() {
             {t('susFootnote')}
           </p>
         </Tabs.Content>
-        <Tabs.Content value="rouge">
-          <div className="evaluation-tools">
-            <p className="help-note">{t('rougeNote')}</p>
-            <div>
-              <Button onClick={() => downloadData(rouge, 'rouge-results', 'csv')}>
-                {t('exportCsv')}
-              </Button>
-              <Button onClick={() => downloadData(rouge, 'rouge-results', 'json')}>
-                {t('exportJson')}
-              </Button>
-            </div>
-          </div>
-          <input
-            type="file"
-            ref={fileInput}
-            accept=".json,.csv"
-            className="sr-only"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void importRouge(file);
-            }}
-          />
-          <div style={{ display: 'flex', gap: 10, marginBottom: 25 }}>
-            <Button variant="primary" onClick={() => fileInput.current?.click()}>
-              <Upload />
-              {t('importResults')}
-            </Button>
-            <Button onClick={() => void sample()}>{t('loadSample')}</Button>
-          </div>
-          {rouge.length === 0 ? (
-            <div className="empty-state" style={{ minHeight: 200 }}>
-              <h2>{t('noRouge')}</h2>
-            </div>
-          ) : (
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t('scenario')}</th>
-                    <th>ROUGE-1 (P / R / F1)</th>
-                    <th>ROUGE-2 (P / R / F1)</th>
-                    <th>ROUGE-L (P / R / F1)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rouge.map((row) => (
-                    <tr key={row.scenario}>
-                      <td>{row.scenario}</td>
-                      {(['rouge1', 'rouge2', 'rougeL'] as const).map((metric) => (
-                        <td key={metric}>
-                          {row[metric].precision.toFixed(3)} / {row[metric].recall.toFixed(3)} /{' '}
-                          {row[metric].f1.toFixed(3)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+        <Tabs.Content value="bertscore">
+          <p>{t('bertLocal')}</p>
         </Tabs.Content>
       </Tabs.Root>
       {formError && (

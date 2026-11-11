@@ -32,6 +32,7 @@ import {
 } from './data';
 import {
   computeRouge,
+  computeBert,
   computeStats,
   importReport,
   statisticalReports,
@@ -122,6 +123,14 @@ export function evaluationRoute(request: Request, resource: string) {
         );
       if (resource === 'sus' && method === 'GET')
         return json((await susRows(owner, scope)).map(susDTO));
+      if (resource === 'bertscore' && method === 'POST')
+        return json(
+          await computeBert(
+            owner,
+            scope,
+            (await readJson(request, z.object({ caseId: z.uuid() }))).caseId,
+          ),
+        );
       if (resource === 'rouge' && method === 'POST')
         return json(
           await computeRouge(owner, scope, await readJson(request, EvaluationComputeSchema)),
@@ -166,7 +175,7 @@ export function evaluationRoute(request: Request, resource: string) {
       if (resource === 'export' && method === 'GET') {
         const format = z.enum(['json', 'csv']).parse(url.searchParams.get('format') ?? 'json'),
           dataset = z
-            .enum(['logs', 'reviews', 'sus', 'rouge', 'statistics', 'cases'])
+            .enum(['logs', 'reviews', 'sus', 'bertscore', 'rouge', 'statistics', 'cases'])
             .parse(url.searchParams.get('dataset') ?? 'logs'),
           design = z
             .enum(['paired', 'independent'])

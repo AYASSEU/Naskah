@@ -1,0 +1,1 @@
+grant select, insert on public.bertscore_results to service_role;

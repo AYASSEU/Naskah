@@ -35,7 +35,7 @@ Independent memerlukan dua kelompok peserta yang tidak tumpang tindih.
 | Tabel RQ2 empat dimensi ahli | `evaluation_cases`, `blind_assignments`, `blind_source_maps`, `expert_reviews`; `reviews.csv` / `stats_input` | Skala 1–5: unambiguous, complete, correct, verifiable; rata-rata lintas kasus per peserta, lalu deskriptif antar peserta |
 | Gambar RQ2 sistem vs manusia | Input peserta yang sama untuk statistik | Paired dot plot bila berpasangan; tampilkan kelompok terpisah jika independent; jangan menautkan peserta berbeda |
 | Tabel inferensi RQ2 | `statistical_results`, output `stats` | Wilcoxon paired / Mann–Whitney independent, dua sisi, Holm empat dimensi, effect size dan CI jika tersedia |
-| Tabel RQ2 ROUGE | `rouge_results`, snapshot teks privat + baseline | ROUGE-1/2/L precision/recall/F1, bahasa/tokenizer/stemmer, valid_comparison; overlap bukan mutu semantik |
+| Tabel RQ2 BERTScore | Snapshot sistem dan baseline manusia dengan bahasa sama, tabel bertscore_results dan bertscore.csv | Precision, recall dan F1 dari kesamaan kosinus embedding token kontekstual, lihat metode di bawah |
 | Tabel/gambar RQ3 SUS | `participants`, `sus_responses`; `sus.csv` | Sepuluh jawaban; skor per peserta dan mean/median/SD; satu respons immutable/peserta; 0–100 bukan persentase |
 | Tabel provenance/batas | Manifest, output JSON analisis dan protokol privat | Commit, model yang dilayani, seed, versi engine, SHA-256 input, n/exclusion, tanggal dan keterbatasan |
 
@@ -56,7 +56,7 @@ pnpm local:evaluation
 pnpm evaluation sus --input evaluation-scripts/examples/sus.json --output artifacts/sus.json
 pnpm evaluation expert --input evaluation-scripts/examples/expert.json --output artifacts/expert.json
 pnpm evaluation stats --input evaluation-scripts/examples/expert.json --output artifacts/stats.json
-pnpm evaluation rouge --input evaluation-scripts/examples/rouge.json --output artifacts/rouge.json
+pnpm evaluation bertscore --input evaluation-scripts/examples/bertscore.json --output artifacts/bertscore.json
 ```
 
 Wrapper numerik memakai image evaluator yang dipin, network container dimatikan.
@@ -77,7 +77,7 @@ pnpm evaluation stats --input artifacts/evaluation-dev/snapshot.json --output ar
 ```
 
 Export menulis `snapshot.json`, `logs.csv`, `cases.csv`, `reviews.csv`, `sus.csv`,
-`rouge.csv`, `statistics.csv` dan README. CLI memilih **paired** untuk `stats_input`
+`bertscore.csv`, `rouge.csv` (arsip), `statistics.csv` dan README. CLI memilih **paired** untuk `stats_input`
 secara default. Untuk independent, pilih desain independent di dashboard/export
 API, atau bentuk input dari review lengkap dengan desain itu:
 
@@ -145,17 +145,9 @@ Input ini harus Anda siapkan: `{data_scope, markdown, template}`; template memua
 chapters dan subsections required dari run, bukan template yang sudah berubah.
 Tidak ada file naskah privat otomatis dalam ekspor anonim.
 
-ROUGE sebaiknya dihitung pada UI terhadap case snapshot. Untuk offline:
+Pada tab **BERTScore**, pilih kasus dengan baseline dalam bahasa yang sama dan klik BERTScore. Simpan CSV untuk tabel RQ2. Ekspor snapshot JSON dan CLI juga menyertakan dataset `bertscore`. Ekspor lama mempertahankan ROUGE sebagai metrik historis. Hitung ulang terhadap pasangan naskah asli untuk memperoleh BERTScore.
 
-```powershell
-pnpm evaluation rouge --input artifacts/private-rouge-input.json --output artifacts/rouge-current.json
-```
-
-Ikuti schema `pairs` pada [contoh ROUGE](../evaluation-scripts/examples/rouge.json),
-ganti dengan snapshot prediction/reference yang sah dan bahasa masing-masing.
-Simpan provenance serta case ID privat untuk impor server. Pseudonim case ekspor
-bukan ID database untuk impor. Impor statistik/ROUGE server dihitung ulang
-terhadap input yang dimiliki, bukan dipercaya karena label scope/provenance saja.
+Evaluator memakai DistilBERT multilingual cased revisi `45c032ab32cc946ad88a166f7cb282f58c753c2e`, hidden layer 5, bobot token seragam tanpa baseline rescaling. Setiap token kandidat mencari kosinus maksimum di seluruh referensi untuk precision, dan sebaliknya untuk recall. F1 adalah rata-rata harmonik keduanya. Untuk dokumen panjang, token dibagi jendela kontekstual 510 tanpa overlap lalu dicocokkan lintas seluruh dokumen. Catat varian jendela ini saat membandingkan hasil penelitian. Batas 8.192 subtoken per teks. Model berada dalam image, inferensi di CPU lokal. Interpretasikan bersama penilaian ahli.
 
 Setelah enrollment/provenance penelitian benar-benar tersedia dan lolos guard,
 ekspor penelitian menggunakan:
@@ -176,9 +168,7 @@ SUS: kontribusi ganjil `jawaban−1`, genap `5−jawaban`, total ×2,5. Ahli: un
 analisis mean peserta lintas kasus. Minimal dua pasangan/peserta per kelompok
 untuk inferensi; CI efek bootstrap aproksimasi hanya bila n≥5 dan tidak degenerat.
 Seed default 20261110, Holm untuk empat dimensi; CI tidak dikoreksi multiplikitas.
-Jangan menyimpulkan sebab-akibat atau mutu keseluruhan dari p-value/ROUGE saja.
-ROUGE harus bahasa sama; override beda bahasa hanya dev dan tidak valid untuk
-kesimpulan. Tokenizer ASCII/lowercase memiliki keterbatasan linguistik.
+Laporkan BERTScore bersama bahasa, revisi model, ukuran sampel dan penilaian ahli.
 
 Ekspor adalah **pseudonimisasi**, bukan anonimitas yang terjamin: HMAC 24 digit
 hex mengganti ID peserta/proyek/case/session. Kode peserta, UUID asli, credential,

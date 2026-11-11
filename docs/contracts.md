@@ -148,7 +148,8 @@ Perhatikan CLI exporter default research: selalu tulis `--scope` secara eksplisi
 | `reviews` | GET/POST `EvaluationReviewInputSchema`: assignment, empat rating 1–5, alasan/comments; immutable |
 | `sus` | GET/POST `EvaluationSusInputSchema`: sepuluh integer 1–5; server/DB menghitung, skor kiriman klien diabaikan |
 | `overview` / `logs` | GET ringkasan scoped/desain dan log generation |
-| `rouge` | GET/POST `EvaluationComputeSchema` → `RougeReportSchema` dengan bahasa/valid_comparison/provenance |
+| `bertscore` | POST dengan caseId dan scope. Server mengambil kedua snapshot dari kasus milik owner, menghitung P/R/F1 dan menyertakan dataset bertscore pada ekspor JSON/CSV. |
+| `rouge` (arsip) | GET/POST `EvaluationComputeSchema` → `RougeReportSchema` dengan bahasa/valid_comparison/provenance |
 | `statistics` | GET/POST `EvaluationStatisticsInputSchema` → `StatisticsReportSchema` (desain, seed, unit peserta, Holm, effect/CI/provenance) |
 | `import` | POST report terverifikasi; dihitung ulang terhadap input owned, bukan percaya angka file |
 | `export` | GET JSON `EvaluationExportSchema` atau CSV dataset; pseudonim, tanpa free text/key/naskah |

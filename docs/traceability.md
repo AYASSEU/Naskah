@@ -17,7 +17,7 @@ Semua path test relatif root repo. Detail chain terhubung: [B9](B9-end-to-end.md
 | FR-EXP-02 — unduh DOCX/PDF | `/export/[id]`, `/api/exports/{id}` | Compiler, Supabase Storage privat, authorized download | B7 ZIP/XML/PDF/cache/auth; `tests/e2e/live-system.spec.ts`; `scripts/test-compiler-lifecycle.mjs` 30 compile, nol zombie |
 | Settings / integrasi | `/settings`, `/api/settings/integrations/*`, `/api/system/status` | Registry, AES envelope, credential sync/rebind, empat smoke; **Error Handler** untuk job gagal | `tests/e2e/live-settings.spec.ts` create/rotate/delete/full recovery/key hash; `scripts/test-integrations.ts`; security unit + secret scans |
 | RQ1 — otomasi/struktur | `/evaluation`, logs/overview API | `srs_generation_logs`, retrieval logs, core/Python structure | B5/B6 callbacks/log dedupe; `scripts/test-b8.mjs`; `tests/evaluation-golden.test.ts` |
-| RQ2 — ahli/ROUGE/statistik | `/evaluation`, cases/blind/reviews/rouge/statistics/export API | Frozen snapshots, separate source maps, evaluator Python | `tests/e2e/live-evaluation.spec.ts`, `tests/e2e/live-system.spec.ts`; `scripts/test-b8.mjs`, `pnpm test:python` numerical/reference |
+| RQ2 — ahli/BERTScore/statistik | `/evaluation`, cases/blind/reviews/rouge/statistics/export API | Frozen snapshots, separate source maps, evaluator Python | `tests/e2e/live-evaluation.spec.ts`, `tests/e2e/live-system.spec.ts`; `scripts/test-b8.mjs`, `pnpm test:python` numerical/reference |
 | RQ3 — SUS | `/evaluation?tab=sus`, context/sus/export API | Consent, participant cookie, TS/server/DB SUS recompute | `tests/evaluation-golden.test.ts`, `pnpm test:python`; B8 HTTP scope/idempotency, live evaluation reload |
 
 `tests/e2e/flows.spec.ts` dan `ai-settings.spec.ts` mempertahankan original browser

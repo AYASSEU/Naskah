@@ -1,5 +1,7 @@
 # Local evaluation tools
 
+Run `pnpm local:evaluation` to install the CPU dependencies and pinned multilingual model in the local Docker image. Initial setup requires a download. Run `pnpm evaluation bertscore --input evaluation-scripts/examples/bertscore.json --output artifacts/bertscore.json` for offline scoring. The service memory limit is 3 GiB. JSON/CSV exports use the bertscore dataset. Existing ROUGE data remains available as historical evidence.
+
 Final mapping of BAB IV tables/figures, exact export/analysis commands, research
 eligibility and privacy limits: [thesis data guide](../docs/thesis-data-guide.md).
 Research enrollment is not yet a UI flow; changing a file scope/flag is not proof
