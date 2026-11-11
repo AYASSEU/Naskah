@@ -1,8 +1,16 @@
 # Phase 2 implementation order
 
+**Current checkpoint: B10, 2026-11-11.** Local live adapters, workflows, parser,
+compiler and evaluation are implemented and accepted with mock providers. Final
+documentation is in [B10 handoff](B10-handoff.md), [Windows guide](local-laptop-setup.md)
+and [runbook](runbook.md). The original plan below is historical, not the current
+adapter status. Real-provider/corpus/study validation, enrollment UI, first-run
+bootstrap and encryption-key rotation remain explicitly limited in the handoff.
+
 Phase 1 starts no services and makes no calls to n8n, Supabase or DeepSeek.
 Never put `DEEPSEEK_API_KEY`, `N8N_WEBHOOK_SECRET`, or the service-role key in a
-public environment variable. Existing HTTP adapters throw NotImplementedError.
+public environment variable. At the original Phase 1 checkpoint, HTTP adapters
+threw NotImplementedError. The active live routes now use the implemented ports.
 
 The Settings page now includes an AI connection form behind `AiConnectionService`.
 Phase 1 saves only versioned provider/model/base URL configuration in IndexedDB;

@@ -1,5 +1,8 @@
 # Backend phase reports
 
+Current checkpoint: [B10 documentation and handoff](B10-handoff.md),
+2026-11-11. Entries below preserve the evidence/limitations at each phase.
+
 ## B0 — reconnaissance
 
 Read the complete Phase 2 brief, Phase 1 ports/contracts, architecture and traceability. Enumerated both MCP servers and inspected n8n workflows, preferences, credential inventory and node catalog. Verified n8n version, health, public API authentication, credential schemas and installed PATCH controller. No hosted Supabase project was modified.

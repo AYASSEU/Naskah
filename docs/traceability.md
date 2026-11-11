@@ -1,68 +1,41 @@
-# Functional traceability
+# Traceability fungsional final B10
 
-| Requirement | UI route / implementation                              | Port                                 | Verification                                                                                | Phase 2                                                   |
-| ----------- | ------------------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| FR-IN-01    | /new-project, features/intake                          | ProjectRepository, GenerationService | Text-only browser flow                                                                      | Workflow 1 webhook                                        |
-| FR-IN-02    | File picker and drop zone, features/intake             | ParserService                        | PDF + notes browser flow                                                                    | Upload / parse endpoint                                   |
-| FR-IN-03    | entities/document/cleaning.ts, services/mock/parser.ts | ParserService                        | Cleaning unit tests, extraction browser flow                                                | pdf-parse or Python parser                                |
-| FR-HITL-01  | /workspace/[id], manuscript-editor.tsx                 | DocumentRepository                   | Autosave browser flow                                                                       | Transactional section save                                |
-| FR-HITL-02  | Workspace revision dialog                              | RevisionService                      | 2FA / QRIS proposal tests                                                                   | Workflow 2 webhook                                        |
-| FR-HITL-03  | entities/revision/apply.ts, repository locks           | RevisionService, DocumentRepository  | Byte identity, lock, stale proposal tests                                                   | Isolated regeneration                                     |
-| FR-HITL-04  | features/revision, word diff viewer                    | DocumentRepository                   | Accept / reject browser flow                                                                | Same proposal contract                                    |
-| FR-EXP-01   | /export/[id], services/mock/compiler.ts                | CompilerService                      | Real DOCX ZIP/XML validation                                                                | Server document compiler                                  |
-| FR-EXP-02   | Word download, /export/[id]/print                      | CompilerService                      | Browser download and print route                                                            | DOCX + PDF service                                        |
-| AI settings | /settings, features/settings/ai-connection.tsx         | AiConnectionService                  | Validation, session credential isolation, simulated test, reset and responsive browser flow | Authenticated server credential storage and provider test |
+11 November 2026. Ini peta implementasi **saat ini**, menggantikan kolom rencana
+Phase 1. Bukti berikut memakai layanan lokal dan provider mock; bukan hasil studi.
+Semua path test relatif root repo. Detail chain terhubung: [B9](B9-end-to-end.md).
 
-RQ1: /evaluation summary, real logs from simulated executions; RQ2: blind expert
-form with rationales and descriptive statistics; RQ3: ten-item SUS with tested
-scorer. Sample results are demonstration data, not research findings.
+| ID | Route UI / API | Backend/workflow | Bukti pengujian |
+| --- | --- | --- | --- |
+| FR-IN-01 — teks | `/new-project`, `/api/projects`, `/api/generations` | Supabase project, **Generate SRS**, callback + SSE | `tests/e2e/live-system.spec.ts` alur text/reconnect/resume; `scripts/test-b5.ts`, `scripts/test-b6.ts` |
+| FR-IN-02 — PDF/TXT | `/new-project`, `POST /api/parse-pdf` | Parser server multipart; merged notes | `tests/e2e/server-parser.spec.ts`, `tests/e2e/live-system.spec.ts`; `scripts/test-b7.mjs` PDF/TXT/encoding/limit |
+| FR-IN-03 — ekstrak/bersih | Intake preview, `/api/parse-pdf` | PDF child worker, shared cleanPages, duplicate header/footer cleaning | `tests/domain.test.ts`, `tests/e2e/server-parser.spec.ts`; B7 parity, encrypted/scanned/200-call soak |
+| FR-HITL-01 — edit manual | `/workspace/[id]`, `/api/sections/{id}`, versions/restore | Supabase transaksi section/history; tanpa panggilan LLM | `tests/e2e/live-workflows.spec.ts` autosave/conflict; `tests/e2e/live-system.spec.ts`; `scripts/test-b6.ts` |
+| FR-HITL-02 — revisi instruksi | `/workspace/[id]`, `/api/revisions` | **Revise Section**, query refinement/retrieval/proposal callback | `scripts/test-b5.ts`, `scripts/test-b6.ts`; `tests/e2e/live-system.spec.ts` accept/reject |
+| FR-HITL-03 — isolasi target | Section/proposal API, `/api/revisions/{id}/accept` | Lock/version/ID guards, transaksi target-only | B5/B6 other-section byte identity, locked/stale/concurrent proposal; `tests/port-conformance.test.ts`, `tests/markdown-contract.test.ts` |
+| FR-HITL-04 — diff/accept/reject | Revision diff, `/api/revisions/{id}/accept|reject` | Pending proposal tersimpan, version history; reject tidak mengganti teks | `tests/e2e/live-workflows.spec.ts` reload pending; `tests/e2e/live-system.spec.ts`; `scripts/test-b6.ts` |
+| FR-EXP-01 — susun template | `/export/[id]`, `/api/compile-document` | Compiler Pandoc + IEEE830 DOCX template + LibreOffice TOC | `scripts/test-b7.mjs`, `scripts/verify-b7-documents.py` OOXML/layout; all-page QA B7; `tests/e2e/live-system.spec.ts` |
+| FR-EXP-02 — unduh DOCX/PDF | `/export/[id]`, `/api/exports/{id}` | Compiler, Supabase Storage privat, authorized download | B7 ZIP/XML/PDF/cache/auth; `tests/e2e/live-system.spec.ts`; `scripts/test-compiler-lifecycle.mjs` 30 compile, nol zombie |
+| Settings / integrasi | `/settings`, `/api/settings/integrations/*`, `/api/system/status` | Registry, AES envelope, credential sync/rebind, empat smoke; **Error Handler** untuk job gagal | `tests/e2e/live-settings.spec.ts` create/rotate/delete/full recovery/key hash; `scripts/test-integrations.ts`; security unit + secret scans |
+| RQ1 — otomasi/struktur | `/evaluation`, logs/overview API | `srs_generation_logs`, retrieval logs, core/Python structure | B5/B6 callbacks/log dedupe; `scripts/test-b8.mjs`; `tests/evaluation-golden.test.ts` |
+| RQ2 — ahli/ROUGE/statistik | `/evaluation`, cases/blind/reviews/rouge/statistics/export API | Frozen snapshots, separate source maps, evaluator Python | `tests/e2e/live-evaluation.spec.ts`, `tests/e2e/live-system.spec.ts`; `scripts/test-b8.mjs`, `pnpm test:python` numerical/reference |
+| RQ3 — SUS | `/evaluation?tab=sus`, context/sus/export API | Consent, participant cookie, TS/server/DB SUS recompute | `tests/evaluation-golden.test.ts`, `pnpm test:python`; B8 HTTP scope/idempotency, live evaluation reload |
 
-B5 (2026-11-10): FR-IN-01 now has a real authenticated Generate SRS workflow;
-FR-HITL-02/03/04 have target-only revision, a pending callback proposal and atomic
-acceptance with version/lock protection. `scripts/test-b5.ts` verifies actual local
-n8n/Supabase execution, other-section byte identity, concurrent proposals, failure
-events, resume/cancel and callback idempotency. Shared Markdown golden/runner tests
-and `tests/b5-workflows.test.ts` verify schema, IDs, numeric guardrails and rendering.
-These backend checks use synthetic inputs and mock provider responses. Existing
-browser ports stay mocked until B6; they do not imply live UI integration or
-research validation. See `B5-workflows.md` and `backend-phase-reports.md`.
+`tests/e2e/flows.spec.ts` dan `ai-settings.spec.ts` mempertahankan original browser
+mock acceptance, terpisah dari live counterparts. Test B9 memilih live suite
+dan menolak konfigurasi provider nyata; mock suite dijalankan setelah server
+diganti ke mode mock. Jangan mengartikan skipped mock cases di live suite sebagai
+uji backend yang tidak dilakukan. Lihat [runbook](runbook.md).
 
-B6 (2026-11-10): FR-IN-01 and FR-HITL-01/02/03/04 now run through authenticated
-HTTP adapters with real local n8n/Supabase. Shared mock/HTTP port conformance,
-SSE reconnect, owner/version/lock checks, human-edited checkpoint resume, and
-both-theme live UI acceptance cover the integration. Manual drafts survive slow
-autosave and explicit conflict review; pending revisions survive reload. Client
-DOCX export uses the persisted document. Server parsing/compilation and research
-evaluation remain B7/B8. Providers and acceptance data remain synthetic mock;
-these tests are not thesis findings. See `B6-local-ui.md`.
+## Cross-cutting dan batas bukti
 
-## B7 document counterpart
+| Aspek | Bukti | Batas |
+| --- | --- | --- |
+| Kontrak/parity | `tests/port-conformance.test.ts`, `markdown-contract.test.ts`, `n8n-markdown.test.ts`, `http-stream.test.ts` | Pure renderer/ports + replay; bukan mutu LLM |
+| Auth/secret | `backend-security.test.ts`, `backend-auth-stream.test.ts`, `backend-integrations.test.ts`, `workflow-callbacks.test.ts`; B9 scans | Local-owner, bukan portal publik |
+| RLS/integritas | `scripts/test-database.mjs`, advisor lokal B9 | 29 tabel, anon GET/POST ditolak; tiga warning SQL lint B5 existing tetap tercatat |
+| Penelitian | B8 scope/provenance/import guards dan Python research rejection | Tidak ada studi nyata/enrollment UI; research checkpoint kosong |
+| Operasi | B9 Windows startup/doctor/credential recovery, B10 verifikasi docs | Full volume restore, rotasi encryption key dan instalasi Windows kosong belum didrill |
 
-FR-IN-03 maps to POST /api/parse-pdf and shared cleanPages, with synthetic
-multipage/scanned/encrypted/limit fixtures, browser/server parity and a 200-call
-measured soak. Export maps to POST /api/compile-document, the local Docker service
-and authenticated GET /api/exports/{uuid}. Hospital OOXML/PDF assertions, all-page
-raster review, private download/cache checks and both-theme live UI tests cover
-DOCX/PDF output. Mock helpers remain selectable. See B7-documents.md.
-
-## B8 evaluation counterpart — 2026-11-11
-
-RQ1 uses owner/scoped logs and summaries, RQ2 uses frozen case snapshots,
-participant-bound random blind assignments and immutable four-dimension reviews,
-and RQ3 uses consented SUS answers with core/server/database recomputation.
-The ResearchService HTTP port connects the UI to local Supabase and Python.
-Shared SUS/heading goldens, numerical/reference tests, HTTP isolation/import/
-export checks and both-theme live flows cover the implementation. Research scope
-excludes mock/dev_seed runs; all executed acceptance is synthetic. Participant
-means avoid pseudoreplication, with explicit paired/independent analysis design.
-See B8-evaluation.md for limits, assumptions and CLI reproduction.
-
-## B9 connected acceptance — 2026-11-11
-
-The same persisted project now travels from text or PDF/TXT intake through
-generation/reconnect/recovery, manual edit, accepted/rejected revision, DOCX/PDF
-and consented evaluation. Live Settings proves the actual provider key hash after
-create, rotation and full credential recovery. Both themes and all four evaluation
-tabs at phone width are covered. The complete FR/route/workflow/test mapping is
-in [B9-end-to-end.md](B9-end-to-end.md); user-triggered real-provider steps are in
-[runbook.md](runbook.md). These are mock acceptance results, not thesis findings.
+Hasil gate tercatat dalam [laporan backend](backend-phase-reports.md) dan
+[laporan B10](B10-handoff.md). Reproduksi tabel evaluasi:
+[panduan data skripsi](thesis-data-guide.md).

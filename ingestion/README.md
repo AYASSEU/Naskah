@@ -1,5 +1,11 @@
 # Reproducible corpus ingestion
 
+B10 handoff: [real-provider checklist](../docs/real-api-checklist.md),
+[re-embedding and backups](../docs/runbook.md), and
+[thesis eligibility/data guide](../docs/thesis-data-guide.md). Keep real corpus
+and vector space in a separate environment from the current dev seed; identical
+model labels do not make hash mock vectors interchangeable with real embeddings.
+
 Run from the repository root with Python 3.12+. The CLI reads ignored `apps/web/.env.local` without printing secrets. Start local Supabase first.
 
 ```powershell

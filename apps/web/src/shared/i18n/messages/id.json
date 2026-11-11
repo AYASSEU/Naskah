@@ -231,7 +231,7 @@
   "susScale": "1 sangat tidak setuju · 5 sangat setuju",
   "submitSus": "Kirim jawaban SUS",
   "susResult": "Skor SUS Anda",
-  "susBenchmark": "Patokan pembanding: 68. SUS mengukur persepsi kegunaan, bukan persentase keberhasilan.",
+  "susBenchmark": "SUS membalik skor lima pernyataan negatif. Memilih 5 pada semua butir menghasilkan 50/100. Patokan pembanding: 68. SUS mengukur persepsi kegunaan, bukan persentase keberhasilan.",
   "susFootnote": "Interpretasi: Bangor, Kortum & Miller (2009); Sauro (2011). Terjemahan instrumen perlu divalidasi peneliti.",
   "rougeNote": "ROUGE mengukur kesamaan kata antara draf dan dokumen acuan. Baca hasilnya bersama penilaian pakar.",
   "importResults": "Impor hasil JSON / CSV",

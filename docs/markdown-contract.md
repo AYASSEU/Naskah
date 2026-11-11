@@ -1,5 +1,10 @@
 # Shared Markdown contract, version 1
 
+Final review B10, 2026-11-11. The grammar remains version 1: live browser/server
+adapters and the n8n bundle share this core. No template-standard change or
+lossless-to-canonical rewrite was introduced during handoff. See
+[backend contracts](contracts.md) and [traceability](traceability.md).
+
 The pure implementation is `packages/core`. The web app and n8n Code-node bundle
 consume the same implementation. Provider responses must first pass
 `ChapterDraftSchema`; no provider credential is part of this contract.
@@ -78,4 +83,8 @@ generation, revision or error handling.
 B5 additionally verifies byte identity between the actual Generate SRS callback
 Markdown and `renderDocumentSections`, using its persisted document and callback
 SHA-256. The real local workflow and revision/error acceptance are documented in
-`B5-workflows.md`; the browser remains in mock mode until B6.
+[B5-workflows.md](B5-workflows.md). Since B6 the live UI uses the persisted
+backend; B7 compiler and B9 connected acceptance preserve this contract.
+Target-only revision is checked before acceptance and other sections retain
+their content. Human editing may intentionally change content; canonical
+rendering is never a license to reformat untouched user sections silently.

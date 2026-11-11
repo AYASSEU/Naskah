@@ -1,5 +1,9 @@
 # Local parser and compiler
 
+Final Windows startup/stop and backup ownership: [Windows guide](../docs/local-laptop-setup.md)
+and [runbook](../docs/runbook.md). Compilation stays local independently of the
+generation provider; current acceptance uses synthetic manuscripts/mock AI.
+
 Run `pnpm.cmd local:compiler` from the repository root with Docker Desktop active.
 `scripts/start-local.ps1 -Mode live` starts this automatically. Full operation,
 security boundaries, acceptance commands and limitations: [B7 documents](../docs/B7-documents.md).

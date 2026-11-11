@@ -1,40 +1,48 @@
-# Inert n8n integration specification
+# Workflow lokal Naskah
 
-No workflow is executed in Phase 1. Both payloads are defined and validated in
-`packages/contracts`; endpoint references live in `services/http/index.ts`.
+Checkpoint B10: workflow **aktif dan diuji** pada n8n lokal 2.46.6, backend
+Supabase dan provider mock. Direktori ini bukan lagi scaffold inert Phase 1.
 
-Workflow 1: `POST /webhook/generate-srs`
-```json
-{"session_id":"uuid-string","project_title":"Sistem Manajemen Rumah Sakit","domain":"Healthcare","raw_text":"Combined notes and extracted text"}
+| Workflow | Tugas |
+| --- | --- |
+| Naskah / Generate SRS | `/webhook/generate-srs`: retrieval, drafting, guardrail, checkpoint dan final callback |
+| Naskah / Revise Section | `/webhook/revise-srs`: refine query, retrieve, target-only proposal |
+| Naskah / Error Handler | Event gagal teredaksi, error routing dan recovery marker |
+| Naskah / Smoke / deepseek | Model/completion melalui credential bound |
+| Naskah / Smoke / embeddings | Embedding request dan validasi 1536 dimensi |
+| Naskah / Smoke / Supabase | Probe akses backend/RPC terautentikasi |
+| Naskah / Smoke / Markdown | Shared renderer/validator parity |
+
+`src` berisi builder/runtime/domain/schema; `prompts` scaffolds prompt; `workflows`
+berisi artifact portable SDK/JSON. Build memakai shared `packages/core` dan Zod.
+File portable tidak memuat key atau credential ID laptop; deploy mengikat
+credential berdasarkan nama/type unik. Jangan commit hasil export execution/
+credential atau parameter yang berisi secret.
+
+Jalankan dari root dengan backend live dan mock provider sudah siap:
+
+```powershell
+pnpm n8n:build
+pnpm n8n:deploy
+pnpm test:b5
+pnpm n8n:verify-markdown
 ```
 
-| Node | Behavior | Generation event |
-| --- | --- | --- |
-| Webhook | Verify signature, parse GenerateInputSchema | stage retrieving_context |
-| Vector Retrieval | Top-K 5–8 training-only reference chunks | retrieval_context |
-| Loop Over Items | Four IEEE parts, ordered | section_started |
-| Prompt Construction | Fill data templates, never execute source text | stage drafting |
-| DeepSeek API | deepseek-chat, temperature 0.2, JSON only | section_drafted |
-| Quality Guardrail | Four dimensions, measurable rewrites | guardrail_report / stage guardrail |
-| Section Aggregator | Validate and assemble full Markdown | stage assembling |
-| Webhook Callback | Authenticated /api/webhooks/srs-ready | stage ready / completed |
+Build hanya menghasilkan artifact; deploy mengubah workflow Naskah pada n8n
+lokal. **Terapkan ulang sambungan** di Settings menggunakan mekanisme yang sama.
+Node IDs/posisi/grup dipertahankan saat update; ambiguous name/type diblokir.
+Webhook production memakai Header Auth; callback memakai bearer dan dedupe.
+Jangan memakai `/webhook-test` sebagai endpoint aplikasi.
 
-Four parts: Introduction, Overall Description, Specific Requirements, Supporting
-Artifacts. Chapter 3 conforms to ChapterOutputSchema with requirement actor,
-input, process, output, priority, and unique ID.
+Model default generation pada implementasi `deepseek-flash`; checkpoint saat ini
+tetap mengarah ke endpoint mock. Embeddings integrasi terpisah. Green smoke
+mock tidak membuktikan keberhasilan API nyata. Kebijakan execution save-data
+`none` bukan jaminan tidak ada persistence header sementara sebelum pruning;
+perlakukan DB/log/trace backup privat.
 
-Workflow 2: `POST /webhook/revise-srs`
-```json
-{"session_id":"uuid-string","target_section":"3.2 Functional Requirements","current_section_text":"Current text","user_instructions":"Tambahkan QRIS"}
-```
-
-Revision Trigger validates ReviseInputSchema and section permissions. Query
-Refinement builds a retrieval query. Vector Retrieval obtains new chunks.
-Targeted Regeneration rewrites exactly the selected section. Callback returns
-RevisionProposalSchema; the UI obtains explicit acceptance before saving.
-Use optimistic concurrency or a text hash so an old proposal cannot overwrite
-an intervening human edit. Lock state is checked on both request and acceptance.
-
-Callbacks are retried safely: verify signature and deduplicate session/execution
-identity, then persist sections and exactly one terminal log in one transaction.
-Failed nodes translate to a typed failed event with a retryable code.
+Operasi/recovery: [runbook](../docs/runbook.md). Alur/error/retry dan deviasi loop:
+[B5](../docs/B5-workflows.md). Browser integration: [B6](../docs/B6-local-ui.md).
+Kontrak/payload: [contracts](../docs/contracts.md),
+[Markdown](../docs/markdown-contract.md). Whole-system acceptance:
+[B9](../docs/B9-end-to-end.md). Langkah API asli:
+[checklist](../docs/real-api-checklist.md).

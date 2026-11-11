@@ -1,199 +1,160 @@
-# Penyiapan lokal laptop, diperbarui 10 November 2026
+# Panduan menjalankan Naskah di Windows
 
-Proyek tetap di `C:\Users\MSI1\OneDrive\文档\WebApp Skripsi`. Remote dan history Git
-dipertahankan. Ini pemulihan lingkungan laptop tujuan, bukan pemulihan database
-atau credentials dari komputer sumber.
+Checkpoint B10, 11 November 2026. Panduan utama untuk laptop yang sudah
+dikonfigurasi; bagian mesin baru menjelaskan dependensi yang belum otomatis.
+Provider dan corpus checkpoint ini tetap mock/sintetis.
 
-## Yang berjalan
+## Menjalankan setiap hari
 
-| Layanan         | Alamat                                | Keadaan terverifikasi                                                          |
-| --------------- | ------------------------------------- | ------------------------------------------------------------------------------ |
-| Naskah          | http://127.0.0.1:3000                 | Backend live lokal, provider mock, HTTP 200                                     |
-| n8n 2.46.6      | http://localhost:5678                 | Healthy, existing volume `n8n_local_data`                                      |
-| MCP n8n         | http://localhost:5678/mcp-server/http | Discovery, detail, eksekusi manual Hello World, dan hasil sukses terverifikasi |
-| Mock provider   | http://localhost:4010/v1              | Container `naskah-mock-llm`, provider otomatis tanpa biaya                     |
-| Supabase API    | http://127.0.0.1:54321                | Stack lokal `naskah`, migrasi dan seed yang ada                                |
-| PostgreSQL      | 127.0.0.1:54322                       | Integrity/RLS checks untuk 27 tabel lulus                                      |
-| Supabase Studio | http://127.0.0.1:54323                | Lokal                                                                          |
-
-Korpus lokal memiliki 150 chunk `dev_seed`, model `text-embedding-3-small`, dimensi
-1536, token perkiraan 386–426. Tidak ada duplikasi atau held-out yang tercampur.
-Retrieval security dan specific_requirements lulus. Data ini sintetis dan **tidak
-boleh menjadi metrik atau bukti hasil penelitian**. Tidak ada dataset penelitian
-dari komputer lain yang diasumsikan sudah dipindahkan.
-
-## Menjalankan kembali
-
-Script akan mencoba menghidupkan engine Docker Desktop. Dari PowerShell di folder proyek:
+Prasyarat: Docker Desktop dengan Linux containers, browser Edge/Chrome,
+dependency proyek terpasang, Node.js 24+ dan pnpm 11.25.0. Script startup dapat
+memakai runtime Codex terpasang bila `node.exe` tidak ada di PATH. Perintah
+`pnpm`/`node` lain memerlukan PATH terminal yang sesuai.
 
 ```powershell
-./scripts/start-local.ps1
+Set-Location -LiteralPath 'C:\Users\MSI1\OneDrive\文档\WebApp Skripsi'
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode live
 ```
 
-Default B6 adalah backend **live lokal**, dengan provider tetap mock. Script
-menjalankan Compose existing jika tersedia, atau memulai container existing saat
-file Compose privat tidak ada. Volume/key dipertahankan. Supabase ikut dinyalakan
-untuk mode live. Scaffold Compose lama di `infra/` tidak digunakan.
-Untuk menjalankan ulang mode simulasi Phase 1:
+Tunggu pesan URL, lalu buka [webapp](http://127.0.0.1:3000). Tetap gunakan origin
+ini selama bekerja; `localhost` dan `127.0.0.1` memiliki cookie/browser storage
+terpisah. Biarkan terminal terbuka. Docker pertama kali menyiapkan image dapat
+memerlukan internet; analisis dan acceptance memakai layanan lokal.
+
+Startup menyalakan Docker bila perlu, Compose privat existing atau tiga container
+n8n/runner/mock existing, Supabase, evaluator dan compiler. Ia tidak membuat
+instance n8n baru dari nol, mengisi REST key, memuat corpus, atau reset volume.
+Compiler memakai `--init` untuk memanen proses sisa LibreOffice. Script
+mempertahankan server yang sudah mendengarkan port 3000, termasuk modenya.
+
+| Layanan | Alamat | Pemeriksaan |
+| --- | --- | --- |
+| Naskah | http://127.0.0.1:3000 | Footer mode tersambung; Settings readiness |
+| n8n 2.46.6 | http://127.0.0.1:5678 | `/healthz/readiness` |
+| Mock AI/embedding | http://127.0.0.1:4010 | `/health`, respons `mock: true` |
+| Supabase API | http://127.0.0.1:54321 | Doctor dan Storage/database checks |
+| PostgreSQL / Studio | 127.0.0.1:54322 / http://127.0.0.1:54323 | Lokal, proyek `naskah` |
+| Compiler/parser | http://127.0.0.1:8000 | `/health` |
+| Evaluator Python | http://127.0.0.1:8010 | `/health` |
+
+Di Settings, n8n dan kedua provider harus Tersimpan/Tersinkron/Teruji. Provider
+mock memakai `http://host.docker.internal:4010/v1` dari container. Jangan mengganti
+alamat itu dengan loopback container. Knowledge saat checkpoint: 150 `dev_seed`,
+1536 dimensi; label model tidak menjadikan vector hash mock sebagai embedding nyata.
+
+Di terminal kedua:
 
 ```powershell
-./scripts/start-local.ps1 -Mode mock
+node scripts/doctor.mjs
+docker ps --format '{{.Names}}: {{.Status}}'
+Invoke-WebRequest 'http://127.0.0.1:8000/health' -UseBasicParsing
+Invoke-WebRequest 'http://127.0.0.1:8010/health' -UseBasicParsing
 ```
 
-Dalam terminal Codex yang memiliki pnpm:
+Doctor yang sehat mengembalikan `ready: true`, alasan kosong, tujuh workflow
+aktif, dan `knowledge.devOnly: true` untuk konfigurasi mock ini. Doctor bukan
+pengganti uji ekspor atau validasi kualitas AI. Jangan mencetak `.env.local`,
+output status Supabase lengkap, atau hasil `docker inspect` tanpa pemilihan field.
+
+## Berhenti, restart, dan ganti mode
+
+Selesaikan atau batalkan pekerjaan lewat UI sebelum mematikan layanan.
+
+1. Ctrl+C di terminal startup menghentikan **webapp saja**. Jika server berasal
+   dari terminal lain, hentikan melalui terminal/proses Naskah yang Anda kenali.
+2. Untuk menghentikan layanan proyek, sesudah web berhenti:
 
 ```powershell
-pnpm.cmd install --frozen-lockfile
-pnpm.cmd dev
-```
-
-Dependensi proyek tidak diupgrade. pnpm 11.25.0 berasal dari runtime terpasang;
-`npm`/`npx` tidak tersedia pada PATH sesi ini. Helper Supabase sekarang bisa
-memakai entry JavaScript pnpm dari runtime tanpa melewati shell, dengan CLI
-Supabase tetap dipin ke 3.0.0. Jalur standar npm/npx masih tersedia sebagai fallback.
-
-Ctrl+C pada terminal startup menghentikan webapp. Untuk n8n dan mock provider:
-
-```powershell
+docker stop naskah-compiler naskah-evaluation
 docker stop n8n-local-runners n8n-local naskah-mock-llm
-```
-
-Untuk Supabase gunakan helper dari Node yang tersedia pada terminal Codex:
-
-```powershell
 node scripts/local-database.mjs stop
 ```
 
-Tidak ada perintah yang menghapus volume. Jangan menambahkan prune atau `down -v`.
+Perintah tersebut mempertahankan data lokal. Jangan memakai `down -v`, reset
+database, atau volume prune untuk restart biasa. Menutup jendela Docker Desktop
+tidak selalu menghentikan engine. Menjalankan kembali perintah startup memulai
+layanan yang sama. Jangan menutup Docker ketika pekerjaan masih berjalan.
 
-## Konfigurasi backend lokal
-
-`apps/web/.env.local` dibuat untuk laptop ini dan diabaikan Git. Nilai server
-Supabase diperoleh dari CLI lokal. Encryption key aplikasi/owner lokal dibuat
-baru karena belum ada database aplikasi lokal sebelumnya. Encryption key n8n
-dan token webhook existing tetap digunakan.
-
-Kunci awal verifikasi hanya memiliki workflow:list/read dan GET credentials
-ditolak HTTP 403. Sesudah persetujuan eksplisit pengguna, key baru
-`Naskah local backend` dibuat untuk 30 hari (berakhir 9 Desember 2026) dengan:
-
-- credential:list/read/create/update/delete;
-- workflow:list/read/create/update/activate/deactivate;
-- execution:list/read/stop.
-
-Key baru sudah disimpan lokal pada environment pengguna Windows, `.env.local`,
-dan store Settings terenkripsi. GET workflows/credentials, pembuatan/PATCH
-credential, serta deploy/aktivasi workflow sudah berhasil. Environment pengguna
-dan `.env.local` bukan sumber yang otomatis selalu sinkron. Saat mengganti key,
-perbarui keduanya serta Sambungan n8n di Settings. Hak OAuth MCP tetap
-workflow:read, workflow:execute, execution:read. Jangan tempelkan key ke chat.
-
-Pemulihan koneksi lokal dapat dijalankan ulang dengan:
+Untuk browser mock Phase 1, hentikan web lama dahulu:
 
 ```powershell
-pnpm.cmd local:setup-mock
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode mock -SkipN8n
 ```
 
-Perintah ini hanya memakai mock provider pada port 4010, menolak konfigurasi
-provider nyata, menyimpan key dengan envelope terenkripsi, dan mengadopsi
-credential transfer dengan nama/type unik. Tiga ID credential transfer, ID dan
-posisi node, grup, serta visibilitas MCP sudah diverifikasi tetap sama. Lima nama
-credential yang diperlukan kini unik; kedua webhook provider lulus pengujian.
+Mode ini tidak memerlukan Supabase/compiler/evaluator, memakai IndexedDB dan
+fixture browser. `-SkipN8n` tidak mematikan container yang sudah berjalan. Data
+browser mock tidak otomatis dipindah ke database live. Mengganti mode tidak
+mengganti key/model yang tersimpan pada backend.
 
-B6 sudah menyambungkan Generate SRS, Revisi AI, penyimpanan dan history ke n8n
-serta Supabase lokal. `NEXT_PUBLIC_DATA_MODE=live` berarti backend/persistensi
-nyata; provider tetap mock. Parser/kompiler server dan evaluasi penelitian masih
-mengikuti B7–B10. Helper browser untuk parsing dan Word/print tetap digunakan.
-Gunakan key provider nyata hanya pada pengujian manual; tes otomatis selalu mock.
+## Dependency dan production build lokal
 
-## Alur UI B6
-
-Lihat [B6-local-ui.md](B6-local-ui.md) untuk penggunaan, endpoint, SSE/reconnect,
-accept/reject revisi, autosave/version conflict, cancel/resume dan batas fase.
-Pengujian backend UI dapat diulang dengan `pnpm.cmd test:b6`; laporan lokal ada
-di `artifacts/b6-acceptance.json`. Entri contoh membuat draft kosong dari input
-sintetis, bukan mengimpor hasil AI fixture sebagai dokumen live.
-
-## Kemajuan B5
-
-`packages/core` menjadi sumber tunggal parser requirement, template IEEE,
-penilaian struktur, renderer manuscript, dan pemeriksaan numeric rewrite.
-Tiga fixture Phase 1 dipertahankan sebagai golden manuscripts. UI tetap memakai
-ports dan desain Phase 1. Perakitan mock tidak lagi mengulang heading bab.
+Jika pnpm tidak dikenali tetapi Node/npm terpasang:
 
 ```powershell
-pnpm.cmd n8n:build
+npx.cmd --yes pnpm@11.25.0 install --frozen-lockfile
 ```
 
-Build menghasilkan `n8n/schemas/chapter-draft.json` dari schema Zod dan workflow
-`Naskah / Smoke / Markdown` dengan renderer/validator kecil yang mandiri. Graph
-dan parameter diperiksa melalui katalog node live dan validator MCP. Tidak ada
-credential ID atau nilai rahasia di artefak Git.
+Gunakan `pnpm.cmd` bila PowerShell memblokir `pnpm.ps1`, atau prefix
+`npx.cmd --yes pnpm@11.25.0` untuk script lain. Tidak perlu mengubah kebijakan
+PowerShell global. Jangan upgrade dependency sebagai langkah restart.
 
-Pengujian ulang webhook kontrak:
-
-```powershell
-pnpm.cmd n8n:verify-markdown
-```
-
-Script menolak nama workflow/credential ambigu, mempertahankan node IDs dan grup
-saat update, melakukan upsert dan publikasi, lalu menguji webhook production
-terautentikasi dengan fixture sintetis. Hasil harus byte-identical dengan Node
-renderer. Ini hanya smoke kontrak Markdown, bukan workflow Generate SRS.
-Pengujian nyata sudah lulus untuk empat fixture (18.952; 9.821; 2.592; dan 292
-byte), termasuk field requirement terstruktur; token yang salah ditolak. Laporan
-tanpa rahasia ada di `artifacts/n8n-markdown-verification.json` (diabaikan Git).
-Runner n8n memblokir Object.defineProperty: bundle menggunakan container hasil
-lokal biasa, bukan getter ekspor bundler, tanpa melonggarkan sandbox.
-
-## Workflow B5
+Untuk build, hentikan dev dahulu; layanan Docker boleh tetap berjalan:
 
 ```powershell
-pnpm.cmd n8n:build
-pnpm.cmd n8n:deploy
-pnpm.cmd test:b5
-```
-
-Build sekarang juga menghasilkan ketiga workflow utama dan smoke Supabase.
-Deploy menggunakan sambungan n8n terenkripsi dari Settings, mengikat credential
-berdasarkan nama/type, mengaktifkan workflow, serta memeriksa error routing.
-**Terapkan ulang** di Settings memakai fungsi deploy yang sama setelah smoke
-provider berhasil. ID, posisi node, grup, serta visibilitas MCP dipertahankan.
-
-Tes hanya mengizinkan mock provider lokal pada port 4010 dengan key dummy.
-Webapp harus berjalan pada port 3000 agar callback nyata dapat diterima. Laporan
-per kasus ada di `artifacts/b5-acceptance.json`, diabaikan Git. Proyek uji berlabel
-`B5 synthetic` dan bukan data penelitian. Rincian arsitektur, error, retry,
-checkpoint/resume, dan batas fase berikutnya ada di [B5-workflows.md](B5-workflows.md).
-
-## Pemeriksaan
-
-```powershell
-pnpm.cmd typecheck
-pnpm.cmd lint
-pnpm.cmd test
+$env:NEXT_PUBLIC_DATA_MODE='live'
 pnpm.cmd build
-pnpm.cmd audit:slop
-pnpm.cmd check:contrast
-node scripts/test-database.mjs
+pnpm.cmd --filter @naskah/web exec next start --hostname 127.0.0.1
 ```
 
-Hasil dan status fase dicatat di `docs/backend-phase-reports.md`. Backup n8n dan
-prosedur rollback tetap berada di `%LOCALAPPDATA%\n8n-docker` dan
-`%LOCALAPPDATA%\n8n-backups`, di luar Git dan sinkronisasi OneDrive.
+Mode publik dibekukan saat build. Build dan dev memakai output `.next` yang sama;
+jangan jalankan bersamaan pada Windows/OneDrive. Ctrl+C lalu startup standar
+mengembalikan dev server. Production build lokal belum berarti siap dipublikasikan.
 
-## B7 parser dan ekspor server
+## Mesin baru atau clone kosong
 
-Start-local -Mode live kini menyalakan container naskah-compiler pada
-127.0.0.1:8000. Parser PDF/TXT dipakai dari formulir proyek; Word dan PDF asli
-diunduh setelah finalisasi. Provider tetap mock. Token layanan dan font Windows
-disiapkan otomatis secara lokal. Petunjuk operasi, fallback COMPILER_MODE=client,
-batas unggahan, serta pengujian: [B7-documents.md](B7-documents.md).
+Clone Git **tidak mencakup** `.env.local`, database, Storage, key enkripsi,
+Compose privat n8n, corpus maupun font privat. Script `bootstrap.mjs` satu langkah
+yang disebut brief awal **belum tersedia**. Jalur pemulihan yang disarankan adalah
+backup lengkap pada [runbook](runbook.md); startup harian bukan installer kosong.
 
-## B8 evaluasi lokal
+Urutan penyiapan yang perlu dikerjakan operator pada mesin kosong:
 
-Start-local -Mode live juga menyalakan naskah-evaluation di 127.0.0.1:8010,
-dengan token server-only yang dibuat otomatis. Buka /evaluation untuk persetujuan
-peserta, penilaian ahli A/B, SUS, ROUGE, statistik dan ekspor JSON/CSV. Data uji
-dan penelitian terpisah; mock tidak memenuhi syarat penelitian. Perintah Python,
-backup input privat, batas dan asumsi: [B8-evaluation.md](B8-evaluation.md).
+1. Clone repo, pasang versi dependency terkunci dan Docker Desktop Linux.
+2. Pulihkan atau provision Compose n8n/runner/mock privat; cocokkan image,
+   loopback ports, runner auth dan key n8n. `infra/docker-compose.yml` adalah
+   scaffold lama, bukan konfigurasi siap pakai laptop ini.
+3. Jalankan `node scripts/local-database.mjs start`. Pada DB baru CLI menerapkan
+   migration/seed; untuk DB existing, periksa history dan rencanakan migration
+   tanpa reset. Wrapper dipin Supabase CLI 3.0.0, target lokal secara default.
+4. **Hanya jika belum ada konfigurasi**, jalankan
+   `node scripts/init-local-env.mjs` untuk nilai yang masih kosong. Jangan
+   menggunakannya mengganti env/owner/key backup. Ia tidak menyediakan REST key n8n.
+5. Buat REST key n8n dengan izin backend yang dijelaskan pada
+   [checklist](real-api-checklist.md), masukkan secara privat di konfigurasi lokal,
+   lalu restart web. Jangan menempelkan nilai key pada command line/chat.
+6. Jalankan startup live, `pnpm local:setup-mock`, lalu **Terapkan ulang sambungan**
+   di Settings atau `pnpm n8n:deploy`. Helper mock hanya menerima endpoint lokal
+   4010 dengan key dummy dan menolak menimpa provider nyata.
+7. Ikuti [ingestion dev seed](../ingestion/README.md) menggunakan
+   `all --use-app-settings --require-mock`, lalu doctor dan acceptance lokal.
+
+Ini prosedur penyiapan komponen, belum diuji sebagai instalasi satu klik dari
+Windows kosong. Jangan menyalin key dari chat lama sebagai pengganti backup.
+
+## Jika tidak bisa dibuka
+
+| Gejala | Langkah berikutnya |
+| --- | --- |
+| Docker engine belum siap | Buka Docker Desktop, tunggu engine Linux sehat, ulang startup. Periksa disk/WSL melalui Docker. |
+| Port 3000 terpakai | `Get-NetTCPConnection -LocalPort 3000 -State Listen`; periksa PID dengan `Get-Process -Id <PID>`, hentikan hanya server yang dikenali. |
+| Footer masih simulasi | Hentikan web lama, jalankan `-Mode live`, reload. Startup tidak mengganti server existing. |
+| Konfigurasi belum lengkap | Periksa **nama** field yang hilang dari error/doctor; pulihkan env privat yang cocok, jangan menimpa dengan file contoh kosong. |
+| Settings 401/403 dari n8n | REST key kedaluwarsa atau scope kurang; perbarui sendiri, simpan, test, reapply. |
+| Tersimpan tetapi belum tersinkron | Baca kode/langkah error, periksa n8n, nama/type credential, kemudian reapply; panduan recovery ada di runbook. |
+| Knowledge kosong/model mismatch | Pastikan corpus dev dan konfigurasi embedding konsisten; jangan memuat vector nyata ke corpus mock. |
+| PDF scan atau terenkripsi | Parser tidak menyediakan OCR/password unlock; berikan TXT/PDF bertulisan yang dapat diekstrak. |
+| Ekspor gagal berulang | `pnpm local:compiler`, cek health dan Docker Init. Jangan hanya mengandalkan health sebagai bukti compile sukses. |
+| Statistik menolak input | Periksa jumlah peserta, pasangan lengkap, desain dan scope; contoh sintetis tetap bisa dipakai untuk demonstrasi. |
+
+Backup dan pemulihan volume/key, tes B9, serta langkah ke API asli:
+[runbook](runbook.md), [checklist](real-api-checklist.md), [laporan B10](B10-handoff.md).

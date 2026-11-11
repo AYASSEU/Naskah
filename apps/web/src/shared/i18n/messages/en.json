@@ -231,7 +231,7 @@
   "susScale": "1 strongly disagree · 5 strongly agree",
   "submitSus": "Submit SUS answers",
   "susResult": "Your SUS score",
-  "susBenchmark": "Comparison benchmark: 68. SUS measures perceived usability, not a success percentage.",
+  "susBenchmark": "SUS reverse-scores the five negative statements. Selecting 5 for every statement gives 50/100. Comparison benchmark: 68. SUS measures perceived usability, not a success percentage.",
   "susFootnote": "Interpretation: Bangor, Kortum & Miller (2009); Sauro (2011). The researcher should validate this translation.",
   "rougeNote": "ROUGE measures word overlap between a draft and its reference document. Read it alongside expert assessments.",
   "importResults": "Import JSON / CSV results",

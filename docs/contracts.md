@@ -1,41 +1,52 @@
-# Shared contracts
+# Kontrak final backend lokal
 
-Source of truth: `packages/contracts/src/index.ts`. Schemas infer all TypeScript
-entities. Unknown/invalid inputs return 400 at API boundaries; valid requests
-reach deliberate 501 placeholders in Phase 1.
+Checkpoint B10, 11 November 2026. Source of truth:
+[`index.ts`](../packages/contracts/src/index.ts),
+[`backend.ts`](../packages/contracts/src/backend.ts), dan
+[`ai-connection.ts`](../packages/contracts/src/ai-connection.ts).
+Zod memvalidasi boundary; HTTP adapters sudah berfungsi, bukan lagi placeholder
+Phase 1. Schema lama tetap dipertahankan untuk kompatibilitas adapter mock.
 
-AI connection schemas live in `packages/contracts/src/ai-connection.ts` and are
-re-exported from the package entry. `AiConnectionConfigSchema` validates provider,
-model and HTTPS base URL; `AiConnectionSaveSchema` adds an optional write-only key.
-`AiConnectionSnapshotSchema` exposes configuration, `hasApiKey`, and credential
-storage (`memory` or `server`), never the key. `AiConnectionTestSchema` distinguishes
-mock/simulated results from live/connected results. Generation and revision
-payloads remain unchanged: credentials are resolved behind the service boundary.
+## Boundary, auth dan error
 
-| Schema                 | Fields / role                                                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| ProjectSchema          | UUID, ownerId, title, domain, version, status, dates, sessionId, rawText                                     |
-| RequirementSchema      | REQ identifier, title, description, actor, input, process, output, priority                                  |
-| RewriteSchema          | ID, original, rewritten, reason, resolved                                                                    |
-| GuardrailSchema        | Four dimension verdicts and rewrite list                                                                     |
-| SectionSchema          | Number, title, Markdown, status, source, requirements, guardrail, date                                       |
-| RetrievedChunkSchema   | Dataset, similarity in [0,1], excerpt                                                                        |
-| DocumentSchema         | Project, template, sections, metadata, retrieval chunks                                                      |
-| VersionSchema          | Immutable section snapshot, label, date                                                                      |
-| GenerationLogSchema    | Session, project title, domain, terminal status, duration, completeness                                      |
-| GenerateInputSchema    | Workflow 1 request below                                                                                     |
-| ReviseInputSchema      | Workflow 2 request below                                                                                     |
-| RevisionProposalSchema | Target, instruction, before, after, refined query, pending/accepted/rejected                                 |
-| ChapterOutputSchema    | section_title, external_interfaces, functional_requirements, performance_requirements, security_requirements |
-| ReadyCallbackSchema    | session_id, markdown, validated document                                                                     |
-| ParseInputSchema       | filename, content; Phase 2 transport placeholder                                                             |
-| CompileInputSchema     | documentId, docx/pdf format                                                                                  |
-| ExpertReviewSchema     | Pseudonym, A/B label, four ratings and rationales, comments                                                  |
-| SusResponseSchema      | Ten integer responses 1–5, computed score, comment                                                           |
-| RougeSchema            | Scenario, ROUGE-1/2/L precision, recall, F1                                                                  |
-| TemplateSchema         | Standard identifier, chapters, required subsections, prompt references                                       |
+UI mengakses typed service ports melalui registry `NEXT_PUBLIC_DATA_MODE`.
+`mock` memilih IndexedDB/helper browser; `live` memilih HTTP same-origin ke
+Next.js. Live bukan sinonim provider berbayar: checkpoint memakai mock lokal.
 
-`POST /webhook/generate-srs`
+`GET /api/auth/session` dengan `X-Naskah-Client: web` menerbitkan signed HttpOnly
+cookie local-owner 12 jam. Route owner memeriksa host loopback, port, origin,
+owner dan kedaluwarsa; mutation memerlukan same origin atau header client lokal
+sesuai implementasi. Ini bukan akun Auth publik. Service-role/DB/provider key
+hanya server-side. Endpoint callback terpisah memakai bearer, freshness dan
+identitas run. Webhook production n8n memakai `X-Naskah-Token`.
+
+Error normal: `{code, retryable, userMessageKey, detail?}`; detail hanya konteks
+konflik aman milik owner. Invalid schema 400, content type 415, batas payload 413,
+unauthorized/forbidden 401/403, konflik versi/scope 409, dependency failure sesuai
+kode. JSON owner response tidak di-cache. Jangan menganggap semua object schema
+strict: field tambahan hanya ditolak oleh schema yang menggunakan `.strict()`.
+
+## Entitas dan mutation HTTP
+
+| Kontrak | Route / perilaku |
+| --- | --- |
+| `ProjectSchema`, `ProjectCreateSchema`, `ProjectPatchSchema` | `/api/projects`, `/api/projects/{id}`; owner ditentukan server, title/domain/rawText/language/template disaring |
+| `DocumentSchema`, `DocumentWriteSchema` | `/api/documents/{id}`; project, metadata, template, sections dan retrieved chunks |
+| `SectionSchema`, `SectionWriteSchema` | `/api/sections/{id}`; ID bagian berupa teks, project context wajib; `If-Match` untuk versi |
+| `VersionSchema`, `SectionVersionSchema` | Version/list/restore di `/api/documents/{id}/versions` dan `/api/sections/{id}/versions`; restore membuat versi baru |
+| `RequirementSchema` | ID `REQ-[A-Z]-digits`, title/description/actor/input/process/output/priority; unik lintas dokumen |
+| `GuardrailSchema`, `RewriteSchema` | Empat verdict, proposal rewrite dengan `needs_confirmation`; angka baru tetap memerlukan review manusia |
+| `RetrievedChunkSchema` | Sumber/dataset/excerpt/similarity, model/dimensi/provenance/dev_seed; tidak memuat key |
+
+Section write memeriksa owner, lock dan versi secara transaksional. Konflik
+`section_changed` membawa `detail.current` untuk review eksplisit. Lock/stale
+tidak diatasi dengan retry overwrite otomatis. Riwayat immutable; target revision
+tidak boleh mengubah bagian lain atau menggandakan requirement ID.
+
+## Generate, SSE dan Revise
+
+Public app route `POST /api/generations` memakai `GenerationRequestSchema`;
+gateway memanggil `POST /webhook/generate-srs` terautentikasi. Field awal tetap:
 
 ```json
 {
@@ -46,7 +57,23 @@ payloads remain unchanged: credentials are resolved behind the service boundary.
 }
 ```
 
-`POST /webhook/revise-srs`
+Amendment opsional: run ID, output language, template, options (K/model/temperature)
+dan resume state. Server menetapkan konteks/owner/run yang sah; payload tidak
+boleh mengirim provider key. `GenerationAcceptedSchema` berisi accepted,
+session/run/project ID, after_seq dan nullable execution ID. HTTP menerima job,
+bukan menunggu seluruh naskah jadi. Run cancel/resume di
+`/api/generations/{id}/cancel|resume` memeriksa checkpoint dan terminal state.
+
+`GET /api/generations/{session_id}/events` membawa `WorkflowEventSchema` melalui SSE:
+monotonic `id`, JSON `data`, heartbeat, replay cursor. Event stage/retrieval,
+section_started/drafted, guardrail_report, completed/failed/cancelled tersedia;
+revision memakai revision_ready. Persistensi checkpoint/event mendahului replay;
+reconnect tidak memulai job baru. Revision menggunakan route SSE yang sama dengan
+`?scope=revision&ref={revision_id}`. Cursor dikirim sebagai `Last-Event-ID` atau
+query `after`. Detail: [B6](B6-local-ui.md).
+
+`POST /api/revisions` memakai `RevisionRequestSchema`; webhook
+`POST /webhook/revise-srs` mempertahankan field berikut:
 
 ```json
 {
@@ -57,42 +84,85 @@ payloads remain unchanged: credentials are resolved behind the service boundary.
 }
 ```
 
-Callbacks may be retried. Phase 2 must authenticate the webhook and deduplicate
-session/execution delivery before writes. Port failures include a stable code,
-retryable flag, and localization key. No transport-specific data leaks into UI.
+Amendment: revision ID, base section version, output language. Callback menyimpan
+proposal pending; `POST /api/revisions/{id}/accept|reject` keputusan terpisah.
+Accept mengecek ulang versi/lock/ID; reject mempertahankan teks. Pending proposal
+dapat dibaca ulang setelah reload. Mode mock mengimplementasikan port yang sama.
 
-## Phase 2 additive contracts
+`WorkflowReadyCallbackSchema`, `WorkflowRevisionCallbackSchema` dan failure
+schema memuat event_id, session_id, sent_at dan optional run_id; callback sukses
+juga memuat execution_id. Sequence SSE diberikan saat event dipersistensi. Route
+`/api/webhooks/srs-ready|srs-revision-ready|srs-failed` melakukan autentikasi,
+freshness dan deduplikasi sebelum transaksi event/checkpoint/final. Callback
+berulang tidak menggandakan terminal log. Provider output harus lolos
+`ChapterDraftSchema` sebelum [render Markdown bersama](markdown-contract.md).
 
-The original generate/revise fields are retained. Optional generation fields now include `run_id`, `output_language`, `template_id`, `options` (K, model, temperature), and resume state. Revision requests add revision ID, base section version and output language. Projects add language/template; sections add version/lock; rewrites add `needs_confirmation`; retrieved chunks add source/model provenance and `dev_seed`; logs add thesis eligibility and metrics. Legacy mock payloads still parse.
+## Settings dan readiness
 
-Settings uses `Services.integrations` in live mode. Its safe DTO contains config, last-four hint, stored/synced/tested, failure code, step and timestamps. `apiKey` is write-only. Changing the destination URL requires key re-entry. Routes live under `/api/settings/integrations/{id}` with test/reapply actions; `/api/system/status` returns readiness reasons and direct Settings links. Browser session bootstrap is `/api/auth/session` with `X-Naskah-Client: web`; mutations require the signed local-owner cookie and same origin.
+Live memakai `Services.integrations`, bukan penyimpanan key browser Phase 1.
+`IntegrationIdSchema` terbatas `n8n|deepseek|embeddings`.
 
-## B6 HTTP contracts
+| Route | Kontrak |
+| --- | --- |
+| `/api/settings/integrations/{id}` | GET/PUT/DELETE config/key; `IntegrationSaveSchema.apiKey` write-only |
+| `/api/settings/integrations/{id}/test` | POST smoke nyata melalui n8n; provider checkpoint ini mock |
+| `/api/settings/integrations/reapply` | POST sinkron internal credential, binding, publish dan smoke |
+| `/api/system/status` | GET `SystemStatusSchema`: reasons, links Settings, workflow dan knowledge readiness |
 
-The original webhook builders/payloads remain intact behind the server gateway.
-`ProjectCreateSchema`/`ProjectPatchSchema` constrain owner-independent input;
-`SectionWriteSchema` adds the project context for textual section identifiers.
-Section writes require `If-Match` and return a typed `section_changed` conflict
-with `detail.current`. `DocumentWriteSchema` supports versioned bulk saves.
-`GenerationAcceptedSchema` adds project/run IDs and `after_seq`; scoped SSE carries
-the shared `WorkflowEventSchema` with monotonic IDs and terminal events.
-`RevisionAcceptedSchema` identifies the proposal/scope; accept/reject are separate
-authenticated transactions. `SectionVersionSchema` and existing `VersionSchema`
-describe immutable history.
+Safe DTO `IntegrationStateSchema`: config, last-four hint, stored/synced/tested,
+step/error code/timestamps; tidak mengembalikan secret. Base URL berubah memerlukan
+key baru. Key disimpan AES-256-GCM dengan associated data provider+owner dan
+key_version. Doctor startup/periodik mendeteksi drift; ambiguous name/type diblokir.
+Update credential mencoba metode terdukung, memperbaiki binding yatim hanya pada
+workflow Naskah. Detail recovery/rotasi: [runbook](runbook.md).
 
-Optional port methods `generation.resume`, `revision.acceptRevision`,
-`rejectRevision` and `listPending` keep the original mock adapter compatible.
-`PortError.detail` carries safe owner-specific conflict context. New error keys
-`generation_in_progress` and `duplicate_requirement_id` are localized in both
-languages. Full route and validation behavior: `B6-local-ui.md`.
+Legacy `/api/ai/settings` dan `/api/ai/test-connection` tetap placeholder 501
+(invalid input settings 400); UI Settings live menggunakan integrasi baru di
+atas. Jangan memakai API legacy untuk provisioning backend baru.
 
-## B7 document contracts
+## Parser dan compiler
 
-Parse uploads use multipart file rather than the original placeholder JSON
-ParseInputSchema. The response is ParsedDocumentSchema (name, size, cleaned text,
-page/character counts and removed lines). CompileInputSchema retains documentId
-and format and adds optional literal author/institution. CompileResultSchema is
-server artifact metadata plus mode, or an explicit client-fallback choice.
-Artifacts use an authenticated same-origin /api/exports/{uuid} URL; a private
-60-second Storage signature is created only inside the download API. See
-B7-documents.md for limits, error codes and cache/storage behavior.
+`POST /api/parse-pdf` memakai **multipart file** untuk PDF/TXT; nama route tidak
+membatasi input hanya PDF. `ParseInputSchema` JSON lama bukan transport upload
+live. `ParsedDocumentSchema`: name, text, pages, before/after/removed dan size.
+Ekstraksi dan shared cleaning server dipakai intake; OCR tidak tersedia.
+
+`POST /api/compile-document` memakai `CompileInputSchema` (documentId, format
+docx/pdf, author/institution literal opsional). Server menggunakan snapshot
+tersimpan; `CompileResultSchema` adalah `{mode:'server',url,filename,size,format}`
+atau pilihan eksplisit `{mode:'client'}`. Tidak ada fallback diam-diam saat gagal.
+`GET /api/exports/{id}` mengotorisasi owner, membuat signature Storage privat
+60 detik di server dan mengirim berkas; URL key Storage tidak dikembalikan ke UI.
+Limit, cache, sanitasi dan QA: [B7](B7-documents.md).
+
+## Evaluasi
+
+Seluruh `/api/evaluation/{resource}` owner-scoped; query `scope` default **dev**.
+Perhatikan CLI exporter default research: selalu tulis `--scope` secara eksplisit.
+
+| Resource | Method dan schema |
+| --- | --- |
+| `context` | GET/POST; `EvaluationConsentSchema`, cookie peserta per scope, `EvaluationContextSchema` |
+| `cases` / `blind` / `mapping` | GET/POST cases: `EvaluationCaseInputSchema`; GET snapshot A/B, mapping setelah review lengkap |
+| `seed` | POST fixture hanya dev; research ditolak |
+| `reviews` | GET/POST `EvaluationReviewInputSchema`: assignment, empat rating 1–5, alasan/comments; immutable |
+| `sus` | GET/POST `EvaluationSusInputSchema`: sepuluh integer 1–5; server/DB menghitung, skor kiriman klien diabaikan |
+| `overview` / `logs` | GET ringkasan scoped/desain dan log generation |
+| `rouge` | GET/POST `EvaluationComputeSchema` → `RougeReportSchema` dengan bahasa/valid_comparison/provenance |
+| `statistics` | GET/POST `EvaluationStatisticsInputSchema` → `StatisticsReportSchema` (desain, seed, unit peserta, Holm, effect/CI/provenance) |
+| `import` | POST report terverifikasi; dihitung ulang terhadap input owned, bukan percaya angka file |
+| `export` | GET JSON `EvaluationExportSchema` atau CSV dataset; pseudonim, tanpa free text/key/naskah |
+
+Case snapshot, design dan review/SUS yang terkirim immutable. Satu SUS per peserta;
+retry identik idempoten. Research membutuhkan completed thesis run tanpa mock/
+dev_seed; enrollment masih belum menjadi UI. `legacy-import` hanya compatibility
+dev/unverified. Seluruh detail limit/metode: [B8](B8-evaluation.md),
+[panduan data skripsi](thesis-data-guide.md).
+
+## Bukti kontrak
+
+Unit/shared goldens memverifikasi schema, Markdown, SUS, auth/redaction dan port
+conformance. B5 menguji webhook/callback aktual, B6 HTTP/SSE/konflik, B7 upload/
+compile/download, B8 scope/immutability/analisis/impor/ekspor, B9 alur yang sama
+dari browser. [Traceability](traceability.md) memetakan setiap FR ke file tes.
+Semua acceptance lokal memakai mock; tidak membuktikan API atau mutu data nyata.

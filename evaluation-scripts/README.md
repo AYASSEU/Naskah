@@ -1,5 +1,10 @@
 # Local evaluation tools
 
+Final mapping of BAB IV tables/figures, exact export/analysis commands, research
+eligibility and privacy limits: [thesis data guide](../docs/thesis-data-guide.md).
+Research enrollment is not yet a UI flow; changing a file scope/flag is not proof
+of real-study provenance.
+
 B8 implements SUS, expert descriptions, heading completeness, ROUGE-1/2/L,
 Wilcoxon/Mann–Whitney with effect sizes/Holm correction, and pseudonymized local
 API exports. These tools never call an AI provider. Examples are synthetic dev

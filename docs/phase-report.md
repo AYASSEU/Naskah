@@ -1,5 +1,9 @@
 # Phase 1 implementation report
 
+Historical Phase 1 report. Current local-backend status and Windows operation:
+[B10 handoff](B10-handoff.md), [Windows guide](local-laptop-setup.md), and
+[runbook](runbook.md). Limitations below describe the original Phase 1 checkpoint.
+
 Run on Windows: `pnpm install`, `pnpm dev`, then http://127.0.0.1:3000.
 Production: `pnpm build`, `pnpm start`.
 

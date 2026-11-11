@@ -14,8 +14,8 @@ export function Logo() {
   return (
     <Link href="/" className="brand" aria-label={BRAND.name}>
       <svg viewBox="0 0 28 30" width="25" height="28" fill="none" aria-hidden="true">
-        <path d="M5 25V5h4l10 15V5h4v20h-4L9 10v15H5Z" fill="currentColor" />
-        <path d="M3 28h22" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M22 5H11a7 7 0 0 0 0 14h6a2 2 0 0 1 0 4H5v4h12a6 6 0 0 0 0-12h-6a3 3 0 0 1 0-6h11Z" fill="currentColor" />
+        <path d="M19 2h6v6" stroke="currentColor" strokeWidth="1.5" />
       </svg>
       <span>{BRAND.name}</span>
     </Link>
