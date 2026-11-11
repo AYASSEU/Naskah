@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+test.skip(
+  process.env.NASKAH_E2E_MODE === 'live',
+  'Phase 1 fixture suite; live counterparts exercise persisted services.',
+);
 import { unzipSync, strFromU8 } from 'fflate';
 import { readFile, mkdir } from 'node:fs/promises';
 test.beforeEach(async ({ page }, info) => {

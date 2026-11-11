@@ -9,7 +9,7 @@ Penyusun draf SRS berstandar IEEE 830
 A manuscript workspace for drafting, reviewing, and exporting software requirements.
 Built for a human reviewer to stay in control, one section at a time.
 
-![Stage: Phase 2 B8](https://img.shields.io/badge/stage-Phase_2_B8-e6b422?style=flat-square&labelColor=232018)
+![Stage: Phase 2 B9](https://img.shields.io/badge/stage-Phase_2_B9-e6b422?style=flat-square&labelColor=232018)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-15130e?style=flat-square)
 ![React 19](https://img.shields.io/badge/React-19-15130e?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-15130e?style=flat-square)
@@ -21,9 +21,9 @@ Built for a human reviewer to stay in control, one section at a time.
 
 ![Naskah manuscript workspace showing numbered requirements, chapter navigation, and the review inspector](docs/screenshots/dark-workspace-detail-1440.png)
 
-> **Current checkpoint: local backend through B8, using the mock AI provider.** Generate and Revise use local n8n/Supabase; PDF/TXT parsing, DOCX/PDF compilation and research evaluation run locally. Evaluation includes consent, blind expert reviews, SUS, ROUGE, statistics and pseudonymized exports, with dev/research isolation. All acceptance data remains synthetic; B9–B10 and real research validation remain pending. The browser-only mock mode remains available.
+> **Current checkpoint: local backend through B9, using the mock AI provider.** Generate and Revise use local n8n/Supabase; PDF/TXT parsing, DOCX/PDF compilation and research evaluation run locally. Evaluation includes consent, blind expert reviews, SUS, ROUGE, statistics and pseudonymized exports, with dev/research isolation. All acceptance data remains synthetic; B9 whole-flow acceptance uses the local mock provider; B10 and real-provider/research validation remain pending. The browser-only mock mode remains available.
 
-On this configured Windows laptop, run `powershell -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode live`, then open `http://127.0.0.1:3000`. See [local document setup](docs/B7-documents.md) and [B8 evaluation](docs/B8-evaluation.md).
+On this configured Windows laptop, run `powershell -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode live`, then open `http://127.0.0.1:3000`. See the [Windows runbook](docs/runbook.md), [B9 acceptance](docs/B9-end-to-end.md) and [B8 evaluation](docs/B8-evaluation.md).
 
 ## Why Naskah
 
@@ -305,7 +305,7 @@ Developer controls are available through Settings or **Ctrl + Shift + D** when e
 - [x] Local n8n orchestration, chapter generation, and targeted revision with mock provider.
 - [x] Local Supabase/pgvector retrieval and source-level split guards (synthetic corpus).
 - [x] Server document compilation and reproducible local evaluation tools.
-- [ ] Real research corpus/provider runs, participant study and B9–B10 acceptance/runbooks.
+- [ ] Real research corpus/provider runs, participant study and B10 final handoff.
 
 The [backend roadmap](docs/backend-roadmap.md) defines the implementation order and acceptance checks. Backend work should replace adapters behind the existing ports, then validate the contracts and browser flows against real services.
 

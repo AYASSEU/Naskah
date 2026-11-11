@@ -96,3 +96,12 @@ The local Python engine provides descriptive expert summaries, ROUGE and explici
 paired/independent statistics with effect sizes and Holm correction. UI and
 pseudonymized JSON/CSV exports keep dev/research separate; mock runs cannot enter
 research cases. See B8-evaluation.md. B9–B10 and real-study validation remain pending.
+
+## B9 checkpoint — 2026-11-11
+
+Whole-system live counterparts cover generated manuscripts through server exports
+and evaluation in both themes, including SSE reconnect, failure/resume and the
+actual mock key used after Settings create/rotate/recovery. Canonical binding
+recovery and mobile evaluation controls are repaired. See B9-end-to-end.md and
+runbook.md. Real-provider execution remains user-triggered and unverified; all
+acceptance data stays synthetic/dev. B10 final handoff remains pending.

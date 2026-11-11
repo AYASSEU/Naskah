@@ -187,6 +187,20 @@ export class N8nClient {
     return this.request<Workflow>(`workflows/${id}/activate`, 'POST');
   }
   async rebind(oldId: string, replacement: CredentialRef) {
+    return this.rebindMatching((_type, ref) => ref.id === oldId, replacement);
+  }
+  async rebindNamed(name: string, type: string, replacement: CredentialRef) {
+    if (!name.startsWith('naskah/') || replacement.name !== name)
+      throw new AppError('credential_schema_mismatch', 409);
+    return this.rebindMatching(
+      (nodeType, ref) => nodeType === type && ref.name === name && ref.id !== replacement.id,
+      replacement,
+    );
+  }
+  private async rebindMatching(
+    matches: (type: string, ref: CredentialRef) => boolean,
+    replacement: CredentialRef,
+  ) {
     const rebound: { workflowId: string; node: string }[] = [];
     for (const listed of await this.list<Workflow>('workflows')) {
       if (!listed.id || !listed.name.startsWith('Naskah / ')) continue;
@@ -194,12 +208,25 @@ export class N8nClient {
       let changed = false;
       for (const node of w.nodes)
         for (const [type, ref] of Object.entries(node.credentials ?? {}))
-          if (ref.id === oldId) {
+          if (matches(type, ref)) {
             node.credentials![type] = replacement;
             changed = true;
             rebound.push({ workflowId: w.id!, node: node.name });
           }
       if (changed) {
+        const available = await this.list<CredentialRef & { type: string }>('credentials');
+        const ids = new Set(available.map((c) => c.id));
+        for (const node of w.nodes)
+          for (const [type, ref] of Object.entries(node.credentials ?? {})) {
+            if (ids.has(ref.id) || !ref.name.startsWith('naskah/')) continue;
+            const matches = available.filter((c) => c.name === ref.name && c.type === type);
+            if (matches.length > 1) throw new AppError('credential_name_ambiguous', 409);
+            if (matches[0]) node.credentials![type] = { id: matches[0].id, name: matches[0].name };
+          }
+        const complete = w.nodes.every((node) =>
+          Object.values(node.credentials ?? {}).every((ref) => ids.has(ref.id)),
+        );
+        if (!complete) throw new AppError('integration_not_ready', 409, true);
         await this.putWorkflow(w);
         if (w.active) await this.activate(w.id!);
       }

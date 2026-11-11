@@ -122,3 +122,134 @@ describe('integration boundaries', () => {
     expect(create).toHaveBeenCalledOnce();
   });
 });
+
+describe('canonical binding recovery after deletion', () => {
+  it('repairs owned names and types while preserving workflow identity and activation', async () => {
+    const client = new N8nClient('http://localhost:5684', 'in-memory-dummy');
+    vi.spyOn(client, 'list').mockImplementation(async (resource) =>
+      resource === 'credentials'
+        ? [{ id: 'new' }, { id: 'other' }]
+        : [
+            { id: 'owned', name: 'Naskah / Generate SRS' },
+            { id: 'foreign', name: 'Personal workflow' },
+          ],
+    );
+    const workflow = {
+      id: 'owned',
+      name: 'Naskah / Generate SRS',
+      active: true,
+      nodes: [
+        {
+          id: 'stable-node',
+          name: 'LLM',
+          position: [20, 40],
+          credentials: {
+            httpHeaderAuth: { id: 'deleted', name: 'naskah/deepseek' },
+            httpBasicAuth: { id: 'other', name: 'naskah/deepseek' },
+          },
+        },
+      ],
+      connections: {},
+      settings: {},
+    };
+    vi.spyOn(client, 'request').mockResolvedValue(structuredClone(workflow));
+    const put = vi.spyOn(client, 'putWorkflow').mockResolvedValue({} as never),
+      activate = vi.spyOn(client, 'activate').mockResolvedValue({} as never);
+    expect(
+      await client.rebindNamed('naskah/deepseek', 'httpHeaderAuth', {
+        id: 'new',
+        name: 'naskah/deepseek',
+      }),
+    ).toEqual([{ workflowId: 'owned', node: 'LLM' }]);
+    expect(put.mock.calls[0]![0].nodes[0]).toMatchObject({
+      id: 'stable-node',
+      position: [20, 40],
+      credentials: { httpHeaderAuth: { id: 'new' }, httpBasicAuth: { id: 'other' } },
+    });
+    expect(activate).toHaveBeenCalledExactlyOnceWith('owned');
+    expect(client.request).toHaveBeenCalledExactlyOnceWith('workflows/owned');
+  });
+  it('does not rewrite current references and refuses foreign names', async () => {
+    const client = new N8nClient('http://localhost:5685', 'in-memory-dummy');
+    vi.spyOn(client, 'list').mockResolvedValue([{ id: 'owned', name: 'Naskah / Revise Section' }]);
+    vi.spyOn(client, 'request').mockResolvedValue({
+      id: 'owned',
+      name: 'Naskah / Revise Section',
+      nodes: [
+        { name: 'LLM', credentials: { httpHeaderAuth: { id: 'new', name: 'naskah/deepseek' } } },
+      ],
+    });
+    const put = vi.spyOn(client, 'putWorkflow');
+    expect(
+      await client.rebindNamed('naskah/deepseek', 'httpHeaderAuth', {
+        id: 'new',
+        name: 'naskah/deepseek',
+      }),
+    ).toEqual([]);
+    expect(put).not.toHaveBeenCalled();
+    await expect(
+      client.rebindNamed('personal/key', 'httpHeaderAuth', { id: 'x', name: 'personal/key' }),
+    ).rejects.toMatchObject({ code: 'credential_schema_mismatch' });
+  });
+});
+
+it('defers activation until all credential references have been restored', async () => {
+  const client = new N8nClient('http://localhost:5686', 'in-memory-dummy');
+  vi.spyOn(client, 'list').mockImplementation(async (resource) =>
+    resource === 'credentials' ? [{ id: 'new' }] : [{ id: 'owned', name: 'Naskah / Generate SRS' }],
+  );
+  vi.spyOn(client, 'request').mockResolvedValue({
+    id: 'owned',
+    name: 'Naskah / Generate SRS',
+    active: true,
+    nodes: [
+      { name: 'LLM', credentials: { httpHeaderAuth: { id: 'deleted', name: 'naskah/deepseek' } } },
+      {
+        name: 'Embeddings',
+        credentials: { httpHeaderAuth: { id: 'also-deleted', name: 'naskah/embeddings' } },
+      },
+    ],
+    connections: {},
+    settings: {},
+  });
+  const put = vi.spyOn(client, 'putWorkflow').mockResolvedValue({} as never),
+    activate = vi.spyOn(client, 'activate');
+  await expect(
+    client.rebindNamed('naskah/deepseek', 'httpHeaderAuth', { id: 'new', name: 'naskah/deepseek' }),
+  ).rejects.toMatchObject({ code: 'integration_not_ready' });
+  expect(put).not.toHaveBeenCalled();
+  expect(activate).not.toHaveBeenCalled();
+});
+
+it('repairs all orphaned owned sibling references before publishing an active workflow', async () => {
+  const client = new N8nClient('http://localhost:5687', 'in-memory-dummy');
+  vi.spyOn(client, 'list').mockImplementation(async (resource) =>
+    resource === 'credentials'
+      ? [
+          { id: 'new', name: 'naskah/deepseek', type: 'httpHeaderAuth' },
+          { id: 'embedding-new', name: 'naskah/embeddings', type: 'httpHeaderAuth' },
+        ]
+      : [{ id: 'owned', name: 'Naskah / Generate SRS' }],
+  );
+  vi.spyOn(client, 'request').mockResolvedValue({
+    id: 'owned',
+    name: 'Naskah / Generate SRS',
+    active: true,
+    nodes: [
+      { name: 'LLM', credentials: { httpHeaderAuth: { id: 'deleted', name: 'naskah/deepseek' } } },
+      {
+        name: 'Embedding',
+        credentials: { httpHeaderAuth: { id: 'also-deleted', name: 'naskah/embeddings' } },
+      },
+    ],
+    settings: {},
+    connections: {},
+  });
+  const put = vi.spyOn(client, 'putWorkflow').mockResolvedValue({} as never);
+  vi.spyOn(client, 'activate').mockResolvedValue({} as never);
+  await client.rebindNamed('naskah/deepseek', 'httpHeaderAuth', {
+    id: 'new',
+    name: 'naskah/deepseek',
+  });
+  expect(put.mock.calls[0]![0].nodes[1]!.credentials!.httpHeaderAuth!.id).toBe('embedding-new');
+});

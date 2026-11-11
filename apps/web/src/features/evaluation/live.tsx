@@ -328,7 +328,7 @@ export function LiveEvaluation() {
               </select>
             </label>
           </div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+          <div className="evaluation-actions">
             {scope === 'dev' && (
               <Button
                 disabled={action}
@@ -573,7 +573,7 @@ export function LiveEvaluation() {
                 </tbody>
               </table>
             </div>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div className="evaluation-actions">
               <Button
                 disabled={action}
                 onClick={() =>
@@ -798,7 +798,7 @@ export function LiveEvaluation() {
               {t('stemmer')}
             </label>
           )}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+          <div className="evaluation-actions">
             <Button
               variant="primary"
               disabled={action || !caseId}

@@ -25,7 +25,9 @@
     "local:evaluation": "node scripts/local-evaluation.mjs",
     "test:b8": "node scripts/test-b8.mjs",
     "test:python": "node scripts/test-python-evaluation.mjs",
-    "evaluation": "node scripts/evaluate.mjs"
+    "evaluation": "node scripts/evaluate.mjs",
+    "test:b9": "node scripts/test-b9.mjs",
+    "scan:secrets": "node scripts/scan-secrets.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

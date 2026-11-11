@@ -32,7 +32,7 @@ if (!match || match[1].trim().length < 32) throw new Error('Token compiler lokal
 const envPath = join(runtime, 'compiler.env');
 writeFileSync(envPath, `COMPILER_SERVICE_TOKEN=${match[1].trim()}\n`, { mode: 0o600 });
 const service = resolve(root, 'compiler-service');
-const hash = createHash('sha256');
+const hash = createHash('sha256').update('runtime:init-v1');
 for (const name of readdirSync(service)
   .filter((name) => !['output', 'node_modules'].includes(name))
   .sort()) {
@@ -76,6 +76,7 @@ if (inspect.status === 0 && inspect.stdout.trim() === fingerprint) {
   docker(
     [
       'run',
+      '--init',
       '-d',
       '--name',
       'naskah-compiler',

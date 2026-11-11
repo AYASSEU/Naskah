@@ -1,4 +1,8 @@
 import { expect, test } from '@playwright/test';
+test.skip(
+  process.env.NASKAH_E2E_MODE === 'live',
+  'Phase 1 fixture suite; live counterparts exercise persisted services.',
+);
 
 test.beforeEach(async ({ page }, info) => {
   await page.addInitScript((theme) => localStorage.setItem('theme', theme), info.project.name);

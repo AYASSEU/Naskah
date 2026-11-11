@@ -121,8 +121,17 @@ try {
       const data = await response.json();
       assert.equal(data.pages.length, 3);
       if (i % 20 === 0) {
-        const state = await (await fetch(service + '/health')).json();
-        assert.equal(state.active, 0);
+        // The HTTP response can finish just before asynchronous temp cleanup.
+        // Measure the persistent process only after the job has fully settled.
+        const deadline = Date.now() + 3000;
+        let state;
+        do {
+          state = await (await fetch(service + '/health')).json();
+          assert.ok(Number.isInteger(state.active) && state.active >= 0 && state.active <= 2);
+          if (state.active === 0) break;
+          await new Promise((resolve) => setTimeout(resolve, 25));
+        } while (Date.now() < deadline);
+        assert.equal(state.active, 0, 'parser did not become idle after cleanup');
         samples.push({ call: i, rss: state.rss });
         console.log('parser soak ' + i + '/220');
       }

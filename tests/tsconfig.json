@@ -8,5 +8,12 @@
       "@/*": ["../apps/web/src/*"]
     }
   },
-  "include": ["./e2e/live-evaluation.spec.ts", "./evaluation-golden.test.ts"]
+  "include": [
+    "./e2e/live-evaluation.spec.ts",
+    "./evaluation-golden.test.ts",
+    "./e2e/live-system.spec.ts",
+    "./e2e/live-settings.spec.ts",
+    "./e2e/b9-support.ts",
+    "../scripts/b9-runtime.ts"
+  ]
 }

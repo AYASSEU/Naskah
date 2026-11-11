@@ -38,16 +38,15 @@ async function bindCredential(
     .eq("provider", provider)
     .maybeSingle();
   if (error) throw new AppError("internal_error", 500);
-  const credential = await client.syncNamedCredential(
-    name,
-    type,
-    data,
-    binding?.credential_id,
-  );
+  const credential = await client.syncNamedCredential(name, type, data, binding?.credential_id);
   const rebound =
     binding?.credential_id && binding.credential_id !== credential.id
       ? await client.rebind(binding.credential_id, credential)
       : [];
+  // A deleted app binding cannot tell us the old n8n ID. Repair canonical named
+  // references as well, before declaring the replacement synchronized.
+  if (!binding?.credential_id || binding.credential_id !== credential.id)
+    rebound.push(...(await client.rebindNamed(name, type, credential)));
   const { error: saveError } = await db().from("n8n_bindings").upsert({
     owner_id: owner,
     provider,
@@ -61,6 +60,40 @@ async function bindCredential(
   if (saveError) throw new AppError("internal_error", 500);
   return credential;
 }
+async function prepareMissingCredentials(owner: string) {
+  const client = await n8nClient(owner);
+  const plans: { name: string; type: string; data: Record<string, string> }[] = [];
+  for (const [id, def] of Object.entries(internalRegistry)) {
+    const stored = await readSecret(owner, id);
+    const data = stored
+      ? (JSON.parse(decryptSecret(stored)) as Record<string, string>)
+      : def.data();
+    if (!stored) await storeSecret(owner, id, JSON.stringify(data), {});
+    plans.push({ name: def.name, type: def.type, data });
+  }
+  for (const id of ["deepseek", "embeddings"] as const) {
+    const stored = await readSecret(owner, id);
+    if (!stored) continue;
+    const def = providerRegistry[id];
+    plans.push({
+      name: def.credentialName,
+      type: def.credentialType,
+      data: def.toCredentialData(decryptSecret(stored)),
+    });
+  }
+  const current = await client.list<CredentialRef & { type: string }>("credentials");
+  for (const plan of plans) {
+    const matches = current.filter((c) => c.name === plan.name);
+    if (matches.length > 1) throw new AppError("credential_name_ambiguous", 409);
+    if (matches[0] && matches[0].type !== plan.type)
+      throw new AppError("credential_schema_mismatch", 409);
+  }
+  // n8n publishes updates to active workflows. Recreate all missing credentials
+  // before attempting any reference update, preserving active workflow identities.
+  for (const plan of plans)
+    if (!current.some((c) => c.name === plan.name))
+      await client.createCredential(plan.name, plan.type, plan.data);
+}
 export async function bootstrapInternal(owner = env().LOCAL_OWNER_ID) {
   if (!(await readSecret(owner, "n8n")) && env().N8N_API_KEY) {
     await storeSecret(owner, "n8n", env().N8N_API_KEY!, {
@@ -69,6 +102,7 @@ export async function bootstrapInternal(owner = env().LOCAL_OWNER_ID) {
     });
     await markIntegration(owner, "n8n", "ready");
   }
+  await prepareMissingCredentials(owner);
   const result: Record<string, CredentialRef> = {};
   for (const [id, def] of Object.entries(internalRegistry)) {
     result[id] = await withProviderLock(owner, id, async () => {
@@ -82,11 +116,7 @@ export async function bootstrapInternal(owner = env().LOCAL_OWNER_ID) {
   }
   return result;
 }
-export async function saveIntegration(
-  owner: string,
-  id: IntegrationId,
-  raw: IntegrationSave,
-) {
+export async function saveIntegration(owner: string, id: IntegrationId, raw: IntegrationSave) {
   return withProviderLock(owner, id, async () => {
     const input = IntegrationSaveSchema.parse(raw),
       config = IntegrationConfigSchema.parse(input),
@@ -98,8 +128,7 @@ export async function saveIntegration(
       IntegrationConfigSchema.parse(previous.config).baseUrl !== config.baseUrl
     )
       throw new AppError("key_required_for_new_url");
-    const key =
-      input.apiKey ?? (previous ? decryptSecret(previous) : undefined);
+    const key = input.apiKey ?? (previous ? decryptSecret(previous) : undefined);
     if (!key) throw new AppError("invalid_api_key");
     const started = Date.now();
     await def.validate(config, key);
@@ -122,26 +151,10 @@ export async function saveIntegration(
         def.toCredentialData(key),
       );
       await markIntegration(owner, id, "binding");
-      await ensureSmoke(
-        client,
-        id,
-        config,
-        credential,
-        internal["webhook-inbound"]!,
-      );
+      await ensureSmoke(client, id, config, credential, internal["webhook-inbound"]!);
       await markIntegration(owner, id, "synced");
-      const { data } = await client.webhook(
-        def.smokePath,
-        env().N8N_WEBHOOK_SECRET,
-        {},
-        60000,
-      );
-      if (
-        !data ||
-        typeof data !== "object" ||
-        !("ok" in data) ||
-        data.ok !== true
-      )
+      const { data } = await client.webhook(def.smokePath, env().N8N_WEBHOOK_SECRET, {}, 60000);
+      if (!data || typeof data !== "object" || !("ok" in data) || data.ok !== true)
         throw new AppError("provider_invalid_response", 502, true);
       await markIntegration(owner, id, "ready");
       await audit(owner, "integration_tested", id);
@@ -198,22 +211,16 @@ export async function deleteIntegration(owner: string, id: IntegrationId) {
         .eq("provider", id)
         .maybeSingle();
     if (binding?.credential_id)
-      await client
-        .request(`credentials/${binding.credential_id}`, "DELETE")
-        .catch((e) => {
-          if (!(e instanceof N8nApiError && e.httpStatus === 404)) throw e;
-        });
+      await client.request(`credentials/${binding.credential_id}`, "DELETE").catch((e) => {
+        if (!(e instanceof N8nApiError && e.httpStatus === 404)) throw e;
+      });
     const { error } = await db()
       .from("integration_secrets")
       .delete()
       .eq("owner_id", owner)
       .eq("provider", id);
     if (error) throw new AppError("internal_error", 500);
-    await db()
-      .from("n8n_bindings")
-      .delete()
-      .eq("owner_id", owner)
-      .eq("provider", id);
+    await db().from("n8n_bindings").delete().eq("owner_id", owner).eq("provider", id);
     await audit(owner, "integration_deleted", id);
     return integrationState(owner, id);
   });
@@ -225,10 +232,7 @@ export async function reapplyIntegrations(owner: string) {
   const providers = await Promise.all(
     ["deepseek", "embeddings"].map((id) => readSecret(owner, id)),
   );
-  if (
-    owner === env().LOCAL_OWNER_ID &&
-    providers.every((row) => row?.status === "ready")
-  )
+  if (owner === env().LOCAL_OWNER_ID && providers.every((row) => row?.status === "ready"))
     await deployWorkflows();
 }
 
@@ -247,8 +251,7 @@ export async function repairMissingCredentials(owner: string) {
         .eq("owner_id", owner)
         .eq("provider", id)
         .maybeSingle();
-      if (binding && existing.some((c) => c.id === binding.credential_id))
-        return;
+      if (binding && existing.some((c) => c.id === binding.credential_id)) return;
       const def = providerRegistry[id],
         credential = await bindCredential(
           owner,

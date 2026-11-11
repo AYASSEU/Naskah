@@ -121,7 +121,7 @@ export function Intake() {
             <p className="help-note">
               {t('standard')}
               <br />
-              {t('simulation')}
+              {t(services.mode === 'mock' ? 'simulation' : 'liveMode')}
             </p>
           </div>
         </aside>

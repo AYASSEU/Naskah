@@ -20,3 +20,9 @@ process. `worker.mjs` bounds output/time and kills the complete job process grou
 The helper supplies a private named font build context; do not copy font binaries
 or populated environment files into this repository. Build-time QA intermediates
 belong in ignored `artifacts/` or `compiler-service/output/`.
+
+B9 startup uses Docker --init so orphaned LibreOffice/GPG descendants are reaped.
+Do not omit it when launching the image manually. The runtime fingerprint includes
+this setting so existing containers are recreated safely without touching Storage
+or database volumes. Run node scripts/test-compiler-lifecycle.mjs for the repeated
+compile/process-count acceptance.

@@ -3013,3 +3013,26 @@ tbody tr:hover {
     scroll-margin-top: 138px;
   }
 }
+
+/* Evaluation controls wrap within the manuscript width on small screens. */
+.evaluation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.evaluation-actions > label {
+  display: grid;
+  flex: 1 1 18rem;
+  min-width: 0;
+  max-width: 100%;
+  gap: 8px;
+}
+.evaluation-actions input[type='file'] {
+  width: 100%;
+  max-width: 20rem;
+  min-width: 0;
+}
+.evaluation-page .field { min-width: 0; max-width: 100%; }
+.evaluation-page code { overflow-wrap: anywhere; }

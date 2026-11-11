@@ -11,6 +11,7 @@ const redact = (text) => {
   for (const secret of secrets) text = text.replaceAll(secret, '[REDACTED]');
   return text
     .replace(/naskah-(?:owner|evaluation-(?:dev|research))=[A-Za-z0-9_.-]+/g, '[REDACTED-SESSION]')
+    .replace(/naskah-test-b9-[a-f0-9]{32}/g, '[REDACTED-MOCK-KEY]')
     .replace(/github_pat_[A-Za-z0-9_]+/g, '[REDACTED]');
 };
 const child = spawn(

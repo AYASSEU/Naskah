@@ -225,7 +225,7 @@ HTTP recovery case passes and makes prior local projects usable in the ledger.
 
 ## Remaining implementation
 
-B9–B10 remain pending: broader live UI/research acceptance and final runbooks.
+B10 remains pending: real-study handoff and final documentation.
 B8 evaluation is implemented below using synthetic development acceptance. B7 server parsing/compilation is complete as described below. Generate and Revise now work from the
 UI with local n8n/Supabase and a mock provider. Phase 2 is not entirely complete.
 
@@ -329,3 +329,55 @@ Windows PowerShell 5 startup succeeds with all local services. Final UI HTTP 200
 backend ready, seven active workflows, compiler/evaluation healthy, provider and
 embeddings restricted to local mock port 4010, and research export empty. The
 webapp is restored to live backend mode; no push or real study run was performed.
+
+## B9 — connected local acceptance, 2026-11-11
+
+Added whole-project live browser acceptance, owner-scoped synthetic cleanup,
+encrypted test recovery and reproducible test:b9 orchestration. The pipeline uses
+its own generated/revised manuscript for real server DOCX/PDF and evaluation,
+including two expert/SUS identities, verified statistics/ROUGE and privacy exports.
+SSE replay uses a positive cursor; failed generation resumes without repeating
+the first chapter or losing a manual edit. Credential lifecycle tests verify
+actual mock key hashes, not only green Settings indicators.
+
+Found and repaired stale main-workflow references after credential deletion,
+bulk recovery against n8n's active-workflow publication validation, phone-width
+evaluation toolbar overflow and the live intake's simulation label. Binding
+repair is restricted by managed workflow namespace, canonical credential name
+and credential type. All missing credentials are recreated before a workflow
+update; orphaned sibling references are healed together and incomplete/ambiguous
+publication is blocked. No schema change or volume reset was required.
+
+The Phase 1 fixture suite is selected separately in mock mode; live counterparts
+test persisted entities and server features. Manual real-provider execution is
+not performed under the user's mock-only restriction. Exact user steps and
+remaining n8n/key/corpus requirements are in runbook.md; B10 remains pending.
+
+Repeated acceptance exposed over 100 orphaned LibreOffice/GPG zombies in the
+old compiler container, exhausting its 128-PID limit and eventually breaking both
+exports and parsing. The helper now uses Docker --init and fingerprints that
+runtime option, recreating only the stateless service. Thirty consecutive compile
+jobs preserve zero zombies and a bounded idle process count. Parser soak samples
+also wait up to three seconds for asynchronous temp cleanup to settle.
+
+Final B9 gate: 99 unit tests, strict typecheck, lint, production build, design
+audit and all 26 contrast pairs pass. The complete test:b9 invocation passes:
+14 live UI cases across light/dark, 26 B5 real-webhook cases, ten B6 HTTP cases,
+six B7 document groups, seven B8 evaluation groups, 19 Python numerical tests
+and database integrity/anonymous denial for 29 tables. The 20 original mock UI
+cases also pass separately. Five document-worker bounds/descendant cases pass.
+
+Parser soak measures 200 calls after 20 warm-up calls, with RSS range 2097152
+bytes. Thirty repeated compiles keep zero zombies and a stable three-process
+probe count. The complete live suite now remains healthy after repeated exports.
+The mock-UI preflight rejection is verified before a recovery snapshot is written.
+Security/performance advisors report no warn/error issues. Repository, artifact,
+public-bundle, workflow/execution and server-log credential scans pass.
+
+Temporary synthetic projects, participants and derived reports were cleaned;
+original provider settings were restored and the encrypted recovery snapshot was
+removed. Generated baseline screenshots were restored. Final Windows PowerShell 5
+startup succeeds; UI HTTP 200, live backend ready, seven active workflows, mock
+provider port 4010, compiler init enabled, evaluator healthy and research export
+empty. No real-provider execution, research promotion, schema reset or push was
+performed. User-controlled real-provider steps remain in runbook.md.

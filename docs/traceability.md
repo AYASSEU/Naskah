@@ -56,3 +56,13 @@ export checks and both-theme live flows cover the implementation. Research scope
 excludes mock/dev_seed runs; all executed acceptance is synthetic. Participant
 means avoid pseudoreplication, with explicit paired/independent analysis design.
 See B8-evaluation.md for limits, assumptions and CLI reproduction.
+
+## B9 connected acceptance — 2026-11-11
+
+The same persisted project now travels from text or PDF/TXT intake through
+generation/reconnect/recovery, manual edit, accepted/rejected revision, DOCX/PDF
+and consented evaluation. Live Settings proves the actual provider key hash after
+create, rotation and full credential recovery. Both themes and all four evaluation
+tabs at phone width are covered. The complete FR/route/workflow/test mapping is
+in [B9-end-to-end.md](B9-end-to-end.md); user-triggered real-provider steps are in
+[runbook.md](runbook.md). These are mock acceptance results, not thesis findings.
