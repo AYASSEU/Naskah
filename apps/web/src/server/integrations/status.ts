@@ -50,7 +50,7 @@ export async function systemStatus(owner: string): Promise<SystemStatus> {
     (tx) =>
       tx<
         { dataset_source: string; embedding_model: string; count: number }[]
-      >`select dataset_source,embedding_model,count(*)::int as count from public.srs_knowledge_base where owner_id=${owner} group by dataset_source,embedding_model`,
+      >`select dataset_source,embedding_model,count(*)::int as count from public.webapp_pure_chunks k where k.owner_id=${owner} group by dataset_source,embedding_model`,
   );
   const datasets: Record<string, number> = {};
   for (const row of rows)

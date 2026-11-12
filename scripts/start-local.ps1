@@ -18,6 +18,17 @@ if($nodeCommand){$nodePath=$nodeCommand.Source}else{
 }
 if(-not (Test-Path -LiteralPath $nodePath)){throw 'Executable Node.js tidak tersedia.'}
 $pnpmCli=Join-Path (Split-Path $nodePath -Parent) '..\node_modules\pnpm\bin\pnpm.mjs'
+# IDE terminals may select a different Node installation without npm/pnpm.
+# Share the installed package-manager entry with every local helper.
+if(-not (Test-Path -LiteralPath $pnpmCli)){
+  $packageManagerRuntime=Get-AppxPackage -Name 'OpenAI.CodexPrimaryRuntime*' |
+    Sort-Object Version -Descending | Select-Object -First 1
+  if($packageManagerRuntime){
+    $candidateCli=Join-Path $packageManagerRuntime.InstallLocation 'dependencies\node\node_modules\pnpm\bin\pnpm.mjs'
+    if(Test-Path -LiteralPath $candidateCli){$pnpmCli=$candidateCli}
+  }
+}
+if(Test-Path -LiteralPath $pnpmCli){$env:PNPM_CLI_PATH=(Resolve-Path -LiteralPath $pnpmCli).Path}
 if(-not (Test-Path -LiteralPath 'apps\web\node_modules\next\dist\bin\next')){
   if(-not (Test-Path -LiteralPath $pnpmCli)){throw 'Pasang dependency proyek dengan pnpm 11.25.0 terlebih dahulu.'}
   & $nodePath $pnpmCli install --frozen-lockfile
@@ -66,6 +77,9 @@ if($Mode -eq 'live' -and -not (Test-Path -LiteralPath 'apps\web\.env.local')){
 if($Mode -eq 'live'){
   & $nodePath 'scripts/local-evaluation.mjs'
   if($LASTEXITCODE -ne 0){throw 'Layanan evaluasi lokal gagal dijalankan.'}
+  if(Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'naskah-runtime/e5.env')){
+    & (Join-Path $PSScriptRoot 'start-e5.ps1')
+  }
   & $nodePath 'scripts/local-compiler.mjs'
   if($LASTEXITCODE -ne 0){throw 'Layanan dokumen lokal gagal dijalankan.'}
 }

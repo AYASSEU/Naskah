@@ -16,3 +16,8 @@ ingestion/output/
 compiler-service/output/
 artifacts/
 infra/.env.local
+
+# Local provider credentials and service token files
+*.env
+.envrc
+!.env.example

@@ -52,9 +52,9 @@ def embedding_config(use_app_settings):
     return config, key
 
 
-def embed_batch(config,key,texts):
+def embed_batch(config,key,texts, role="query"):
     response = request(config['baseUrl'].rstrip('/')+'/embeddings','POST',
-                       {'model':config['model'],'dimensions':config['dimensions'],'input':texts},
+                       {'model':config['model'],'dimensions':config['dimensions'],'input':texts, **({'input_type':role} if config['model']=='multilingual-e5-small-614241f6-pad1536' else {})},
                        {'Authorization':f'Bearer {key}'})
     if response.get('model') and response['model'] != config['model']:
         raise ValueError('embedding_model_mismatch')
@@ -142,7 +142,7 @@ def embed(args):
     try:
         for offset in range(0,len(remaining),32):
             batch = remaining[offset:offset+32]
-            vectors = embed_batch(config,key,[row['content'] for row in batch])
+            vectors = embed_batch(config,key,[row['content'] for row in batch], role='passage')
             with cache_path.open('a',encoding='utf-8') as handle:
                 for row,vector in zip(batch,vectors):
                     handle.write(json.dumps({'content_hash':row['content_hash'],'embedding_model':config['model'],'dimensions':1536,'embedding':vector})+'\n')

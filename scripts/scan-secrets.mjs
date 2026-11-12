@@ -33,7 +33,7 @@ for (const path of files) {
   const text = readFileSync(path, 'utf8');
   if (
     secrets.some((s) => text.includes(s)) ||
-    /github_pat_[A-Za-z0-9_]{30,}|naskah-test-b9-[a-f0-9]{32}|naskah-(?:owner|evaluation-(?:dev|research))=[A-Za-z0-9_.-]{40,}/.test(
+    /\bsk-[A-Za-z0-9_-]{32,}\b|github_pat_[A-Za-z0-9_]{30,}|naskah-test-b9-[a-f0-9]{32}|naskah-(?:owner|evaluation-(?:dev|research))=[A-Za-z0-9_.-]{40,}/.test(
       text,
     )
   )

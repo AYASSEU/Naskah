@@ -40,3 +40,27 @@ Kaggle discovery identifies `corpus4panwo/fault-prone-srs-dataset`, but publishe
 Tokens use `ceil(character_count / 4)`, an approximation, not billing tokens. Target 450, range 300–600, short final chunks allowed. Unknown headings remain `unknown`; confidence is recorded. Whole-statement overlap is capped at 15%, approximating 12.5%; it may fall below 10% when a complete statement would exceed the cap. Requirements are never split to meet overlap targets.
 
 Verification paginates all rows and checks duplicate hashes, document leakage, model/dimensions, token bounds, counts and section-filtered retrieval. Cost is zero only for mock tests, otherwise unknown unless `EMBEDDING_USD_PER_MILLION_TOKENS` is set. Provider billing is authoritative.
+
+## Indeks PURE dengan embedding multibahasa lokal
+
+Untuk instalasi Windows yang sudah menjalankan evaluator lokal, jalankan
+`powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-e5.ps1`.
+Layanan ini memakai CPU dan bobot intfloat/multilingual-e5-small pada revisi
+`614241f622f53c4eeff9890bdc4f31cfecc418b3`. Port host 4011 hanya terbuka
+pada loopback. Setelah pemasangan, startup live juga memeriksa layanan ini.
+
+Untuk mengindeks ulang snapshot Kaggle PURE yang sudah dimuat, jalankan
+`python -m ingestion.reindex_pure_e5` dari root repo. Proses ini mengambil
+potongan berdasarkan sumber Kaggle milik owner lokal, membuat vektor, lalu
+memperbarui seluruh baris tersebut dalam satu permintaan database.
+Di Settings Embeddings pilih custom, gunakan endpoint
+`http://host.docker.internal:4011/v1`, model
+`multilingual-e5-small-614241f6-pad1536`, dimensi 1536, dan token lokal
+di `%LOCALAPPDATA%\naskah-runtime\e5.env` (nilai setelah tanda sama dengan).
+Simpan dan jalankan uji sambungan.
+
+Teks dokumen memakai prefix `passage: ` dan kueri memakai `query: `.
+Untuk input panjang, server membagi token menjadi jendela maksimal 512,
+menjumlahkan representasi token bermasker, dan menormalisasi hasilnya.
+Vektor asli mempunyai 384 komponen. Penambahan 1152 nol mempertahankan
+cosine similarity pada kolom vector(1536) aplikasi.
