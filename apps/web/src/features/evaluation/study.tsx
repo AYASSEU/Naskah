@@ -121,7 +121,12 @@ function SusResults({ items }: { items: Session[] }) {
       {responses.length > 0 && (
         <details>
           <summary>Lihat rincian SUS</summary>
-          <div className="study-scroll">
+          <div
+            className="study-scroll sus-scroll"
+            role="region"
+            aria-label="Tabel rincian SUS"
+            tabIndex={0}
+          >
             <table>
               <thead>
                 <tr>

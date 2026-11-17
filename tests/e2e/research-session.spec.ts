@@ -25,6 +25,22 @@ test('independent expert session survives reload and unlocks SUS after submissio
   const card = page.getByRole('region', { name: 'Rata-rata SUS' });
   await expect(card).toContainText('50/100');
   await expect(card).toContainText('1 respons lengkap');
+  await card.getByText('Lihat rincian SUS').click();
+  const scroll = card.getByRole('region', { name: 'Tabel rincian SUS' });
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(
+      await scroll.evaluate((el) => {
+        el.scrollLeft = 120;
+        return el.scrollLeft > 0;
+      }),
+    ).toBe(true);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    ).toBe(true);
+  }
   const downloading = page.waitForEvent('download');
   await card.getByRole('button', { name: 'Unduh CSV SUS' }).click();
   const file = await downloading;

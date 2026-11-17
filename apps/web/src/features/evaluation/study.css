@@ -139,3 +139,23 @@
 .study-scroll td {
   min-width: 3rem;
 }
+.study,
+.study section,
+.study form {
+  grid-template-columns: minmax(0, 1fr);
+}
+.study details {
+  min-width: 0;
+  max-width: 100%;
+}
+.study .sus-scroll {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+}
+.sus-scroll table {
+  min-width: 92rem;
+}

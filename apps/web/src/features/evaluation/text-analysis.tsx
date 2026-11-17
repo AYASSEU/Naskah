@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { ManualComparison } from './manual-comparison';
 import { useState } from 'react';
 import type { EvaluationScope } from '@naskah/contracts';
 import { useServices } from '@/shared/lib/providers';
@@ -52,6 +53,7 @@ export function TextAnalysis() {
         DistilBERT multilingual menghitung kemiripan kontekstual. Precision mengukur kecocokan token
         kandidat, recall mengukur cakupan token referensi, dan F1 menggabungkan keduanya.
       </p>
+      <ManualComparison />
       {research ? (
         <>
           <label>
@@ -110,9 +112,7 @@ export function TextAnalysis() {
             Unduh CSV BERTScore
           </a>
         </>
-      ) : (
-        <p>Jalankan backend lokal dalam mode live untuk mengakses kasus dan evaluator BERTScore.</p>
-      )}
+      ) : null}
     </main>
   );
 }
