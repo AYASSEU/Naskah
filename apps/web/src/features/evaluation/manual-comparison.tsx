@@ -1,5 +1,14 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import {
+  ArrowRight,
+  Calculator,
+  CheckCircle2,
+  Download,
+  FileText,
+  LoaderCircle,
+  Upload,
+} from 'lucide-react';
 import { parser } from '@/services/client/parser';
 import { downloadData } from '@/shared/lib/download';
 type Doc = { name: string; text: string; hash: string };
@@ -34,12 +43,23 @@ function FileSlot({
   disabled: boolean;
 }) {
   const version = useRef(0),
-    [error, setError] = useState('');
+    mounted = useRef(true),
+    [error, setError] = useState(''),
+    [reading, setReading] = useState(false);
+  const inputId = useId();
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   async function choose(file?: File) {
     const seq = ++version.current;
     onChange(null);
     setError('');
+    setReading(false);
     if (!file) return;
+    setReading(true);
     try {
       if (!/\.(pdf|txt)$/i.test(file.name) || file.size > 10 * 1024 * 1024)
         throw Error('Pilih PDF berisi teks atau TXT hingga 10 MB.');
@@ -53,28 +73,54 @@ function FileSlot({
       const hash = Array.from(new Uint8Array(digest), (v) => v.toString(16).padStart(2, '0')).join(
         '',
       );
-      if (seq === version.current) onChange({ name: file.name, text, hash });
+      if (mounted.current && seq === version.current) onChange({ name: file.name, text, hash });
     } catch (e) {
-      if (seq === version.current)
+      if (mounted.current && seq === version.current)
         setError(e instanceof Error ? e.message : 'Dokumen gagal dibaca.');
+    } finally {
+      if (mounted.current && seq === version.current) setReading(false);
     }
   }
   return (
-    <div>
-      <label>
-        {label}
+    <div className="bert-file-slot">
+      <div className={`bert-upload${doc ? ' has-document' : ''}${error ? ' has-error' : ''}`}>
         <input
+          id={inputId}
+          aria-label={label}
+          aria-describedby={`${inputId}-help${error ? ` ${inputId}-error` : ''}`}
+          aria-invalid={!!error}
           type="file"
           accept=".txt,.pdf"
           disabled={disabled}
           onChange={(e) => void choose(e.target.files?.[0])}
         />
-      </label>
-      {error && <p role="alert">{error}</p>}
+        <label htmlFor={inputId}>
+          <span className="bert-upload-icon" aria-hidden="true">
+            {reading ? <LoaderCircle className="bert-spinning" /> : doc ? <FileText /> : <Upload />}
+          </span>
+          <strong className="bert-filename">
+            {reading ? 'Membaca dokumen…' : (doc?.name ?? 'Pilih dokumen')}
+          </strong>
+          <span id={`${inputId}-help`}>
+            {doc
+              ? `${doc.text.length.toLocaleString('id-ID')} karakter terbaca`
+              : 'PDF berisi teks atau TXT · Maks. 10 MB'}
+          </span>
+          <span className="bert-file-action">
+            {doc ? 'Ganti dokumen' : 'Jelajahi file'}
+            <ArrowRight aria-hidden="true" />
+          </span>
+        </label>
+      </div>
+      {error && (
+        <p className="bert-error" id={`${inputId}-error`} role="alert">
+          {error}
+        </p>
+      )}
       {doc && (
-        <details>
-          <summary>Pratinjau · {doc.text.length.toLocaleString('id-ID')} karakter</summary>
-          <p style={{ whiteSpace: 'pre-wrap', maxHeight: 220, overflow: 'auto' }}>{doc.text}</p>
+        <details className="bert-preview">
+          <summary>Lihat teks yang terbaca</summary>
+          <p>{doc.text}</p>
         </details>
       )}
     </div>
@@ -117,11 +163,19 @@ function Results({ run, history }: { run: Run; history: Run[] }) {
     );
   }
   return (
-    <section>
-      <h2>Hasil proyek {run.project}</h2>
-      <p>
-        {run.baseline} · {run.language.toUpperCase()}
-      </p>
+    <section className="bert-results" aria-label="Hasil BERTScore">
+      <div className="bert-section-heading">
+        <div>
+          <h2>Hasil perbandingan</h2>
+          <p>
+            Proyek {run.project} · Baseline {run.baseline} · {run.language.toUpperCase()}
+          </p>
+        </div>
+        <button className="bert-secondary" onClick={exportCsv}>
+          <Download aria-hidden="true" />
+          Unduh CSV BERTScore
+        </button>
+      </div>
       {options.length > 0 && (
         <label>
           Pasangan metode lain
@@ -135,7 +189,19 @@ function Results({ run, history }: { run: Run; history: Run[] }) {
           </select>
         </label>
       )}
-      <div className="study-scroll">
+      <div className="bert-scorecards">
+        {rows.map((r) => (
+          <div className="bert-scorecard" key={r.id}>
+            <span>{r.method}</span>
+            <p>
+              <strong>{r.f1.toFixed(4)}</strong>
+              <span>F1</span>
+            </p>
+            <span className="bert-filename">{r.candidate}</span>
+          </div>
+        ))}
+      </div>
+      <div className="bert-table-scroll" role="region" aria-label="Rincian skor" tabIndex={0}>
         <table>
           <thead>
             <tr>
@@ -159,7 +225,7 @@ function Results({ run, history }: { run: Run; history: Run[] }) {
           </tbody>
         </table>
       </div>
-      <div className="bert-chart">
+      <div className="bert-chart" aria-label="Grafik perbandingan skor">
         {metrics.map((m) => (
           <div key={m}>
             <strong>{m.toUpperCase()}</strong>
@@ -181,12 +247,11 @@ function Results({ run, history }: { run: Run; history: Run[] }) {
         ))}
       </div>
       {other && (
-        <p>
+        <p className="bert-difference">
           Selisih F1 (LLM + RAG dikurangi LLM-only):{' '}
           <strong>{(rows[1]!.f1 - rows[0]!.f1).toFixed(4)}</strong>
         </p>
       )}
-      <button onClick={exportCsv}>Unduh CSV BERTScore</button>
     </section>
   );
 }
@@ -268,75 +333,119 @@ export function ManualComparison() {
   }
   return (
     <>
-      <section>
-        <h2>Bandingkan dokumen SRS</h2>
-        <label>
-          Kode proyek
-          <select
-            disabled={busy}
-            value={project}
-            onChange={(e) => {
-              setProject(e.target.value);
-              setBaseline(null);
-              setCandidate(null);
-              setSlot((s) => s + 1);
-            }}
-          >
-            {['A', 'B', 'C'].map((p) => (
-              <option key={p}>{p}</option>
-            ))}
-          </select>
-        </label>
-        <fieldset disabled={busy}>
-          <FileSlot
-            key={project}
-            label="SRS baseline manusia"
-            doc={baseline}
-            onChange={setBaseline}
-            disabled={busy}
-          />
-          <label>
-            Bahasa baseline
-            <select value={baseLang} onChange={(e) => setBaseLang(e.target.value)}>
-              <option value="id">Indonesia</option>
-              <option value="en">English</option>
-            </select>
-          </label>
-        </fieldset>
-        <fieldset disabled={busy}>
-          <label>
-            Metode pembanding
-            <select value={method} onChange={(e) => setMethod(e.target.value as Method)}>
-              {methods.map((m) => (
-                <option key={m}>{m}</option>
+      <section className="bert-comparison" aria-labelledby="bert-compare-title">
+        <div className="bert-section-heading">
+          <div>
+            <h2 id="bert-compare-title">Bandingkan dokumen SRS</h2>
+            <p>Gunakan dua dokumen dari brief proyek yang sama.</p>
+          </div>
+          <label className="bert-project">
+            Kode proyek
+            <select
+              disabled={busy}
+              value={project}
+              onChange={(e) => {
+                setProject(e.target.value);
+                setBaseline(null);
+                setCandidate(null);
+                setSlot((s) => s + 1);
+              }}
+            >
+              {['A', 'B', 'C'].map((p) => (
+                <option key={p}>{p}</option>
               ))}
             </select>
           </label>
-          <FileSlot
-            key={slot}
-            label="SRS pembanding"
-            doc={candidate}
-            onChange={setCandidate}
-            disabled={busy}
-          />
-          <label>
-            Bahasa pembanding
-            <select value={candLang} onChange={(e) => setCandLang(e.target.value)}>
-              <option value="id">Indonesia</option>
-              <option value="en">English</option>
-            </select>
-          </label>
-        </fieldset>
-        {baseLang !== candLang && <p role="alert">Pilih dua dokumen dengan bahasa yang sama.</p>}
-        <button
-          disabled={busy || !baseline || !candidate || baseLang !== candLang}
-          onClick={calculate}
-        >
-          Hitung BERTScore lokal
-        </button>
-        <output aria-live="polite">{message}</output>
+        </div>
+        <div className="bert-document-grid">
+          <fieldset className="bert-document" disabled={busy}>
+            <legend>Baseline manusia</legend>
+            <p className="bert-document-note">Dokumen acuan untuk kedua metode.</p>
+            <FileSlot
+              key={project}
+              label="SRS baseline manusia"
+              doc={baseline}
+              onChange={setBaseline}
+              disabled={busy}
+            />
+            <div className="bert-document-controls">
+              <label>
+                Bahasa baseline
+                <select value={baseLang} onChange={(e) => setBaseLang(e.target.value)}>
+                  <option value="id">Indonesia</option>
+                  <option value="en">English</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset className="bert-document" disabled={busy}>
+            <legend>Dokumen pembanding</legend>
+            <p className="bert-document-note">SRS hasil LLM-only atau LLM + RAG.</p>
+            <FileSlot
+              key={slot}
+              label="SRS pembanding"
+              doc={candidate}
+              onChange={setCandidate}
+              disabled={busy}
+            />
+            <div className="bert-document-controls">
+              <label>
+                Metode pembanding
+                <select value={method} onChange={(e) => setMethod(e.target.value as Method)}>
+                  {methods.map((m) => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Bahasa pembanding
+                <select value={candLang} onChange={(e) => setCandLang(e.target.value)}>
+                  <option value="id">Indonesia</option>
+                  <option value="en">English</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+        {baseLang !== candLang && (
+          <p className="bert-error" role="alert">
+            Pilih dua dokumen dengan bahasa yang sama.
+          </p>
+        )}
+        <div className="bert-actionbar">
+          <div className="bert-readiness">
+            {baseline && candidate ? (
+              <CheckCircle2 aria-hidden="true" />
+            ) : (
+              <FileText aria-hidden="true" />
+            )}
+            <span>
+              {baseline && candidate
+                ? 'Kedua dokumen siap dibandingkan'
+                : 'Pilih baseline dan dokumen pembanding.'}
+            </span>
+          </div>
+          <button
+            className="bert-primary"
+            disabled={busy || !baseline || !candidate || baseLang !== candLang}
+            onClick={calculate}
+          >
+            {busy ? (
+              <LoaderCircle className="bert-spinning" aria-hidden="true" />
+            ) : (
+              <Calculator aria-hidden="true" />
+            )}
+            Hitung BERTScore lokal
+          </button>
+        </div>
+        {message && (
+          <output className="bert-message" aria-live="polite">
+            {message}
+          </output>
+        )}
         {current && baseline?.hash === current.baseHash && project === current.project && (
           <button
+            className="bert-secondary"
             disabled={busy}
             onClick={() => {
               setMethod(current.method === methods[0] ? methods[1]! : methods[0]!);
@@ -346,11 +455,12 @@ export function ManualComparison() {
             }}
           >
             Bandingkan metode lain
+            <ArrowRight aria-hidden="true" />
           </button>
         )}
       </section>
       {history.length > 0 && (
-        <label>
+        <label className="bert-history">
           Riwayat hasil
           <select value={selected} onChange={(e) => setSelected(e.target.value)}>
             {history.map((r) => (

@@ -1,0 +1,78 @@
+.route-loading {
+  display: grid;
+  place-items: center;
+  min-height: min(65vh, 620px);
+  padding: 32px;
+  color: var(--ink);
+}
+.route-loading-overlay {
+  position: fixed;
+  inset: 56px 0 0;
+  z-index: 40;
+  min-height: 0;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(8px);
+}
+.route-loading-content {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  text-align: center;
+}
+.route-loading-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-1);
+  color: var(--gold-text);
+}
+.route-loading-icon svg {
+  width: 25px;
+  height: 25px;
+  animation: route-turn 1.4s linear infinite;
+}
+.route-loading-content p {
+  font-family: var(--font-serif), serif;
+  font-size: 24px;
+}
+.route-loading-track {
+  width: 128px;
+  height: 2px;
+  overflow: hidden;
+  background: var(--line);
+  border-radius: 2px;
+}
+.route-loading-track span {
+  display: block;
+  height: 100%;
+  width: 45%;
+  background: var(--gold);
+  animation: route-progress 1.5s ease-in-out infinite;
+}
+@keyframes route-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes route-progress {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(330%);
+  }
+}
+@media (max-width: 700px) {
+  .route-loading-overlay {
+    top: 52px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-loading-icon svg,
+  .route-loading-track span {
+    animation: none;
+  }
+}

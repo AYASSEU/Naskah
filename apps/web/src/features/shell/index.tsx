@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { NavigationLink } from '@/shared/ui/navigation-link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -59,17 +60,22 @@ export function Shell({
           </span>
         </div>
         <nav className="main-nav" aria-label={t('documents')}>
-          <Link
+          <NavigationLink
+            loadingLabel={locale === 'id' ? 'Memuat dokumen…' : 'Loading documents…'}
             href="/"
             className={path === '/' || workspace || path.startsWith('/export') ? 'active' : ''}
           >
             <BookOpen />
             {t('documents')}
-          </Link>
-          <Link href="/evaluation" className={path.startsWith('/evaluation') ? 'active' : ''}>
+          </NavigationLink>
+          <NavigationLink
+            loadingLabel={locale === 'id' ? 'Memuat evaluasi…' : 'Loading evaluation…'}
+            href="/evaluation"
+            className={path.startsWith('/evaluation') ? 'active' : ''}
+          >
             <FlaskConical />
             {t('evaluation')}
-          </Link>
+          </NavigationLink>
         </nav>
         <div className="header-actions">
           <button
