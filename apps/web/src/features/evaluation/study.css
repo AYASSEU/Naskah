@@ -159,3 +159,25 @@
 .sus-scroll table {
   min-width: 92rem;
 }
+.bert-chart,
+.bert-chart > div {
+  display: grid;
+  gap: 0.5rem;
+}
+.bert-bar {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) 4rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.bert-track {
+  background: var(--surface-2);
+  height: 0.6rem;
+  border-radius: 0.3rem;
+  overflow: hidden;
+}
+.bert-track i {
+  display: block;
+  height: 100%;
+}

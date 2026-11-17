@@ -49,9 +49,10 @@ export function TextAnalysis() {
       <Link href="/evaluation">← Evaluasi penelitian</Link>
       <h1>Analisis teks BERTScore</h1>
       <p>
-        Bandingkan snapshot SRS kandidat dengan teks referensi pada kasus yang sama. Model
-        DistilBERT multilingual menghitung kemiripan kontekstual. Precision mengukur kecocokan token
-        kandidat, recall mengukur cakupan token referensi, dan F1 menggabungkan keduanya.
+        Pilih satu SRS manusia sebagai baseline, lalu bandingkan dokumen LLM-only dan LLM + RAG dari
+        proyek yang sama. Model DistilBERT multilingual menghitung kemiripan kontekstual. Precision
+        mengukur kecocokan token kandidat, recall mengukur cakupan token referensi, dan F1
+        menggabungkan keduanya.
       </p>
       <ManualComparison />
       {research ? (

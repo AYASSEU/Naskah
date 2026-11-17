@@ -7,6 +7,15 @@ import { rateLimit } from '@/server/http/rate-limit';
 const passage = z.string().trim().min(1).max(100000);
 const input = z.object({ candidate: passage, reference: passage, language: z.enum(['id', 'en']) });
 const report = z.object({
+  provenance: z.object({
+    model: z.string(),
+    revision: z.string(),
+    engine: z.string(),
+    layer: z.number(),
+    window_tokens: z.number(),
+    idf: z.boolean(),
+    rescale_with_baseline: z.boolean(),
+  }),
   results: z.tuple([z.object({ precision: z.number(), recall: z.number(), f1: z.number() })]),
 });
 
@@ -29,7 +38,7 @@ export async function POST(request: Request) {
       },
       report,
     );
-    return json(result.results[0]);
+    return json({ ...result.results[0], provenance: result.provenance });
   } catch (error) {
     return errorResponse(error);
   }
