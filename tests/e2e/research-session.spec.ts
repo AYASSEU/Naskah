@@ -19,11 +19,24 @@ test('independent expert session survives reload and unlocks SUS after submissio
   await page.getByRole('button', { name: 'SUS', exact: true }).click();
   for (const radio of await page.locator('input[type=radio][value="5"]').all()) await radio.check();
   await page.getByRole('button', { name: 'Simpan SUS' }).click();
+  await expect(page.getByText('Skor SUS Anda: 50/100')).toBeVisible();
+  await page.getByRole('button', { name: 'Hasil', exact: true }).click();
+  await page.getByLabel('Kode proyek').selectOption('B');
+  const card = page.getByRole('region', { name: 'Rata-rata SUS' });
+  await expect(card).toContainText('50/100');
+  await expect(card).toContainText('1 respons lengkap');
+  const downloading = page.waitForEvent('download');
+  await card.getByRole('button', { name: 'Unduh CSV SUS' }).click();
+  const file = await downloading;
+  const { readFile } = await import('node:fs/promises');
+  const csv = await readFile((await file.path())!, 'utf8');
+  expect(csv.split('\r\n')).toHaveLength(2);
+  expect(csv).toContain('"Skor SUS"');
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Pilot instrumen' })).toBeVisible();
   await page.getByRole('button', { name: 'Muat sesi' }).click();
   await page.getByRole('button', { name: 'SUS', exact: true }).click();
-  await expect(page.getByText('Skor SUS tersimpan: 50/100')).toBeVisible();
+  await expect(page.getByText('Skor SUS Anda: 50/100')).toBeVisible();
 });
 
 test('multiple experts and sessions aggregate by project and export individual scores', async ({

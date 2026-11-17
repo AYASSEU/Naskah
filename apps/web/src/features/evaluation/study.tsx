@@ -71,11 +71,100 @@ function Matrix({
   );
 }
 const docCode = (project: string, i: number) => project + '0' + (i + 1);
+function downloadCsv(filename: string, header: string[], rows: string[][]) {
+  const escape = (v: string) =>
+    '"' + (/^[=+@\-\t\r]/.test(v) ? "'" : '') + v.replaceAll('"', '""') + '"';
+  const url = URL.createObjectURL(
+    new Blob(['\ufeff' + [header, ...rows].map((row) => row.map(escape).join(',')).join('\r\n')], {
+      type: 'text/csv;charset=utf-8',
+    }),
+  );
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function SusResults({ items }: { items: Session[] }) {
+  const responses = items.flatMap((s) => s.reviews.filter((r) => r.sus).map((r) => ({ s, r })));
+  const rows = responses.map(({ s, r }) => [
+    s.name,
+    r.initials,
+    ...r.sus!.answers.map(String),
+    ...r.sus!.feedback,
+    String(r.sus!.score),
+  ]);
+  const headers = [
+    'Sesi',
+    'Inisial peserta',
+    ...instrument.questions,
+    ...instrument.feedback,
+    'Skor SUS',
+  ];
+  return (
+    <section aria-label="Rata-rata SUS">
+      <h3>Rata-rata SUS</h3>
+      {responses.length ? (
+        <>
+          <strong>
+            {(
+              responses.reduce((sum, { r }) => sum + r.sus!.score, 0) / responses.length
+            ).toLocaleString('id-ID', { maximumFractionDigits: 2 })}
+            /100
+          </strong>
+          <span>{responses.length} respons lengkap</span>
+          <button onClick={() => downloadCsv('hasil-sus.csv', headers, rows)}>Unduh CSV SUS</button>
+        </>
+      ) : (
+        <p>Belum ada respons SUS.</p>
+      )}
+      {responses.length > 0 && (
+        <details>
+          <summary>Lihat rincian SUS</summary>
+          <div className="study-scroll">
+            <table>
+              <thead>
+                <tr>
+                  {[
+                    'Sesi',
+                    'Inisial peserta',
+                    ...instrument.questions,
+                    ...instrument.feedback,
+                    'Skor SUS',
+                  ].map((h) => (
+                    <th key={h}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {responses.map(({ s, r }) => (
+                  <tr key={r.id}>
+                    <td>{s.name}</td>
+                    <td>{r.initials}</td>
+                    {[...r.sus!.answers, ...r.sus!.feedback, r.sus!.score].map((v, i) => (
+                      <td key={i}>{v}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+    </section>
+  );
+}
 function Results({ items, project }: { items: Session[]; project: string }) {
   const reviews = items.flatMap((s) =>
     s.reviews.filter((r) => r.project === project && r.ratings).map((r) => ({ s, r })),
   );
-  if (!reviews.length) return <p>Belum ada penilaian tersimpan untuk pilihan ini.</p>;
+  if (!reviews.length)
+    return (
+      <>
+        <p>Belum ada penilaian tersimpan untuk pilihan ini.</p>
+        <SusResults items={items} />
+      </>
+    );
   const header = [
     'Sesi',
     'Proyek',
@@ -86,7 +175,6 @@ function Results({ items, project }: { items: Session[]; project: string }) {
     'Dimensi',
     'Skor',
     'Catatan',
-    'SUS',
   ];
   const rows = reviews.flatMap(({ s, r }) =>
     r.ratings!.flatMap((ratings, i) =>
@@ -100,25 +188,9 @@ function Results({ items, project }: { items: Session[]; project: string }) {
         dimensions[j]!,
         String(n),
         r.notes?.[i] ?? '',
-        String(r.sus?.score ?? ''),
       ]),
     ),
   );
-  function csv() {
-    const escape = (v: string) =>
-      '"' + (/^[=+@\-\t\r]/.test(v) ? "'" : '') + v.replaceAll('"', '""') + '"';
-    const url = URL.createObjectURL(
-      new Blob(
-        ['\ufeff' + [header, ...rows].map((row) => row.map(escape).join(',')).join('\r\n')],
-        { type: 'text/csv;charset=utf-8' },
-      ),
-    );
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'penilaian-' + project + '.csv';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
   return (
     <>
       <h3>Hasil proyek {project}</h3>
@@ -156,42 +228,10 @@ function Results({ items, project }: { items: Session[]; project: string }) {
           </tbody>
         </table>
       </div>
-      {reviews.some(({ r }) => r.sus) && (
-        <details>
-          <summary>Jawaban dan masukan SUS</summary>
-          <div className="study-scroll">
-            <table>
-              <thead>
-                <tr>
-                  {[
-                    'Sesi',
-                    'Inisial peserta',
-                    ...instrument.questions,
-                    ...instrument.feedback,
-                    'Skor SUS',
-                  ].map((h) => (
-                    <th key={h}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {reviews
-                  .filter(({ r }) => r.sus)
-                  .map(({ s, r }) => (
-                    <tr key={r.id}>
-                      <td>{s.name}</td>
-                      <td>{r.initials}</td>
-                      {[...r.sus!.answers, ...r.sus!.feedback, r.sus!.score].map((v, i) => (
-                        <td key={i}>{v}</td>
-                      ))}
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </details>
-      )}
-      <button onClick={csv}>Unduh rincian CSV</button>
+      <SusResults items={items} />
+      <button onClick={() => downloadCsv('penilaian-' + project + '.csv', header, rows)}>
+        Unduh rincian CSV
+      </button>
       <div className="study-scroll">
         <table>
           <thead>
@@ -310,7 +350,7 @@ export function Evaluation() {
       },
       () => {
         setSelected([active]);
-        setView('Hasil');
+        if (view !== 'SUS') setView('Hasil');
       },
     );
   }
@@ -590,7 +630,7 @@ export function Evaluation() {
             </select>
           </label>
           {review?.sus ? (
-            <p>Skor SUS tersimpan: {review.sus.score}/100</p>
+            <p role="status">Skor SUS Anda: {review.sus.score}/100</p>
           ) : (
             <form key={expert} onSubmit={submit}>
               <p>1 Sangat Tidak Setuju · 2 Tidak Setuju · 3 Netral · 4 Setuju · 5 Sangat Setuju</p>
