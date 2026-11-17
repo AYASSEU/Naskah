@@ -5,8 +5,6 @@ import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { usePreferences } from '@/shared/lib/ui-store';
 import { useServices, useToast } from '@/shared/lib/providers';
-import { appEvents } from '@/shared/lib/events';
-import { flags } from '@/shared/config/flags';
 import { Button, Toggle, Select } from '@/shared/ui';
 import { AiConnectionSettings } from './ai-connection';
 import { IntegrationsSettings } from './integrations';
@@ -131,17 +129,6 @@ export function Settings() {
           {error && <p className="inline-error">{error}</p>}
         </div>
       </section>
-      {flags.devtools && (
-        <section className="settings-section">
-          <h2>{t('developer')}</h2>
-          <div>
-            <Button onClick={() => appEvents.emit('devtools', undefined)}>{t('developer')}</Button>
-            <p className="help-note" style={{ marginTop: 10 }}>
-              Ctrl + Shift + D
-            </p>
-          </div>
-        </section>
-      )}
     </main>
   );
 }

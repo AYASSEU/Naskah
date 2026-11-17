@@ -1,0 +1,77 @@
+{
+  "title": "INSTRUMEN PENILAIAN PAKAR KUALITAS SOFTWARE REQUIREMENTS SPECIFICATION (SRS)",
+  "study": "Penelitian: Implementasi Retrieval-Augmented Generation dengan Large Language Model untuk Otomatisasi Pembuatan Software Requirements Specification Berstandar IEEE",
+  "purpose": "Instrumen ini digunakan untuk mengevaluasi kualitas dokumen Software Requirements Specification (SRS) aplikasi web berdasarkan empat dimensi, yaitu Unambiguous, Complete, Correct, dan Verifiable. Evaluasi dilakukan terhadap dokumen secara keseluruhan dengan mempertimbangkan kesesuaian isi requirement terhadap brief kebutuhan proyek yang diberikan.",
+  "instructions": [
+    "Bacalah brief kebutuhan proyek dan dokumen SRS yang diberikan secara menyeluruh sebelum memberikan penilaian.",
+    "Nilailah kualitas dokumen berdasarkan informasi kebutuhan yang tersedia dalam brief proyek.",
+    "Gunakan pertanyaan pemeriksaan sebagai panduan untuk menentukan skor pada setiap dimensi.",
+    "Berikan satu skor dengan rentang 1-5 untuk setiap dimensi penilaian.",
+    "Cantumkan komentar atau contoh requirement yang mendukung hasil penilaian, terutama ketika ditemukan kekurangan.",
+    "Penilaian dilakukan secara independen tanpa mengetahui sumber penyusunan dokumen SRS."
+  ],
+  "scale": [
+    ["Skor", "Kategori", "Deskripsi Umum"],
+    [
+      "1",
+      "Sangat rendah",
+      "Hampir seluruh requirement menunjukkan permasalahan serius pada dimensi yang dinilai."
+    ],
+    ["2", "Rendah", "Banyak requirement belum memenuhi karakteristik yang dinilai."],
+    [
+      "3",
+      "Cukup",
+      "Sebagian requirement sudah memenuhi karakteristik, tetapi masih terdapat sejumlah kekurangan."
+    ],
+    ["4", "Baik", "Sebagian besar requirement memenuhi karakteristik, dengan sedikit kekurangan."],
+    [
+      "5",
+      "Sangat baik",
+      "Seluruh atau hampir seluruh requirement memenuhi karakteristik yang dinilai tanpa kekurangan berarti."
+    ]
+  ],
+  "criteria": [
+    [
+      "D1 (U) - Unambiguous (Kejelasan dan Ketidakambiguan)",
+      "Definisi: Requirement dinyatakan secara jelas sehingga tidak menimbulkan lebih dari satu interpretasi mengenai kebutuhan atau perilaku sistem.",
+      "Pertanyaan pemeriksaan:\nU1. Apakah setiap pernyataan requirement menggunakan bahasa yang jelas sehingga tidak menimbulkan lebih dari satu interpretasi?\nU2. Apakah istilah teknis, nama aktor, dan objek yang digunakan memiliki makna yang jelas dan digunakan secara konsisten dalam dokumen?\nU3. Apakah hubungan antara aktor, kondisi pemicu, tindakan sistem, dan hasil yang diharapkan dapat dipahami tanpa memerlukan penafsiran tambahan?\nU4. Apakah pernyataan requirement menghindari istilah subjektif atau tidak spesifik, seperti fast, user-friendly, efficient, atau istilah serupa yang tidak dijelaskan maknanya?",
+      "Pertanyaan penilaian utama:\nSejauh mana requirement dalam dokumen SRS dinyatakan secara jelas dan tidak menimbulkan interpretasi yang berbeda?"
+    ],
+    [
+      "D2 (C) - Complete (Kelengkapan Requirement)",
+      "Definisi: Requirement memuat informasi yang diperlukan untuk merepresentasikan kebutuhan perangkat lunak secara memadai dalam cakupan brief proyek yang telah ditetapkan.",
+      "Pertanyaan pemeriksaan:\nC1. Apakah seluruh kebutuhan fungsional utama yang dinyatakan dalam brief proyek telah direpresentasikan dalam dokumen SRS?\nC2. Apakah kebutuhan nonfungsional, batasan sistem, dan kebutuhan antarmuka yang dinyatakan dalam brief telah didokumentasikan secara memadai?\nC3. Apakah requirement menyediakan informasi yang cukup mengenai aktor, masukan, tindakan sistem, keluaran, serta kondisi khusus atau penanganan kesalahan yang relevan berdasarkan brief?\nC4. Apakah dokumen SRS terhindar dari pernyataan requirement yang belum lengkap, informasi penting yang terlewat, atau bagian kebutuhan yang belum dijelaskan secara memadai?",
+      "Pertanyaan penilaian utama:\nSejauh mana dokumen SRS telah mencakup dan menjelaskan kebutuhan perangkat lunak secara lengkap berdasarkan informasi yang tersedia dalam brief proyek?"
+    ],
+    [
+      "D3 (K) - Correct (Ketepatan Requirement)",
+      "Definisi: Requirement merepresentasikan kebutuhan perangkat lunak secara tepat sesuai dengan informasi, tujuan, serta batasan proyek yang dinyatakan dalam brief.",
+      "Pertanyaan pemeriksaan:\nK1. Apakah requirement yang tercantum dalam dokumen SRS sesuai dengan kebutuhan dan tujuan sistem yang dinyatakan dalam brief proyek?\nK2. Apakah fungsi, hak akses pengguna, proses bisnis, dan perilaku sistem yang dijelaskan dalam SRS sesuai dengan informasi pada brief?\nK3. Apakah dokumen SRS terhindar dari penambahan fitur, aturan bisnis, teknologi, atau batasan sistem yang tidak didukung oleh brief dan disajikan seolah-olah telah menjadi kebutuhan yang disepakati?\nK4. Apakah informasi yang belum diketahui atau belum dikonfirmasi dibedakan secara jelas dari requirement yang telah dinyatakan dalam brief proyek?",
+      "Pertanyaan penilaian utama:\nSejauh mana requirement dalam dokumen SRS merepresentasikan kebutuhan proyek secara tepat tanpa menambahkan atau mengubah informasi yang tidak didukung oleh brief?"
+    ],
+    [
+      "D4 (V) - Verifiable (Keterverifikasian Requirement)",
+      "Definisi: Requirement dirumuskan dengan cara yang memungkinkan pemenuhannya diperiksa atau dibuktikan melalui pengujian, inspeksi, analisis, atau prosedur verifikasi lainnya.",
+      "Pertanyaan pemeriksaan:\nV1. Apakah setiap requirement menjelaskan perilaku atau karakteristik sistem yang dapat diamati atau diperiksa?\nV2. Apakah requirement memiliki kondisi, masukan, aturan, atau keluaran yang cukup jelas untuk dijadikan dasar penyusunan skenario pengujian?\nV3. Apakah requirement yang menyatakan karakteristik terukur, seperti waktu respons, kapasitas, atau batas performa, disertai kriteria pengukuran yang cukup jelas apabila karakteristik tersebut ditetapkan dalam brief?\nV4. Apakah pemenuhan requirement dapat ditentukan melalui prosedur verifikasi tanpa harus menambahkan ketentuan substantif baru yang belum disepakati?",
+      "Pertanyaan penilaian utama:\nSejauh mana requirement dalam dokumen SRS dapat diverifikasi melalui prosedur pemeriksaan atau pengujian yang objektif?"
+    ]
+  ],
+  "prompt": "Baca brief dan ketiga dokumen terlebih dahulu. Berikan skor setiap dokumen secara independen menggunakan standar penilaian yang sama. Dokumen boleh mendapatkan skor yang sama.",
+  "questions": [
+    "Saya merasa ingin menggunakan sistem ini secara rutin.",
+    "Saya merasa sistem ini terlalu rumit untuk digunakan.",
+    "Saya merasa sistem ini mudah digunakan.",
+    "Saya merasa membutuhkan bantuan seseorang yang memahami aspek teknis untuk dapat menggunakan sistem ini.",
+    "Saya merasa berbagai fungsi dalam sistem ini terintegrasi dengan baik.",
+    "Saya merasa terdapat terlalu banyak ketidakkonsistenan pada sistem ini.",
+    "Saya membayangkan sebagian besar orang dapat mempelajari cara menggunakan sistem ini dengan sangat cepat.",
+    "Saya merasa sistem ini sangat merepotkan untuk digunakan.",
+    "Saya merasa percaya diri saat menggunakan sistem ini.",
+    "Saya perlu mempelajari banyak hal terlebih dahulu sebelum dapat menggunakan sistem ini."
+  ],
+  "feedback": [
+    "Bagian atau fitur apa yang paling membantu Anda dalam menggunakan sistem ini?",
+    "Kesulitan apa yang Anda alami selama menggunakan sistem?",
+    "Apa saran Anda untuk meningkatkan kemudahan penggunaan sistem ini?"
+  ]
+}

@@ -9,15 +9,15 @@ import { PortError } from '@/services/ports';
 import type { ParsedDocument } from '@/services/ports';
 import { Button } from '@/shared/ui';
 import { mergeSources } from '@/entities/document/cleaning';
-import {SystemStatus,useSystemReadiness} from '@/features/system-status';
+import { SystemStatus, useSystemReadiness } from '@/features/system-status';
 export function Intake() {
   const t = useTranslations();
   const services = useServices();
-  const readiness=useSystemReadiness();
+  const readiness = useSystemReadiness();
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState('');
-  const [domain, setDomain] = useState('Healthcare');
+  const [domain, setDomain] = useState('POS');
   const [version, setVersion] = useState('0.1');
   const [notes, setNotes] = useState('');
   const [files, setFiles] = useState<ParsedDocument[]>([]);
@@ -31,7 +31,7 @@ export function Intake() {
       if (raw) {
         const saved = JSON.parse(raw);
         setTitle(saved.title || '');
-        setDomain(saved.domain || 'Healthcare');
+        setDomain(saved.domain || 'POS');
         setNotes(saved.notes || '');
         setVersion(saved.version || '0.1');
         setFiles(saved.files || []);
@@ -152,12 +152,16 @@ export function Intake() {
               />
               <datalist id="domains">
                 {[
-                  'Healthcare',
-                  'Fintech',
-                  'Education',
+                  'POS',
+                  'Absensi',
+                  'Accounting',
+                  'Booking',
+                  'CRM',
+                  'HRIS',
+                  'LMS',
+                  'Client Portal',
                   'E-commerce',
-                  'Government',
-                  'Logistics',
+                  'Manajemen Inventaris',
                 ].map((d) => (
                   <option key={d} value={d} />
                 ))}
@@ -277,7 +281,7 @@ export function Intake() {
               {error}
             </p>
           )}
-          <SystemStatus status={readiness}/>
+          <SystemStatus status={readiness} />
           <div className="form-submit">
             <Button
               type="submit"
