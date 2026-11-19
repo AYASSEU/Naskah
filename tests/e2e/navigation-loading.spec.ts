@@ -6,7 +6,6 @@ const transitions = [
 for (const route of transitions) {
   test('loading feedback for ' + route.from + ' to ' + route.to, async ({ page }, info) => {
     await page.addInitScript((theme) => localStorage.setItem('theme', theme), info.project.name);
-    await page.goto(route.from);
     let resume: () => void = () => {};
     const responseGate = new Promise<void>((resolve) => {
       resume = resolve;
@@ -18,6 +17,7 @@ for (const route of transitions) {
         await request.continue();
       },
     );
+    await page.goto(route.from);
     const link = page.getByRole('link', { name: route.name, exact: true });
     const clicking = link.click();
     try {
