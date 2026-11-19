@@ -28,40 +28,6 @@ const canonical = (value: unknown): string =>
           )
       : value,
   );
-export async function computeBert(owner: string, scope: EvaluationScope, caseId: string) {
-  const c = await transaction((tx) => caseTx(tx, owner, scope, caseId));
-  const report = await evaluate(
-    'bertscore',
-    {
-      data_scope: scope,
-      pairs: [
-        {
-          case_id: c.id,
-          prediction: c.system_markdown,
-          reference: c.human_markdown,
-          language: c.language,
-          reference_language: c.reference_language,
-          is_thesis_run: c.is_thesis_run,
-        },
-      ],
-    },
-    z.object({
-      kind: z.literal('bertscore'),
-      results: z
-        .array(z.object({ precision: z.number(), recall: z.number(), f1: z.number() }))
-        .length(1),
-      provenance: z
-        .object({ input_digest: z.string(), model: z.string(), revision: z.string() })
-        .passthrough(),
-    }),
-  );
-  const row = report.results[0]!;
-  await transaction(
-    (tx) =>
-      tx`insert into public.bertscore_results(owner_id,case_id,input_digest,is_thesis_run,precision_score,recall_score,f1,provenance) values(${owner},${c.id},${report.provenance.input_digest},${c.is_thesis_run},${row.precision},${row.recall},${row.f1},${JSON.stringify(report.provenance)}::text::jsonb) on conflict do nothing`,
-  );
-  return report;
-}
 export async function computeRouge(
   owner: string,
   scope: EvaluationScope,
@@ -289,9 +255,6 @@ export async function exportSnapshot(
     bounded(logs, 5000);
     bounded(cases, 200);
     return {
-      bertscore: (
-        await tx`select case_id,precision_score as precision,recall_score as recall,f1,provenance,is_thesis_run from public.bertscore_results where owner_id=${owner} and is_thesis_run=${scope === 'research'} order by case_id,input_digest`
-      ).map((row) => ({ ...row, case_id: anon(owner, scope, 'case', row.case_id) })),
       logs: logs.map((r) => ({
         session: anon(owner, scope, 'session', r.session_id),
         project: anon(owner, scope, 'project', r.project_id),

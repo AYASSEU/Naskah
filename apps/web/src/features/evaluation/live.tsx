@@ -40,8 +40,6 @@ function Scale({
   );
 }
 export function LiveEvaluation() {
-  const [bertResult, setBertResult] = useState('');
-  const [bertBusy, setBertBusy] = useState(false);
   const services = useServices(),
     research = services.research!,
     t = useTranslations('researchEvaluation'),
@@ -136,11 +134,10 @@ export function LiveEvaluation() {
         <span>{t('dataScope')}</span>
         <select
           aria-label={t('dataScope')}
-          disabled={bertBusy || action || (!page.data && !page.previousData)}
+          disabled={action || (!page.data && !page.previousData)}
           value={scope}
           onChange={(e) => {
             setScope(e.target.value as EvaluationScope);
-            setBertResult('');
             setCaseId('');
             setMapping({});
             setReport(undefined);
@@ -188,9 +185,9 @@ export function LiveEvaluation() {
         }}
       >
         <Tabs.List className="evaluation-tabs" aria-label={root('evaluation')}>
-          {['summary', 'expert', 'sus', 'bertscore'].map((value) => (
+          {['summary', 'expert', 'sus'].map((value) => (
             <Tabs.Trigger key={value} value={value}>
-              {value === 'bertscore' ? 'BERTScore' : root(value)}
+              {root(value)}
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -739,65 +736,6 @@ export function LiveEvaluation() {
               </Button>
             </form>
           )}
-        </Tabs.Content>
-        <Tabs.Content value="bertscore">
-          <label className="field">
-            {t('case')}
-            <select
-              disabled={bertBusy}
-              value={caseId}
-              onChange={(e) => {
-                setBertResult('');
-                setCaseId(e.target.value);
-              }}
-            >
-              <option value="">{t('chooseCase')}</option>
-              {data.cases.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            disabled={!currentCase || bertBusy}
-            onClick={async () => {
-              setBertBusy(true);
-              setBertResult('');
-              try {
-                const response = await fetch('/api/evaluation/bertscore?scope=' + scope, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json', 'X-Naskah-Client': 'web' },
-                  body: JSON.stringify({ caseId }),
-                });
-                const report = await response.json();
-                if (!response.ok) throw new Error(report.code);
-                const row = report.results[0];
-                setBertResult(
-                  'Precision ' +
-                    row.precision.toFixed(4) +
-                    ' · Recall ' +
-                    row.recall.toFixed(4) +
-                    ' · F1 ' +
-                    row.f1.toFixed(4),
-                );
-              } catch (error) {
-                setBertResult(error instanceof Error ? error.message : 'evaluation_failed');
-              } finally {
-                setBertBusy(false);
-              }
-            }}
-          >
-            {bertBusy ? '…' : 'BERTScore'}
-          </button>
-          <p aria-live="polite">{bertResult}</p>
-          <a href={'/api/evaluation/export?scope=' + scope + '&format=json'}>
-            {locale === 'id' ? 'Ekspor JSON' : 'Export JSON'}
-          </a>{' '}
-          ·{' '}
-          <a href={'/api/evaluation/export?scope=' + scope + '&format=csv&dataset=bertscore'}>
-            CSV · BERTScore
-          </a>
         </Tabs.Content>
       </Tabs.Root>
       {action && (

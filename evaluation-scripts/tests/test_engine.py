@@ -11,6 +11,11 @@ import random
 def observations(a,b,paired=True,cases=1):
     return [{'participant':str(i) if paired or source=='system' else 'human-'+str(i),'case_id':str(case),'source':source,'ratings':[value]*4,'is_thesis_run':False} for source,values in [('system',a),('human',b)] for i,value in enumerate(values) for case in range(cases)]
 class EngineTests(unittest.TestCase):
+    def test_retired_operation_is_rejected(self):
+        from evaluation_scripts.__main__ import run
+        with self.assertRaisesRegex(EvaluationError, 'invalid_operation'):
+            run('bertscore', {})
+
     @classmethod
     def setUpClass(cls):cls.golden=json.loads(Path(os.environ.get('GOLDEN_FILE','/fixtures/golden.json')).read_text())
     def test_shared_sus_vectors(self):

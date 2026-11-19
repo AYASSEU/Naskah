@@ -208,8 +208,6 @@
   "evaluationDescription": "Struktur draf, penilaian pakar, dan pengalaman penggunaan dalam satu catatan penelitian.",
   "expert": "Penilaian pakar",
   "sus": "SUS",
-  "bertscore": "BERTScore",
-  "bertLocal": "Jalankan backend lokal untuk menghitung BERTScore pada naskah dan baseline.",
   "rouge": "ROUGE",
   "successRate": "Tingkat keberhasilan",
   "meanDuration": "Rata-rata durasi",

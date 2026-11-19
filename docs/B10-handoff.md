@@ -1,6 +1,8 @@
 # B10 — serah terima SRequeS
 
-## Pembaruan final evaluasi
+## Catatan historis evaluasi (11 November 2026)
+
+BERTScore dihapus dari aplikasi, API, CLI, dan image evaluator pada 19 November 2026. Catatan di bawah merekam checkpoint sebelumnya. Migrasi dan data tersimpan lama dipertahankan untuk kompatibilitas database.
 
 Tab evaluasi lokal menghitung BERTScore antara snapshot SRS dan baseline manusia. Model DistilBERT multilingual cased tersimpan di image Docker. Inferensi berjalan di CPU dengan provider generasi dan embeddings SRS tetap mock. Precision, recall dan F1 disimpan terpisah dari arsip ROUGE. CSV dan snapshot JSON menyertakan hasil serta provenance model. [Metode dan reproduksi BAB IV](thesis-data-guide.md)
 

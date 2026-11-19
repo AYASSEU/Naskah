@@ -264,24 +264,16 @@ for (const input of ['text', 'pdf-recovery'] as const)
         await expect(
           page.getByText('Desain analisis: Berpasangan', { exact: false }),
         ).toBeVisible();
-        await page.getByRole('tab', { name: 'BERTScore', exact: true }).click();
-        await page
-          .getByRole('combobox', { name: 'Kasus evaluasi', exact: true })
-          .selectOption(caseId);
-        await page.getByRole('button', { name: 'BERTScore', exact: true }).click();
-        await expect(
-          page.getByText(/^Precision .*Recall .*F1 /),
-        ).toBeVisible({ timeout: 25000 });
         await expect(page.getByLabel('Kelompok data', { exact: true })).toBeEnabled();
         next = page.waitForEvent('download');
-        await page.getByRole('link', { name: 'Ekspor JSON', exact: true }).click();
+        await page.getByRole('button', { name: 'Ekspor JSON', exact: true }).click();
         const snapshot = JSON.parse(await readFile((await (await next).path())!, 'utf8'));
         expect(snapshot.stats_input.reviews.length).toBeGreaterThanOrEqual(4);
         expect(JSON.stringify(snapshot)).not.toContain(prefix);
         expect(JSON.stringify(snapshot)).not.toContain(projectId);
         expect(JSON.stringify(snapshot)).not.toContain('B9_PRIVATE');
         await page.setViewportSize({ width: 390, height: 844 });
-        for (const tab of ['Ringkasan', 'Penilaian pakar', 'SUS', 'BERTScore']) {
+        for (const tab of ['Ringkasan', 'Penilaian pakar', 'SUS']) {
           await page.getByRole('tab', { name: tab, exact: true }).click();
           expect(
             await page.evaluate(
