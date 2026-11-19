@@ -4,6 +4,31 @@ Checkpoint B10, 11 November 2026. Panduan utama untuk laptop yang sudah
 dikonfigurasi; bagian mesin baru menjelaskan dependensi yang belum otomatis.
 Provider dan corpus checkpoint ini tetap mock/sintetis.
 
+## Pull dan jalankan webapp dengan BERTScore
+
+Pasang Node.js 24+ dan Docker Desktop dengan Linux containers. Dari folder proyek:
+
+```powershell
+git pull
+npx.cmd --yes pnpm@11.25.0 dev
+```
+
+Tidak perlu menjalankan Docker atau evaluator secara terpisah. Startup memeriksa
+dependency sesuai lockfile, menyalakan Docker Desktop bila engine belum berjalan,
+menyiapkan container `naskah-evaluation`, dan menunggu health check sebelum
+menjalankan webapp. Pertama kali, image beserta model diunduh/dibangun; tunggu
+sampai URL webapp muncul. Internet dan ruang disk diperlukan untuk build pertama.
+Pemakaian berikutnya menggunakan image lokal selama sumber evaluator tidak berubah.
+
+Startup membuat URL dan token evaluator yang belum ada di `apps/web/.env.local`.
+File ini tetap lokal dan tidak masuk Git. BERTScore dapat digunakan tanpa konfigurasi
+database atau n8n. Pada clone baru, fitur lain memakai mode simulasi; konfigurasi
+mode yang sudah ada tetap dipakai. Buka [BERTScore](http://127.0.0.1:3000/evaluation/bertscore)
+untuk membandingkan PDF/TXT. Ctrl+C menghentikan webapp saja.
+
+Jika Docker belum terpasang atau gagal dimulai, startup berhenti dengan petunjuk;
+perbaiki status Docker Desktop lalu jalankan ulang perintah yang sama.
+
 ## Menjalankan setiap hari
 
 Prasyarat: Docker Desktop dengan Linux containers, browser Edge/Chrome,
@@ -81,8 +106,8 @@ Untuk browser mock Phase 1, hentikan web lama dahulu:
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-local.ps1 -Mode mock -SkipN8n
 ```
 
-Mode ini tidak memerlukan Supabase/compiler/evaluator, memakai IndexedDB dan
-fixture browser. `-SkipN8n` tidak mematikan container yang sudah berjalan. Data
+Mode ini memakai IndexedDB dan fixture browser, dengan evaluator BERTScore lokal
+otomatis disiapkan. Supabase/compiler tidak diperlukan. `-SkipN8n` tidak mematikan container yang sudah berjalan. Data
 browser mock tidak otomatis dipindah ke database live. Mengganti mode tidak
 mengganti key/model yang tersimpan pada backend.
 
@@ -103,7 +128,7 @@ Untuk build, hentikan dev dahulu; layanan Docker boleh tetap berjalan:
 ```powershell
 $env:NEXT_PUBLIC_DATA_MODE='live'
 pnpm.cmd build
-pnpm.cmd --filter @naskah/web exec next start --hostname 127.0.0.1
+pnpm.cmd start
 ```
 
 Mode publik dibekukan saat build. Build dan dev memakai output `.next` yang sama;
@@ -113,8 +138,9 @@ mengembalikan dev server. Production build lokal belum berarti siap dipublikasik
 ## Mesin baru atau clone kosong
 
 Clone Git **tidak mencakup** `.env.local`, database, Storage, key enkripsi,
-Compose privat n8n, corpus maupun font privat. Script `bootstrap.mjs` satu langkah
-yang disebut brief awal **belum tersedia**. Jalur pemulihan yang disarankan adalah
+Compose privat n8n, corpus maupun font privat. Webapp dengan BERTScore lokal dapat
+langsung memakai alur pull/run di atas. Untuk backend live lengkap, script
+`bootstrap.mjs` satu langkah yang disebut brief awal **belum tersedia**. Jalur pemulihan yang disarankan adalah
 backup lengkap pada [runbook](runbook.md); startup harian bukan installer kosong.
 
 Urutan penyiapan yang perlu dikerjakan operator pada mesin kosong:

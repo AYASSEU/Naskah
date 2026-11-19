@@ -1,14 +1,20 @@
 import 'server-only';
 import { z } from 'zod';
-import { env } from '../config/env.server';
+import { ServerEnvSchema } from '../config/env.server';
 import { AppError } from '../http/errors';
+const EvaluationEnvSchema = ServerEnvSchema.pick({
+  EVALUATION_SERVICE_URL: true,
+  EVALUATION_SERVICE_TOKEN: true,
+});
 export async function evaluate<T>(
   operation: string,
   input: unknown,
   schema: z.ZodType<T>,
 ): Promise<T> {
-  const cfg = env();
-  if (!cfg.EVALUATION_SERVICE_TOKEN) throw new AppError('evaluation_unavailable', 503, true);
+  const config = EvaluationEnvSchema.safeParse(process.env);
+  if (!config.success || !config.data.EVALUATION_SERVICE_TOKEN)
+    throw new AppError('evaluation_unavailable', 503, true);
+  const cfg = config.data;
   try {
     const response = await fetch(new URL('/evaluate', cfg.EVALUATION_SERVICE_URL), {
       method: 'POST',

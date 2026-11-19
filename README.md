@@ -22,6 +22,22 @@ belum diklaim. Aplikasi memakai Bahasa Indonesia/English serta tema terang/gelap
 
 ## Jalankan di Windows
 
+Untuk membuka webapp dan menghitung BERTScore lokal, jalankan dari folder proyek:
+
+```powershell
+git pull
+npx.cmd --yes pnpm@11.25.0 dev
+```
+
+Pasang Node.js 24+ dan Docker Desktop dengan Linux containers terlebih dahulu.
+Startup memasang dependency sesuai lockfile, menyalakan Docker Desktop bila perlu,
+menyiapkan image evaluator, dan menunggu BERTScore siap sebelum membuka webapp di
+[127.0.0.1:3000](http://127.0.0.1:3000). Build pertama membutuhkan internet untuk
+mengunduh image dan model; berikutnya image lokal digunakan kembali. Konfigurasi
+evaluator dibuat otomatis di `.env.local` tanpa mengganti nilai yang sudah ada.
+Clone baru memakai mode simulasi untuk fitur aplikasi, dengan BERTScore tetap
+dihitung oleh evaluator Docker lokal.
+
 Untuk laptop yang sudah dikonfigurasi ini, buka PowerShell:
 
 ```powershell
@@ -36,7 +52,9 @@ mock provider, Supabase, compiler, dan evaluator tanpa reset volume. Jika port
 
 `live` berarti memakai backend sungguhan di laptop. **LLM dan embeddings tetap
 mock** pada port 4010; mode ini tidak mengaktifkan API berbayar dengan sendirinya.
-`pnpm dev` hanya menyalakan webapp. Panduan prasyarat, berhenti/restart, alternatif
+`pnpm dev` dan `pnpm start` otomatis menyiapkan evaluator BERTScore lokal.
+Ctrl+C menghentikan webapp; container evaluator tetap tersedia untuk pemakaian berikutnya.
+Panduan prasyarat, berhenti/restart, alternatif
 pnpm Windows, dan penyiapan mesin baru: [Panduan Windows](docs/local-laptop-setup.md).
 
 | Layanan | Alamat lokal |
@@ -66,7 +84,7 @@ flowchart LR
 | PDF/TXT | Parser server dan shared cleaning | Parser browser |
 | Word/PDF | Pandoc + LibreOffice, Storage privat, download terautentikasi | DOCX browser dan print-to-PDF |
 | Settings | Key terenkripsi, sinkron credential, smoke melalui n8n | Key di memori tab, tes simulasi |
-| Evaluasi | Consent, blind review, SUS, BERTScore/statistik Python, ekspor pseudonim | Contoh UI/data demonstrasi |
+| Evaluasi | Consent, blind review, SUS, BERTScore/statistik Python, ekspor pseudonim | Form penelitian di browser dan perbandingan BERTScore melalui Docker lokal |
 
 Mock provider menghasilkan jawaban deterministik. Jalur integrasi yang lulus
 tidak membuktikan kualitas generasi AI nyata. Review hasil sebelum digunakan.

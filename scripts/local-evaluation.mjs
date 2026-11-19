@@ -2,15 +2,15 @@ import { createHash, randomBytes } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { root, localEnv, loadEnv, setMissingEnv } from './lib/local.mjs';
+import { root, loadEnv, setMissingEnv } from './lib/local.mjs';
+import { ensureDocker } from './lib/docker.mjs';
+ensureDocker();
 loadEnv();
+const token = process.env.EVALUATION_SERVICE_TOKEN || randomBytes(32).toString('base64url');
 setMissingEnv({
-  EVALUATION_SERVICE_TOKEN: randomBytes(32).toString('base64url'),
-  EVALUATION_SERVICE_URL: 'http://127.0.0.1:8010',
+  EVALUATION_SERVICE_TOKEN: token,
+  EVALUATION_SERVICE_URL: process.env.EVALUATION_SERVICE_URL || 'http://127.0.0.1:8010',
 });
-const token = readFileSync(localEnv, 'utf8')
-  .match(/^EVALUATION_SERVICE_TOKEN=(.+)$/m)?.[1]
-  ?.trim();
 if (!token || token.length < 32) throw new Error('Evaluation service token missing.');
 const runtime = resolve(process.env.LOCALAPPDATA ?? '/tmp', 'naskah-runtime');
 mkdirSync(runtime, { recursive: true });

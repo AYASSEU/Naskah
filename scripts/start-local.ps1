@@ -67,6 +67,8 @@ if(-not $SkipN8n){
     if(-not $servicesReady){throw 'n8n atau mock provider belum siap. Periksa health container existing.'}
   }
 }
+& $nodePath 'scripts/local-evaluation.mjs'
+if($LASTEXITCODE -ne 0){throw 'Layanan evaluasi lokal gagal dijalankan.'}
 if($WithDatabase -or $Mode -eq 'live'){
   & $nodePath 'scripts/local-database.mjs' start
   if($LASTEXITCODE -ne 0){throw 'Supabase lokal gagal dijalankan.'}
@@ -75,8 +77,6 @@ if($Mode -eq 'live' -and -not (Test-Path -LiteralPath 'apps\web\.env.local')){
   throw 'Mode live membutuhkan konfigurasi lokal. Lihat docs/local-laptop-setup.md.'
 }
 if($Mode -eq 'live'){
-  & $nodePath 'scripts/local-evaluation.mjs'
-  if($LASTEXITCODE -ne 0){throw 'Layanan evaluasi lokal gagal dijalankan.'}
   if(Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'naskah-runtime/e5.env')){
     & (Join-Path $PSScriptRoot 'start-e5.ps1')
   }

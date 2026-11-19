@@ -9,6 +9,8 @@
     }
   },
   "include": [
+    "./docker-startup.test.ts",
+    "./local-evaluation-config.test.ts",
     "./e2e/live-evaluation.spec.ts",
     "./evaluation-golden.test.ts",
     "./e2e/live-system.spec.ts",
