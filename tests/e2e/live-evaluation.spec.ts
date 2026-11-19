@@ -109,8 +109,13 @@ test('live evaluation persists consent, blind ratings, SUS and verified metrics'
     await expect(page.getByText('Desain analisis: Berpasangan', { exact: false })).toBeVisible({
       timeout: 20000,
     });
+    await page.getByRole('tab', { name: 'BERTScore', exact: true }).click();
+    await page.getByRole('button', { name: 'BERTScore', exact: true }).click();
+    await expect(
+      page.getByText(/^Precision .*Recall .*F1 /),
+    ).toBeVisible({ timeout: 20000 });
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Ekspor JSON', exact: true }).click();
+    await page.getByRole('link', { name: 'Ekspor JSON', exact: true }).click();
     await download;
     await page.getByLabel('Kelompok data', { exact: true }).selectOption('research');
     await expect(
@@ -120,6 +125,7 @@ test('live evaluation persists consent, blind ratings, SUS and verified metrics'
       await page.request.get('/api/evaluation/export?scope=research&format=json')
     ).json();
     expect(Object.values(research.datasets).flat()).toHaveLength(0);
+    await expect(page.getByRole('button', { name: 'BERTScore', exact: true })).toBeDisabled();
     await expect(page.getByText('Memuat dokumen…', { exact: true })).toHaveCount(0);
     await page.screenshot({
       path: `artifacts/b8-${info.project.name}-research.png`,

@@ -6,13 +6,14 @@ def run(operation,data):
     if operation=='sus':from .sus import evaluate
     elif operation=='expert':from .expert import evaluate
     elif operation=='structure':from .structure_check import evaluate
+    elif operation=='bertscore':from .bertscore import evaluate
     elif operation=='rouge':from .rouge_eval import evaluate
     elif operation=='stats':from .stats import evaluate
     else:raise EvaluationError('invalid_operation')
     return evaluate(data)
 def main():
     parser=argparse.ArgumentParser(description='Local Naskah evaluation; no provider calls.')
-    parser.add_argument('operation',choices=['sus','expert','structure','rouge','stats','export','worker'])
+    parser.add_argument('operation',choices=['sus','expert','structure','rouge','bertscore','stats','export','worker'])
     parser.add_argument('--input');parser.add_argument('--output');parser.add_argument('--scope',choices=['dev','research'],default='research');parser.add_argument('--base-url',default='http://127.0.0.1:3000');parser.add_argument('--allow-language-mismatch',action='store_true')
     args=parser.parse_args()
     try:

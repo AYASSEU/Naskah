@@ -1,18 +1,4 @@
 import { test, expect } from '@playwright/test';
-
-test('evaluation has no BERTScore entry and retired routes return 404', async ({
-  page,
-  request,
-}) => {
-  await page.goto('/evaluation');
-  await expect(
-    page.getByRole('heading', { name: 'Evaluasi penelitian', exact: true }),
-  ).toBeVisible();
-  await expect(page.getByRole('link', { name: /BERTScore/i })).toHaveCount(0);
-  expect((await request.get('/evaluation/bertscore')).status()).toBe(404);
-  expect((await request.post('/api/local-bertscore', { data: {} })).status()).toBe(404);
-});
-
 test('independent expert session survives reload and unlocks SUS after submission', async ({
   page,
 }) => {

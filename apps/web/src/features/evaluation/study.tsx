@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState, type FormEvent } from 'react';
+import { NavigationLink } from '@/shared/ui/navigation-link';
 import { scoreSus } from '@/entities/evaluation/sus';
 import instrument from './instrument.json';
 import { sessions, update, type Session, type Review } from './session-store';
@@ -391,6 +392,9 @@ export function Evaluation() {
             {v}
           </button>
         ))}
+        <NavigationLink href="/evaluation/bertscore" loadingLabel="Memuat BERTScore…">
+          Analisis BERTScore
+        </NavigationLink>
       </nav>
       {error && <p role="alert">{error}</p>}
       {view === 'Ringkasan' && (

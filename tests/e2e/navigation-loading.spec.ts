@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 const transitions = [
   { from: '/', to: '/evaluation', name: 'Evaluasi', label: 'Memuat evaluasi…' },
   { from: '/evaluation', to: '/', name: 'Dokumen', label: 'Memuat dokumen…' },
+  {
+    from: '/evaluation',
+    to: '/evaluation/bertscore',
+    name: 'Analisis BERTScore',
+    label: 'Memuat BERTScore…',
+  },
 ];
 for (const route of transitions) {
   test('loading feedback for ' + route.from + ' to ' + route.to, async ({ page }, info) => {

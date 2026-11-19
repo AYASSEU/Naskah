@@ -79,7 +79,7 @@ membaca API local-owner tanpa DB key.
 ## Pemisahan penelitian dan deployment
 
 `scope=dev|research` dan `is_thesis_run` diterapkan pada consent, cases, reviews,
-SUS, statistik dan ekspor. Mapping sumber buta berada di tabel terpisah.
+SUS, BERTScore/statistik dan ekspor. Mapping sumber buta berada di tabel terpisah.
 Research guards menolak mock/dev_seed; UI enrollment thesis run belum tersedia.
 Local operator masih dapat membaca DB, sehingga blinding bukan batas terhadap
 operator. Ekspor memakai HMAC pseudonym; bukan anonimitas absolut.

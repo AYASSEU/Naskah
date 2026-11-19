@@ -3,7 +3,7 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { resolve, dirname, basename } from 'node:path';
 import { root } from './lib/local.mjs';
 const [operation, ...args] = process.argv.slice(2);
-if (!['sus', 'expert', 'structure', 'rouge', 'stats', 'export'].includes(operation))
+if (!['sus', 'expert', 'structure', 'rouge', 'bertscore', 'stats', 'export'].includes(operation))
   throw new Error('Use sus|expert|structure|rouge|stats|export --input path --output path');
 const read = (key, fallback) => {
   const index = args.indexOf(key);
